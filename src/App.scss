@@ -1,0 +1,300 @@
+/* ----------------------------------
+  1. Import Google Fonts (CSS only)
+---------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+
+/* ----------------------------------
+5. Custom Variables and colors
+---------------------------------- */
+@import "./assets/style/custom-variables.scss";
+
+
+/* ----------------------------------
+3. Custom Components (after utilities)
+---------------------------------- */
+.btn-primary {
+  background-image: linear-gradient(45deg, $primary-gradient-start, $primary-gradient-end);
+  border: 1px solid rgba($primary, 0.25) !important;
+  color: #fff !important;
+  transition: background-image 0.3s ease-in-out;
+
+  &:hover {
+    background-image: linear-gradient(45deg, darken($primary-gradient-start, 10%), darken($primary-gradient-end, 10%));
+    color: #fff;
+  }
+
+  &:focus,
+  &:active {
+    background-image: linear-gradient(45deg, darken($primary-gradient-start, 12%), darken($primary-gradient-end, 12%));
+    box-shadow: 0 0 0 0.25rem rgba($primary, 0.5);
+  }
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  background-image: none;
+  border: 1px solid $primary !important;
+  color: $primary !important;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    background-image: linear-gradient(45deg, $primary-gradient-start, $primary-gradient-end);
+    border-color: transparent !important;
+    color: #fff !important;
+  }
+
+  &:focus,
+  &:active {
+    background-image: linear-gradient(45deg, darken($primary-gradient-start, 12%), darken($primary-gradient-end, 12%));
+    box-shadow: 0 0 0 0.25rem rgba($primary, 0.5);
+    border-color: transparent !important;
+    color: #fff !important;
+  }
+}
+
+.btn-primary.btn-custom {
+  background-image: linear-gradient(to bottom, $primary-gradient-start, $primary-gradient-end);
+  border: transparent !important;
+}
+
+/* ----------------------------------
+4. Bootstrap Version - 5.3.3
+---------------------------------- */
+@import "bootstrap/scss/bootstrap";
+
+/* ----------------------------------
+5. Bootstrap Icons
+---------------------------------- */
+@import "~bootstrap-icons/font/bootstrap-icons";
+
+
+html,
+body {
+  background-color: #F2F4F7;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  // overflow-x: hidden;
+  margin: 0;
+}
+
+.font-inter {
+  font-family: "Inter", sans-serif;
+}
+
+.font-roboto {
+  font-family: "Roboto", sans-serif;
+}
+
+.main-heading {
+  color: #101828;
+  font-size: 1.5rem;
+  // font-size: clamp(22px, 3vw, 30px);
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.fs-12 {
+  font-size: 12px !important;
+}
+
+.fs-14 {
+  font-size: 14px !important;
+}
+
+.fs-16 {
+  font-size: 16px !important;
+}
+
+.fs-18 {
+  font-size: 18px !important;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.container-fluid {
+  @include media-breakpoint-up(xl) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+.btn {
+  min-height: 40px;
+}
+
+.btn-custom {
+  font-size: 16px;
+  // font-weight: 500;
+  min-height: 48px;
+  min-width: 180px;
+  padding: 6px 1.5rem;
+  transition: all 0.3s;
+}
+
+.child-modal-backdrop {
+  z-index: 1055;
+}
+
+.form-label {
+  color: #344054;
+  // font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  margin-bottom: 6px;
+}
+
+.form-check-label {
+  color: #717b9e;
+  font-weight: 400;
+}
+
+.form-check-input:checked+.form-check-label {
+  color: var(--bs-body-color);
+}
+
+.form-control,
+.form-select {
+  color: var(--bs-body-color);
+  font-size: 14px;
+  min-height: 48px;
+}
+
+.form-control::placeholder {
+  color: $placeholder-clr;
+  font-size: 14px;
+}
+
+.form-control::-webkit-input-placeholder {
+  /* Chrome/Opera/Safari */
+  color: $placeholder-clr;
+  font-size: 14px;
+}
+
+.form-control::-moz-placeholder {
+  color: $placeholder-clr;
+  font-size: 14px;
+}
+
+.form-control:-moz-placeholder {
+  color: $placeholder-clr;
+  font-size: 14px;
+}
+
+.form-control:-ms-input-placeholder {
+  /* IE 10+ */
+  color: $placeholder-clr;
+  font-size: 14px;
+}
+
+/* select box placeholder css */
+select:required:invalid {
+  color: $placeholder-clr;
+  font-size: 14px;
+}
+
+/* input type date calender css */
+input[type="date"]:invalid::-webkit-datetime-edit,
+input[type="month"]:invalid::-webkit-datetime-edit,
+input[type="time"]:invalid::-webkit-datetime-edit {
+  color: $placeholder-clr;
+  font-size: 14px;
+}
+
+// Global custom input style
+
+input[type="time"]:invalid:before {
+  content: attr(placeholder);
+  color: #6c757d !important;
+  position: absolute;
+  background: #fff;
+  font-size: $font-size-sm;
+}
+
+// Input search box
+.searchfield-wrapper {
+  position: relative;
+
+  input {
+    padding-left: 42px;
+  }
+
+  .icon {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+  }
+}
+
+// Custom Scrollbar CSS
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9c9c9c;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+// Table style customization
+.table-custom-wrapper {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 8px;
+}
+
+// Start: Top Header Css
+.top-header {
+  .nav-link {
+    &.active {
+      background-color: $theme2;
+      border-radius: 6px;
+    }
+  }
+  .dropdown {
+    list-style-type: none;
+  }
+
+  .account-menu {
+    .dropdown-menu {
+      top: 9px !important;
+      width: 200px;
+
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+
+    .dropdown-toggle:after {
+      display: none;
+    }
+  }
+
+  .chip-wrapper .chip-img {
+    height: 34px;
+    width: 34px;
+  }
+}
+
+.main-content-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  transition: all 0.3s;
+}
+
+// End: Top Header CSS

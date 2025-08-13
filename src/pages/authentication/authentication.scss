@@ -1,0 +1,42 @@
+@import "../../assets/style/custom-variables.scss";
+
+// Authentication Page CSS
+.auth-page {
+    // background: url('../../assets/images/bg-banner2.jpg') no-repeat;
+    background-size: cover;
+
+    .form-control,
+    .form-select {
+        border-color: $theme3;
+        background-color: transparent;
+    }
+
+    .content-wrapper {
+        padding: 2.25rem 1rem;
+
+        @include media-breakpoint-up(xl) {
+            min-height: 550px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @include media-breakpoint-up(sm) {
+            padding: 2.75rem 2.5rem;
+        }
+    }
+
+    .react-tel-input {
+        .form-control {
+            border: 1px solid #A2845E;
+            border-radius: $input-border-radius;
+            background-color: transparent;
+        }
+
+        .flag-dropdown {
+            border: 1px solid #A2845E;
+            border-top-left-radius: $input-border-radius;
+            border-bottom-left-radius: $input-border-radius;
+        }
+    }
+}
