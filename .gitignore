@@ -1,3 +1,7 @@
 # dependencies
 .env
 node_modules
+
+
+# Build files
+build/
