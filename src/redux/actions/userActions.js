@@ -16,25 +16,23 @@ import {
 } from '../constants/userConstants';
 
 
-
-export const registerUser = (userData, navigateCallback) => async (dispatch) => {
+export const registerUser = (userData) => async (dispatch) => {
     try {
         dispatch({ type: USER_REGISTER_REQUEST });
 
         const { data } = await API.post('/user/register', userData);
 
-        dispatch({ type: USER_REGISTER_SUCCESS, payload: data });
-        // navigate("/OtpVerification");
-         navigateCallback(userData.email);
+        if (data.error) {
+            dispatch({ type: USER_REGISTER_FAIL, payload: data.message });
+            return Promise.reject(data.message);
+        }
 
+        dispatch({ type: USER_REGISTER_SUCCESS, payload: data });
+        return Promise.resolve(data);
     } catch (error) {
-        dispatch({
-            type: USER_REGISTER_FAIL,
-            payload:
-                error.response && error.response.data.message
-                    ? error.response.data.message
-                    : error.message
-        });
+        const errMsg = error.response?.data?.message || error.message;
+        dispatch({ type: USER_REGISTER_FAIL, payload: errMsg });
+        return Promise.reject(errMsg);
     }
 };
 

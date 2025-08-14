@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Row, Col, Form, Button } from 'react-bootstrap';
+import { Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import './authentication.scss';
@@ -10,7 +10,7 @@ import { registerUser } from '../../redux/actions/userActions';
 export const SignUp = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { loading } = useSelector(state => state.userRegister);
+    const { loading, error } = useSelector(state => state.userRegister);
 
 
     const [newPassword, setNewPassword] = useState('');
@@ -43,7 +43,7 @@ export const SignUp = () => {
     };
 
     // Submit handler
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (newPassword !== confirmPassword) {
@@ -51,25 +51,30 @@ export const SignUp = () => {
             return;
         }
 
-        // dispatch action
-        // dispatch(registerUser({ ...formData, password: newPassword }, navigate))
-        dispatch(registerUser({ ...formData, password: newPassword }, (email) => {
-            navigate("/OtpVerification", { state: { email } });
-        }));
+        try {
+            // await dispatch(registerUser({ ...formData, password: newPassword }, (email) => {
+            //     navigate("/OtpVerification", { state: { email } });
+            // }));
 
+            await dispatch(registerUser({ ...formData, password: newPassword }));
+            // only redirect if registration succeeds
+            navigate("/OtpVerification", { state: { email: formData.email } });
 
-        setFormData({
-            firstname: '',
-            lastname: '',
-            email: '',
-            username: '',
-            userType: '',
-            countryCode: '+91',
-            mobileNumber: ''
-        });
-        setNewPassword('');
-        setConfirmPassword('');
-        setPhone('');
+            setFormData({
+                firstname: '',
+                lastname: '',
+                email: '',
+                username: '',
+                userType: '',
+                countryCode: '+91',
+                mobileNumber: ''
+            });
+            setNewPassword('');
+            setConfirmPassword('');
+            setPhone('');
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
@@ -83,6 +88,8 @@ export const SignUp = () => {
                         <div className="fs-2 fw-bold font-roboto lh-sm mb-1">Create an account</div>
                         <div className="subtitle fs-14 text-muted">Enter all required details below to create your account!</div>
                     </div>
+
+                    {error && <Alert variant="danger">{error}</Alert>}
 
                     <Form onSubmit={handleSubmit}>
                         <Row className="g-3 mb-3">
