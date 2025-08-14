@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify';
 import { verifyOtp } from '../../redux/actions/userActions';
 
 const OtpVerification = () => {
-  const [email, setEmail] = useState('');
+  const location = useLocation();
+
+  const [email, setEmail] = useState(location.state?.email || '');
   const [otp, setOtp] = useState('');
 
   const dispatch = useDispatch();

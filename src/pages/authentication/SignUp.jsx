@@ -52,10 +52,11 @@ export const SignUp = () => {
         }
 
         // dispatch action
-        dispatch(registerUser({
-            ...formData,
-            password: newPassword
-        }, navigate))
+        // dispatch(registerUser({ ...formData, password: newPassword }, navigate))
+        dispatch(registerUser({ ...formData, password: newPassword }, (email) => {
+            navigate("/OtpVerification", { state: { email } });
+        }));
+
 
         setFormData({
             firstname: '',

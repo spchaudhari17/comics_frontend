@@ -17,14 +17,15 @@ import {
 
 
 
-export const registerUser = (userData, navigate) => async (dispatch) => {
+export const registerUser = (userData, navigateCallback) => async (dispatch) => {
     try {
         dispatch({ type: USER_REGISTER_REQUEST });
 
         const { data } = await API.post('/user/register', userData);
 
         dispatch({ type: USER_REGISTER_SUCCESS, payload: data });
-        navigate("/OtpVerification");
+        // navigate("/OtpVerification");
+         navigateCallback(userData.email);
 
     } catch (error) {
         dispatch({
