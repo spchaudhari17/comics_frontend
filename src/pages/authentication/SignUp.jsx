@@ -184,7 +184,7 @@ export const SignUp = () => {
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
                                             placeholder="Enter the 8 digit password"
-                                            // minLength={8} maxLength={8}
+                                            minLength={8} maxLength={30}
                                             // pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
                                             // title="Must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character."
                                             autoComplete='new-password'
@@ -208,7 +208,7 @@ export const SignUp = () => {
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
                                             placeholder="Enter the 8 digit password"
-                                            // minLength={8} maxLength={8}
+                                            minLength={8} maxLength={30}
                                             // pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
                                             // title="Must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character."
                                             autoComplete='new-password'
@@ -226,9 +226,9 @@ export const SignUp = () => {
                         </Row>
 
                         <div className="form-check fs-6 mb-3">
-                            <input type="checkbox" className="form-check-input fs-16 border-primary border-opacity-75" id="conditionAgreement" required />
+                            <input type="checkbox" className="form-check-input fs-16 border-primary border-opacity-75" id="conditionAgreement" />
                             <label className="form-check-label text-body" htmlFor="conditionAgreement" style={{ paddingTop: '2px' }}>
-                                Agree to the <Link to={'/'} className="text-decoration-none">Terms and Privacy</Link>
+                                Agree to the Terms and Privacy
                             </label>
                         </div>
 

@@ -48,6 +48,12 @@ const OtpVerification = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                readOnly
+                style={{
+                  backgroundColor: "#e9ecef",
+                  cursor: "not-allowed"
+                }}
+
               />
             </Form.Group>
 
