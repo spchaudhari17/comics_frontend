@@ -1,0 +1,4 @@
+// src/redux/constants/comicConstants.js
+export const SET_COMIC_STATUS_REQUEST = "SET_COMIC_STATUS_REQUEST";
+export const SET_COMIC_STATUS_SUCCESS = "SET_COMIC_STATUS_SUCCESS";
+export const SET_COMIC_STATUS_FAIL = "SET_COMIC_STATUS_FAIL";

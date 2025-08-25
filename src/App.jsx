@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.scss';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import ToastContainers from './lib/ToastContainer';
 
 // Auth Pages
 import { LogIn } from './pages/authentication/LogIn';
@@ -13,28 +14,38 @@ import { Home } from './pages/Home';
 import { ComicSubmittedSuccessfully } from './pages/ComicSubmittedSuccessfully';
 import { PageNotFound } from './pages/PageNotFound';
 import OtpVerification from './pages/authentication/OtpVerification';
+import { SuperAdmin } from './pages/admin/SuperAdmin';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Auth Routes */}
-        {/* Redirect root to /login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LogIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/OtpVerification" element={<OtpVerification />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+    <>
+      <BrowserRouter>
+        <Routes>
+          {/* Auth Routes */}
+          {/* Redirect root to /login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LogIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/OtpVerification" element={<OtpVerification />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Main Layout Routes */}
-        <Route path="/" element={<Layout />}>
-          {/* <Route index element={<Dashboard />} /> */}
-          <Route path="home" element={<Home />} />
-          <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
-          <Route path="*" element={<PageNotFound />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          {/* Super Admin Route */}
+
+          {/* Main Layout Routes */}
+          <Route path="/" element={<Layout />}>
+            {/* <Route index element={<Dashboard />} /> */}
+          <Route path="/super-admin" element={<SuperAdmin />} />
+            <Route path="home" element={<Home />} />
+            <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
+            <Route path="*" element={<PageNotFound />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+
+      <ToastContainers />
+
+    </>
+
   );
 }
 

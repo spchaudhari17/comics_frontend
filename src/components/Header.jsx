@@ -7,23 +7,36 @@ import UserIcon from "../assets/images/icons/user.svg";
 import CreditCardIcon from "../assets/images/icons/credit-card.svg";
 import LogoutIcon from "../assets/images/icons/log-out.svg";
 import { logoutUser } from "../redux/actions/userActions";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+
+import { MdDashboard } from "react-icons/md";
 
 export const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+ const userInfo = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : null;
+
 
   const handleLogout = () => {
     dispatch(logoutUser());
     navigate("/login");
   };
 
+ const handleLogoClick = () => {
+    navigate("/home");
+  };
+
+
+
   return (
     <nav className="navbar navbar-light bg-white border-bottom navbar-expand-lgg top-header sticky-top py-2" data-bs-theme="light" style={{ minHeight: "61px" }}>
       <div className="container-xl gap-2 flex-nowrap">
         <div className="left-sec d-flex align-items-center justify-content-start gap-3">
           <div className="logo-wrapper text-center">
-            <img src={require('../assets/images/logo.png')} alt="Logo" className="img-fluid" style={{ width: '136px' }} />
+            <img src={require('../assets/images/logo.png')}  onClick={handleLogoClick} alt="Logo" className="img-fluid" style={{ width: '136px', cursor: "pointer" }} />
           </div>
         </div>
 
@@ -33,11 +46,17 @@ export const Header = () => {
               <img src={BellIcon} alt="Bell Icon" className="img-fluid" style={{ minWidth: '24px' }} />
             </NavLink>
           </li>
-          <li className="nav-item dropdown">
-            <NavLink to={'/'} className="nav-link wactive p-2">
-              <img src={BookIcon} alt="Book Icon" className="img-fluid" style={{ minWidth: '24px' }} />
-            </NavLink>
-          </li>
+
+          {userInfo && userInfo.userType === "admin" && (
+            <li className="nav-item dropdown">
+              <NavLink to={'/super-admin'} className="nav-link wactive p-2">
+                {/* <img src={BookIcon} alt="Book Icon" className="img-fluid" style={{ minWidth: '24px' }} /> */}
+                 <MdDashboard size={24} color="#333" />
+              </NavLink>
+            </li>
+          )}
+
+
           <div className="divider vr d-none d-md-block me-2"></div>
           <Dropdown align="end" className="account-menu">
             <Dropdown.Toggle variant="white" className="bg-transparent border-0 p-0" id="dropdown-basic">
