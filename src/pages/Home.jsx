@@ -180,12 +180,12 @@ export const Home = () => {
           </div>
 
           {/* Debug Step Control (optional for development) */}
-          <div className="d-flex gap-2 mb-3">
+          {/* <div className="d-flex gap-2 mb-3">
             <Button variant="outline-primary" onClick={() => setStep(0)}>Step 0: Story</Button>
             <Button variant="outline-primary" onClick={() => setStep(1)}>Step 1: Prompt</Button>
             <Button variant="outline-primary" onClick={() => setStep(2)}>Step 2: Preview</Button>
             <Button variant="outline-primary" onClick={() => setStep(3)}>Step 3: Publish</Button>
-          </div>
+          </div> */}
 
           <div className="content-wrapper bg-theme1 border rounded-3 px-3 py-4 p-md-5">
             {errorMsg && (
