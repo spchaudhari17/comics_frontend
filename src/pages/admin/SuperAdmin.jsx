@@ -1,21 +1,41 @@
-import React, { useEffect } from "react";
-import { Table, Button, Badge, Card, Row, Col, Spinner } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Table, Button, Badge, Card, Row, Col, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { listAllComicsAdmin, updateComicStatus } from "../../redux/actions/adminComicsActions";
-import { Loader } from "../../lib/loader"
+import { deleteComic } from "../../redux/actions/comicActions";
+import { Loader } from "../../lib/loader";
 
 export const SuperAdmin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Redux states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedComicId, setSelectedComicId] = useState(null);
+
+  // Redux state
   const { loading, error, comics } = useSelector((state) => state.adminComicList);
   const { loading: updating, success: statusUpdated } = useSelector((state) => state.adminComicUpdateStatus);
+  const { loading: deleting, success: deleteSuccess, error: deleteError, message: deleteMessage } = useSelector(
+    (state) => state.deleteComic
+  );
 
   useEffect(() => {
     dispatch(listAllComicsAdmin());
-  }, [dispatch, statusUpdated]); // status update hone ke baad refresh
+  }, [dispatch, statusUpdated, deleteSuccess]);
+
+  // Auto-close modal and refresh after deletion
+  useEffect(() => {
+    if (deleteSuccess) {
+      // alert(deleteMessage || "Comic deleted successfully!");
+      setShowDeleteModal(false);
+      setSelectedComicId(null);
+      dispatch(listAllComicsAdmin());
+    }
+    if (deleteError) {
+      alert(deleteError);
+    }
+  }, [deleteSuccess, deleteError, deleteMessage, dispatch]);
 
   const handleStatusChange = (comicId, newStatus) => {
     dispatch(updateComicStatus(comicId, newStatus));
@@ -39,28 +59,32 @@ export const SuperAdmin = () => {
     navigate("/login");
   };
 
+  const openDeleteModal = (comicId) => {
+    setSelectedComicId(comicId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedComicId) {
+      dispatch(deleteComic(selectedComicId));
+    }
+  };
+
+  const handleClose = () => {
+    setShowDeleteModal(false);
+    setSelectedComicId(null);
+  };
+
   return (
     <div className="super-admin-page pt-4 pb-3">
       <div className="container-xl">
-
-        {/* <div className="header-wrapper d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h1 className="fs-2 fw-bold font-roboto mb-1">Super Admin Dashboard</h1>
-            <p className="text-muted mb-0">Manage creator submissions and approvals</p>
-          </div>
-          <Button variant="outline-danger" onClick={handleLogout}>
-            <i className="bi bi-box-arrow-right me-2"></i>
-            Logout
-          </Button>
-        </div> */}
-
-        {/* Stats Cards */}
         {loading ? (
           <Loader />
         ) : error ? (
           <p className="text-danger">{error}</p>
         ) : (
           <>
+            {/* Stats Cards */}
             <Row className="g-4 mb-4">
               <Col md={3}>
                 <Card className="text-center">
@@ -125,9 +149,7 @@ export const SuperAdmin = () => {
                         <td><strong>{comic.user_id?.firstname || "Unknown"}</strong></td>
                         <td>{comic.user_id?.email || "N/A"}</td>
                         <td>
-                          <Badge bg="info" className="text-white">
-                            {comic.user_id?.userType || "N/A"}
-                          </Badge>
+                          <Badge bg="info" className="text-white">{comic.user_id?.userType || "N/A"}</Badge>
                         </td>
                         <td>{comic.subject}</td>
                         <td>
@@ -173,6 +195,16 @@ export const SuperAdmin = () => {
                               {comic.status === "approved" ? "Approved" : "Rejected"}
                             </div>
                           )}
+
+                          {(comic.status === "approved" || comic.status === "rejected") && (
+                            <Button
+                              size="sm"
+                              variant="outline-danger"
+                              onClick={() => openDeleteModal(comic._id)}
+                            >
+                              <i className="bi bi-trash3 me-1"></i>
+                            </Button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -180,6 +212,30 @@ export const SuperAdmin = () => {
                 </Table>
               </Card.Body>
             </Card>
+
+            {/* Delete Confirmation Modal */}
+            <Modal show={showDeleteModal} centered onHide={handleClose}>
+              <Modal.Body className="text-center px-md-5 py-5">
+                <div
+                  className="icon-cover d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle mx-auto mb-3"
+                  style={{ height: '50px', width: '50px' }}
+                >
+                  <i className="bi bi-exclamation-triangle fs-4 text-danger"></i>
+                </div>
+                <div className="fs-18 fw-semibold lh-sm mb-3 pb-1">Are you sure you want to delete this comic?</div>
+                <div className="btn-wrapper d-flex flex-wrap justify-content-center gap-2">
+                  <Button variant="secondary" className="px-4 py-2" onClick={handleClose}>Cancel</Button>
+                  <Button
+                    variant="danger"
+                    className="px-4 py-2"
+                    onClick={handleDeleteConfirm}
+                    disabled={deleting}
+                  >
+                    {deleting ? "Deleting..." : "Delete"}
+                  </Button>
+                </div>
+              </Modal.Body>
+            </Modal>
           </>
         )}
       </div>

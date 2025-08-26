@@ -5,7 +5,7 @@ import storage from "redux-persist/lib/storage";
 import { persistStore, persistReducer } from "redux-persist";
 import { userLoginReducer, userOtpVerifyReducer, userRegisterReducer } from "./reducers/userReducers";
 import { adminComicListReducer, adminComicUpdateStatusReducer } from "./reducers/adminComicsReducer";
-import {comicStatusReducer} from "./reducers/comicReducers"
+import { comicStatusReducer, deleteComicReducer } from "./reducers/comicReducers"
 
 
 const rootReducer = combineReducers({
@@ -14,6 +14,7 @@ const rootReducer = combineReducers({
     userLogin: userLoginReducer,
     userOtpVerify: userOtpVerifyReducer,
     comicStatus: comicStatusReducer,
+    deleteComic: deleteComicReducer,
 
     adminComicList: adminComicListReducer,
     adminComicUpdateStatus: adminComicUpdateStatusReducer,
