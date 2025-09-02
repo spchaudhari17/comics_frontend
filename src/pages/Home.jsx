@@ -171,6 +171,49 @@ export const Home = () => {
   // helpers
   const isStep0Valid = story?.trim()?.length > 0 && comicTitle.trim() && author.trim() && subject.trim();
 
+
+  // quiz states
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [quizId, setQuizId] = useState(null);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [publishingQuiz, setPublishingQuiz] = useState(false);
+  const [quizError, setQuizError] = useState("");
+
+  // Generate Quiz
+  const handleGenerateQuiz = async () => {
+    setQuizError("");
+    setQuizLoading(true);
+    try {
+      const { data } = await API.post("/user/generate-quiz", {
+        comicId,
+        script: story, // original story bhejna hai
+      });
+
+      setQuizId(data.quizId);
+      setQuizQuestions(data.questions);
+    } catch (err) {
+      console.error(err);
+      setQuizError(err?.response?.data?.error || "Failed to generate quiz");
+    } finally {
+      setQuizLoading(false);
+    }
+  };
+
+  // Publish Quiz
+  const handlePublishQuiz = async () => {
+    setPublishingQuiz(true);
+    try {
+      await API.post("/user/quiz/publish", { quizId });
+      alert("Quiz published successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to publish quiz");
+    } finally {
+      setPublishingQuiz(false);
+    }
+  };
+
+
   return (
     <div className="homePage pt-4 pb-3">
       <div className="container-xl">
@@ -180,12 +223,12 @@ export const Home = () => {
           </div>
 
           {/* Debug Step Control (optional for development) */}
-          {/* <div className="d-flex gap-2 mb-3">
+          <div className="d-flex gap-2 mb-3">
             <Button variant="outline-primary" onClick={() => setStep(0)}>Step 0: Story</Button>
             <Button variant="outline-primary" onClick={() => setStep(1)}>Step 1: Prompt</Button>
             <Button variant="outline-primary" onClick={() => setStep(2)}>Step 2: Preview</Button>
             <Button variant="outline-primary" onClick={() => setStep(3)}>Step 3: Publish</Button>
-          </div> */}
+          </div>
 
           <div className="content-wrapper bg-theme1 border rounded-3 px-3 py-4 p-md-5">
             {errorMsg && (
@@ -318,10 +361,10 @@ export const Home = () => {
                 </div>
               </div>
             )}
-            
+
 
             {/* STEP 3: Publish */}
-            {step === 3 && (
+            {/* {step === 3 && (
               <div className="text-center">
                 <h3>Comic Published 🎉</h3>
                 {pdfUrl ? (
@@ -342,7 +385,76 @@ export const Home = () => {
                   </Button>
                 </div>
               </div>
+            )} */}
+
+
+              {/* Step 3: Publish ke andar Quiz integration */}
+            {step === 3 && (
+              <div className="text-center">
+                <h3>Comic Published 🎉</h3>
+                {pdfUrl ? (
+                  <p className="mt-3">
+                    <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                      Open PDF from S3
+                    </a>
+                  </p>
+                ) : (
+                  <Alert variant="warning">PDF URL not found. Try publishing again.</Alert>
+                )}
+
+                {/* QUIZ Section */}
+                <div className="quiz-wrapper mt-5 text-start">
+                  <h4>Generate Quiz for this Comic</h4>
+                  <Button
+                    variant="info"
+                    className="mb-3"
+                    onClick={handleGenerateQuiz}
+                    disabled={quizLoading}
+                  >
+                    {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
+                  </Button>
+
+                  {quizError && <Alert variant="danger">{quizError}</Alert>}
+
+                  {quizQuestions.length > 0 && (
+                    <div className="quiz-questions mt-4">
+                      {quizQuestions.map((q, idx) => (
+                        <div key={idx} className="mb-4 p-3 border rounded">
+                          <strong>Q{idx + 1}. {q.question}</strong>
+                          <ul className="mt-2">
+                            {q.options.map((opt, i) => (
+                              <li key={i}>{opt}</li>
+                            ))}
+                          </ul>
+                          <p className="text-success">✔ Correct: {q.correctAnswer}</p>
+                          <p className="text-muted">Difficulty: {q.difficulty}</p>
+                        </div>
+                      ))}
+                      <Button
+                        variant="success"
+                        className="mt-3"
+                        onClick={handlePublishQuiz}
+                        disabled={publishingQuiz}
+                      >
+                        {publishingQuiz ? "Publishing Quiz..." : "Publish Quiz"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="d-flex gap-3 justify-content-center mt-4">
+                  <Button onClick={handlePublish}>
+                    Final Submit
+                  </Button>
+                  <Button variant="outline-primary" onClick={() => navigate("/comics")}>
+                    Go to My Comics
+                  </Button>
+                </div>
+              </div>
             )}
+
+
+
           </div>
         </div>
       </div>

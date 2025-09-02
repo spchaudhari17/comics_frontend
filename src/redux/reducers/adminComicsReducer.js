@@ -15,7 +15,7 @@ export const adminComicListReducer = (state = { comics: [] }, action) => {
         case ADMIN_COMIC_LIST_REQUEST:
             return { loading: true, comics: [] };
         case ADMIN_COMIC_LIST_SUCCESS:
-            return { loading: false, comics: action.payload };
+            return { loading: false, comics: action.payload.comics };
         case ADMIN_COMIC_LIST_FAIL:
             return { loading: false, error: action.payload };
         default:
