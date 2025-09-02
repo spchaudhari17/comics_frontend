@@ -27,11 +27,10 @@ export const ForgotPassword = () => {
             await API.post("/user/forgotPassword", {
                 email,
             });
-            //   alert("OTP sent to email");
             toast.success("OTP sent to email!");
             setStep(2);
         } catch (err) {
-            alert(err.response?.data?.message || "Something went wrong");
+            toast.error(err.response?.data?.message || "Something went wrong");
         }
     };
 
@@ -53,11 +52,10 @@ export const ForgotPassword = () => {
 
             setResetKey(res.data.reset_key);
 
-            // alert("OTP verified");
             toast.success("OTP verified");
             setStep(3);
         } catch (err) {
-            alert(err.response?.data?.message || "Something went wrong");
+            toast.error(err.response?.data?.message || "Something went wrong");
         }
     };
 
@@ -68,7 +66,8 @@ export const ForgotPassword = () => {
         console.log("resetKey being sent:", resetKey);
 
         if (newPassword !== confirmPassword) {
-            return alert("Passwords do not match");
+            toast.error("Passwords do not match");
+            return;
         }
 
         try {
@@ -76,11 +75,10 @@ export const ForgotPassword = () => {
                 reset_key: resetKey,
                 password: newPassword,
             });
-            //   alert("Password reset successful. Please login.");
             toast.success("Password reset successful. Please login");;
             navigate("/login");
         } catch (err) {
-            alert(err.response?.data?.message || "Something went wrong");
+            toast.error(err.response?.data?.message || "Something went wrong");
         }
     };
 
