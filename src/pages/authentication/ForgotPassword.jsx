@@ -45,6 +45,12 @@ export const ForgotPassword = () => {
             );
 
             console.log("resetkey response", res.data);
+
+            if (res.data.error) {
+                toast.error(res.data.message || "Invalid OTP");
+                return;
+            }
+
             setResetKey(res.data.reset_key);
 
             // alert("OTP verified");
