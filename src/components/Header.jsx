@@ -2,12 +2,12 @@ import React from "react";
 import { Dropdown } from "react-bootstrap";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import BellIcon from "../assets/images/icons/bell.svg";
-import BookIcon from "../assets/images/icons/book.svg";
 import UserIcon from "../assets/images/icons/user.svg";
 import CreditCardIcon from "../assets/images/icons/credit-card.svg";
 import LogoutIcon from "../assets/images/icons/log-out.svg";
 import { logoutUser } from "../redux/actions/userActions";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { MdMenuBook } from "react-icons/md";
 
 import { MdDashboard } from "react-icons/md";
 
@@ -50,8 +50,15 @@ export const Header = () => {
           {userInfo && userInfo.userType === "admin" && (
             <li className="nav-item dropdown">
               <NavLink to={'/super-admin'} className="nav-link wactive p-2">
-                {/* <img src={BookIcon} alt="Book Icon" className="img-fluid" style={{ minWidth: '24px' }} /> */}
                  <MdDashboard size={24} color="#333" />
+              </NavLink>
+            </li>
+          )}
+          
+          {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
+            <li className="nav-item dropdown">
+              <NavLink to={'/my-comics'} className="nav-link wactive p-2">
+                 <MdMenuBook size={24} color="#333" />
               </NavLink>
             </li>
           )}

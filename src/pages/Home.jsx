@@ -176,8 +176,9 @@ export const Home = () => {
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [quizId, setQuizId] = useState(null);
   const [quizLoading, setQuizLoading] = useState(false);
-  const [publishingQuiz, setPublishingQuiz] = useState(false);
   const [quizError, setQuizError] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+
 
   // Generate Quiz
   const handleGenerateQuiz = async () => {
@@ -186,7 +187,7 @@ export const Home = () => {
     try {
       const { data } = await API.post("/user/generate-quiz", {
         comicId,
-        script: story, // original story bhejna hai
+        script: story,
       });
 
       setQuizId(data.quizId);
@@ -196,20 +197,6 @@ export const Home = () => {
       setQuizError(err?.response?.data?.error || "Failed to generate quiz");
     } finally {
       setQuizLoading(false);
-    }
-  };
-
-  // Publish Quiz
-  const handlePublishQuiz = async () => {
-    setPublishingQuiz(true);
-    try {
-      await API.post("/user/quiz/publish", { quizId });
-      alert("Quiz published successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to publish quiz");
-    } finally {
-      setPublishingQuiz(false);
     }
   };
 
@@ -362,33 +349,79 @@ export const Home = () => {
               </div>
             )}
 
-
-            {/* STEP 3: Publish */}
-            {/* {step === 3 && (
-              <div className="text-center">
-                <h3>Comic Published 🎉</h3>
-                {pdfUrl ? (
-                  <p className="mt-3">
-                    <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
-                      Open PDF from S3
-                    </a>
-                  </p>
+            {/* {step === 2 && (
+              <div>
+                <div className="fs-3 fw-bold mb-3">Preview My Comic</div>
+                {comicImages?.length === 0 ? (
+                  <Alert variant="warning">No images to show. Please go back and regenerate.</Alert>
                 ) : (
-                  <Alert variant="warning">PDF URL not found. Try publishing again.</Alert>
+                  <Row>
+                  
+                    <Col md={3} className="border-end pe-3" style={{ maxHeight: "500px", overflowY: "auto" }}>
+                      <div className="d-flex flex-column gap-2">
+                        {comicImages.map((img, idx) => (
+                          <img
+                            key={idx}
+                            src={img}
+                            alt={`comic-${idx}`}
+                            onClick={() => setSelectedImage(img)}
+                            className={`img-thumbnail ${selectedImage === img ? "border-primary border-3" : ""}`}
+                            style={{
+                              cursor: "pointer",
+                              objectFit: "cover",
+                              height: "80px",
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </Col>
+
+               
+                    <Col md={9} className="d-flex justify-content-center align-items-center">
+                      {selectedImage ? (
+                        <img
+                          src={selectedImage}
+                          alt="selected-comic"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "500px",
+                            borderRadius: "8px",
+                            border: "2px solid #ccc",
+                          }}
+                        />
+                      ) : (
+                        <p className="text-muted">Click on a thumbnail to preview the image.</p>
+                      )}
+                    </Col>
+                  </Row>
                 )}
-                <div className="d-flex gap-3 justify-content-center mt-3">
-                  <Button onClick={handlePublish} >
-                    Final Submit
+
+                <div className="btn-wrapper mt-4 d-flex gap-3 justify-content-center">
+                  <Button
+                    variant="warning"
+                    onClick={() => {
+                      setStep(1);
+                      resetAfterBackToPrompt();
+                    }}
+                  >
+                    Edit / Regenerate
                   </Button>
-                  <Button variant="outline-primary" onClick={() => navigate("/comics")}>
-                    Go to My Comics
+                  <Button variant="success" onClick={handlePublishComic} disabled={publishing}>
+                    {publishing ? (
+                      <>
+                        <Spinner size="sm" className="me-2" /> Publishing...
+                      </>
+                    ) : (
+                      "Publish My Comic"
+                    )}
                   </Button>
                 </div>
               </div>
             )} */}
 
 
-              {/* Step 3: Publish ke andar Quiz integration */}
+
+            {/* STEP 3: Publish */}
             {step === 3 && (
               <div className="text-center">
                 <h3>Comic Published 🎉</h3>
@@ -409,7 +442,8 @@ export const Home = () => {
                     variant="info"
                     className="mb-3"
                     onClick={handleGenerateQuiz}
-                    disabled={quizLoading}
+                    // disabled={quizLoading}
+                    disabled={quizLoading || quizQuestions.length > 0}
                   >
                     {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
                   </Button>
@@ -430,14 +464,6 @@ export const Home = () => {
                           <p className="text-muted">Difficulty: {q.difficulty}</p>
                         </div>
                       ))}
-                      <Button
-                        variant="success"
-                        className="mt-3"
-                        onClick={handlePublishQuiz}
-                        disabled={publishingQuiz}
-                      >
-                        {publishingQuiz ? "Publishing Quiz..." : "Publish Quiz"}
-                      </Button>
                     </div>
                   )}
                 </div>
@@ -446,7 +472,7 @@ export const Home = () => {
                   <Button onClick={handlePublish}>
                     Final Submit
                   </Button>
-                  <Button variant="outline-primary" onClick={() => navigate("/comics")}>
+                  <Button variant="outline-primary" onClick={() => navigate("/my-comics")}>
                     Go to My Comics
                   </Button>
                 </div>

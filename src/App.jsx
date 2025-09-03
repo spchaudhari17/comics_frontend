@@ -15,6 +15,7 @@ import { ComicSubmittedSuccessfully } from './pages/ComicSubmittedSuccessfully';
 import { PageNotFound } from './pages/PageNotFound';
 import OtpVerification from './pages/authentication/OtpVerification';
 import { SuperAdmin } from './pages/admin/SuperAdmin';
+import MyComics from './pages/mycomics/MyComics';
 
 function App() {
   return (
@@ -34,7 +35,8 @@ function App() {
           {/* Main Layout Routes */}
           <Route path="/" element={<Layout />}>
             {/* <Route index element={<Dashboard />} /> */}
-          <Route path="/super-admin" element={<SuperAdmin />} />
+            <Route path="/super-admin" element={<SuperAdmin />} />
+            <Route path="/my-comics" element={<MyComics />} />
             <Route path="home" element={<Home />} />
             <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
             <Route path="*" element={<PageNotFound />} />
