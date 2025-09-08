@@ -1,4 +1,4 @@
-@import "../../assets/style/custom-variables.scss";
+@import "../../assets/styles/custom-variables.scss";
 
 // Authentication Page CSS
 .auth-page {
@@ -9,10 +9,12 @@
     .form-select {
         border-color: $theme3;
         background-color: transparent;
+        min-height: 48px;
     }
 
     .content-wrapper {
         padding: 2.25rem 1rem;
+        border-radius: 20px;
 
         @include media-breakpoint-up(xl) {
             min-height: 550px;

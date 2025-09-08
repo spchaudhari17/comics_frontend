@@ -26,7 +26,7 @@ export const LogIn = () => {
     return (
         <div className="auth-page login-page d-flex justify-content-center align-items-center min-vh-100 py-4">
             <div className="container-xl" style={{ maxWidth: '550px' }}>
-                <div className="content-wrapper bg-theme1 border rounded-3 p-4">
+                <div className="content-wrapper bg-theme1 border">
                     <div className="logo-wrapper text-center mb-4 pb-3">
                         <img src={require('../../assets/images/logo.png')} alt="Logo" className="img-fluid" style={{ width: '136px' }} />
                     </div>

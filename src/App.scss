@@ -8,7 +8,7 @@
 /* ----------------------------------
 5. Custom Variables and colors
 ---------------------------------- */
-@import "./assets/style/custom-variables.scss";
+@import "./assets/styles/custom-variables.scss";
 
 
 /* ----------------------------------
@@ -160,7 +160,7 @@ body {
 .form-select {
   color: var(--bs-body-color);
   font-size: 14px;
-  min-height: 48px;
+  min-height: 45px;
 }
 
 .form-control::placeholder {
@@ -256,6 +256,29 @@ input[type="time"]:invalid:before {
   border-radius: 8px;
 }
 
+// react-select npm customisation
+.custom-select {
+
+  .css-13cymwt-control,
+  .css-t3ipsp-control {
+    border-color: $input-border-color;
+    color: var(--bs-body-color);
+    font-size: 14px;
+    min-height: 48px;
+    box-shadow: none;
+  }
+
+  .css-13cymwt-control:hover {
+    border-color: $input-border-color;
+
+  }
+
+  .css-t3ipsp-control, .css-t3ipsp-control:hover{
+    border-color: rgba($primary, 0.5);
+    box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+  }
+}
+
 // Start: Top Header Css
 .top-header {
   .nav-link {
@@ -264,6 +287,7 @@ input[type="time"]:invalid:before {
       border-radius: 6px;
     }
   }
+
   .dropdown {
     list-style-type: none;
   }

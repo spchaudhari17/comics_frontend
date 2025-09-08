@@ -85,7 +85,7 @@ export const ForgotPassword = () => {
     return (
         <div className="auth-page forgotPassword-page d-flex justify-content-center align-items-center min-vh-100 py-4">
             <div className="container-xl" style={{ maxWidth: "550px" }}>
-                <div className="content-wrapper bg-theme1 rounded-3 shadow">
+                <div className="content-wrapper bg-theme1 border">
                     {/* STEP 1 - Email */}
                     {step === 1 && (
                         <Form onSubmit={handleEmailSubmit}>

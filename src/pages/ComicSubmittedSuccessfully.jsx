@@ -7,7 +7,7 @@ export const ComicSubmittedSuccessfully = () => {
     return (
         <div className="auth-page comic-successful-page pt-5 pb-3">
             <div className="container" style={{ maxWidth: '550px' }}>
-                <div className="content-wrapper bg-theme1 border rounded-3 text-center">
+                <div className="content-wrapper bg-theme1 border text-center">
                     <div className="heading-wrapper text-dark mb-4 pb-2">
                         <div className="icon mb-4"><i className="bi bi-patch-check-fill display-3 text-success"></i></div>
                         <div className="fs-3 fw-bold font-roboto lh-sm mb-2">Comic Published Successfully!</div>

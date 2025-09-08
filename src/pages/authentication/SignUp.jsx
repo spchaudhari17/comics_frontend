@@ -80,7 +80,7 @@ export const SignUp = () => {
     return (
         <div className='auth-page SignUp-page d-flex justify-content-center align-items-center min-vh-100 py-4'>
             <div className="container-xl" style={{ maxWidth: '750px' }}>
-                <div className="content-wrapper bg-theme1 border rounded-3">
+                <div className="content-wrapper bg-theme1 border">
                     <div className="logo-wrapper text-center mb-4 pb-3">
                         <img src={require('../../assets/images/logo.png')} alt="Logo" className="img-fluid" style={{ width: '136px' }} />
                     </div>
