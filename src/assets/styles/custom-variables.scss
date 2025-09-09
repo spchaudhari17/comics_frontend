@@ -23,7 +23,7 @@ $body-color: #344054;
 $btn-border-radius: 0.30rem;
 $input-border-color: $gray;
 $input-border-radius: 0.30rem;
-$font-size-base: 0.875rem;
+// $font-size-base: 0.875rem;
 $btn-padding-x: 1rem;
 
 
@@ -35,18 +35,17 @@ $btn-padding-x: 1rem;
 @import "~bootstrap/scss/mixins";
 
 
+// Override just what you need
+$container-max-widths: map-merge($container-max-widths, (xl: 1170px));
+
 /* ----------------------------------
   3. Extend Theme Colors and Utilities (BEFORE importing utilities)
 ---------------------------------- */
-$theme-colors: map-merge(
-  $theme-colors,
-  (
-    "theme1": $theme1,
-    "theme2": $theme2,
-    "theme3": $theme3,
-    "theme4": $theme4,
-    "theme5": $theme5,
-    "gray": $gray,
-  )
-);
-
+$theme-colors: map-merge($theme-colors,
+    ("theme1": $theme1,
+      "theme2": $theme2,
+      "theme3": $theme3,
+      "theme4": $theme4,
+      "theme5": $theme5,
+      "gray": $gray,
+    ));

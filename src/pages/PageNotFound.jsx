@@ -7,7 +7,7 @@ export const PageNotFound = () => {
 
   return (
     <div className="pageNotFound py-3">
-      <div className="container-xl">
+      <div className="container-xxl">
         <div className="no-data-wrapper bg-white rounded-4 px-3 py-5">
           <div className="text-center mx-auto" style={{ maxWidth: '600px' }}>
             <img src={require('../assets/images/404.png')} alt="404 Page" className="img-fluid w-100 mb-4" style={{ maxWidth: '350px' }} />

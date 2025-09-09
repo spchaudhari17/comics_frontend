@@ -54,7 +54,7 @@ const MyComics = () => {
     <>
 
       {/* <div className="my-comics-page pt-4 pb-3">
-        <div className="container-xl">
+        <div className="container-xxl">
           {loading ? (
             <Loader />
           ) : error ? (

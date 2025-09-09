@@ -6,6 +6,11 @@ import { listAllComicsAdmin, updateComicStatus } from "../../redux/actions/admin
 import { deleteComic } from "../../redux/actions/comicActions";
 import { Loader } from "../../lib/loader";
 
+// react-data-table-component
+import DataTable from 'react-data-table-component';
+import dataTableCustomStyles from '../../assets/styles/dataTableCustomStyles';
+import { NoDataComponent } from '../../components/NoDataComponent';
+
 export const SuperAdmin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -75,9 +80,102 @@ export const SuperAdmin = () => {
     setSelectedComicId(null);
   };
 
+  const columns = [
+    // {
+    //   name: "#",
+    //   selector: (row, index) => index + 1,
+    //   width: "60px",
+    // },
+    {
+      name: "Creator Name",
+      selector: row => row.user_id?.firstname || "Unknown",
+      sortable: true,
+      minWidth: '150px',
+      cell: row => <div className="creator_name fw-medium text-capitalize">{row.user_id?.firstname || "Unknown"}</div>
+    },
+    {
+      name: "Email",
+      selector: row => row.user_id?.email || "N/A",
+      sortable: true,
+      minWidth: '200px',
+    },
+    {
+      name: "User Type",
+      selector: row => row.user_id?.userType || "N/A",
+      sortable: true,
+      cell: row => (
+        <Badge bg="info">
+          {row.user_id?.userType || "N/A"}
+        </Badge>
+      ),
+    },
+    {
+      name: "Subject",
+      selector: row => row.subject,
+      sortable: true,
+    },
+    {
+      name: "Comic Title",
+      selector: row => row.title,
+      sortable: true,
+      minWidth: '180px',
+    },
+    {
+      name: "Comic Viewer",
+      minWidth: '150px',
+      cell: row => (
+        <Button size="sm" variant="link"
+          onClick={() => window.open(row.pdfUrl, "_blank", "noopener,noreferrer")}
+          disabled={!row.pdfUrl}
+        >
+          <i className="bi bi-filetype-pdf me-1"></i> View Comic
+        </Button>
+      ),
+    },
+    {
+      name: "Status",
+      cell: row => getStatusBadge(row.status),
+      sortable: true,
+    },
+    {
+      name: "Created",
+      selector: row => new Date(row.createdAt).toLocaleDateString(),
+      sortable: true,
+      minWidth: '120px',
+    },
+    {
+      name: "Actions",
+      minWidth: '150px',
+      cell: row => (
+        <div className="d-flex align-items-center gap-2">
+          {row.status === "pending" ? (
+            <div className="d-flex gap-2">
+              <Button size="sm" variant="success" onClick={() => handleStatusChange(row._id, "approved")} >
+                <i className="bi bi-check-lg"></i> Accept
+              </Button>
+              <Button size="sm" variant="danger" onClick={() => handleStatusChange(row._id, "rejected")} >
+                <i className="bi bi-x-lg"></i> Decline
+              </Button>
+            </div>
+          ) : (
+            <div className="">
+              {row.status === "approved" ? "Approved" : "Rejected"}
+            </div>
+          )}
+
+          {(row.status === "approved" || row.status === "rejected") && (
+            <Button size="sm" variant="outline-danger" onClick={() => openDeleteModal(row._id)} >
+              <i className="bi bi-trash3"></i>
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="super-admin-page pt-4 pb-3">
-      <div className="container-xl">
+      <div className="container-xxl">
         {loading ? (
           <Loader />
         ) : error ? (
@@ -85,154 +183,71 @@ export const SuperAdmin = () => {
         ) : (
           <>
             {/* Stats Cards */}
-            <Row className="g-4 mb-4">
+            <Row className="g-3 mb-4">
               <Col md={3}>
-                <Card className="text-center">
-                  <Card.Body>
-                    <h3 className="text-primary mb-1">{comics.filter(c => c.status === "pending").length}</h3>
-                    <p className="text-muted mb-0">Pending</p>
-                  </Card.Body>
-                </Card>
+                <div className="bg-primary bg-opacity-25 rounded-4 border-bottom border-4 border-primary p-3">
+                  <div className="fs-3 fw-bold text-primary lh-sm mb-1">{comics.filter(c => c.status === "pending").length}</div>
+                  <div className="title-name text-body">Pending</div>
+                </div>
               </Col>
               <Col md={3}>
-                <Card className="text-center">
-                  <Card.Body>
-                    <h3 className="text-success mb-1">{comics.filter(c => c.status === "approved").length}</h3>
-                    <p className="text-muted mb-0">Approved</p>
-                  </Card.Body>
-                </Card>
+                <div className="bg-success bg-opacity-25 rounded-4 border-bottom border-4 border-success p-3">
+                  <div className="fs-3 fw-bold text-success lh-sm mb-1">{comics.filter(c => c.status === "approved").length}</div>
+                  <div className="title-name text-body">Approved</div>
+                </div>
               </Col>
               <Col md={3}>
-                <Card className="text-center">
-                  <Card.Body>
-                    <h3 className="text-danger mb-1">{comics.filter(c => c.status === "rejected").length}</h3>
-                    <p className="text-muted mb-0">Rejected</p>
-                  </Card.Body>
-                </Card>
+                <div className="bg-danger bg-opacity-25 rounded-4 border-bottom border-4 border-danger p-3">
+                  <div className="fs-3 fw-bold text-danger lh-sm mb-1">{comics.filter(c => c.status === "rejected").length}</div>
+                  <div className="title-name text-body">Rejected</div>
+                </div>
               </Col>
               <Col md={3}>
-                <Card className="text-center">
-                  <Card.Body>
-                    <h3 className="text-info mb-1">{comics.length}</h3>
-                    <p className="text-muted mb-0">Total</p>
-                  </Card.Body>
-                </Card>
+                <div className="bg-info bg-opacity-25 rounded-4 border-bottom border-4 border-info p-3">
+                  <div className="fs-3 fw-bold text-info lh-sm mb-1">{comics.length}</div>
+                  <div className="title-name text-body">Total</div>
+                </div>
               </Col>
             </Row>
 
             {/* Comics Table */}
-            <Card>
-              <Card.Header>
-                <h5 className="mb-0">Creator Submissions</h5>
-              </Card.Header>
-              <Card.Body>
-                {updating && <p className="text-info">Updating status...</p>}
-                <Table responsive striped hover>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Creator Name</th>
-                      <th>Email</th>
-                      <th>User Type</th>
-                      <th>Subject</th>
-                      <th>Comic Title</th>
-                      <th>Comic Viewer</th>
-                      <th>Status</th>
-                      <th>Created</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {comics.map((comic, index) => (
-                      <tr key={comic._id}>
-                        <td>{index + 1}</td>
-                        <td><strong>{comic.user_id?.firstname || "Unknown"}</strong></td>
-                        <td>{comic.user_id?.email || "N/A"}</td>
-                        <td>
-                          <Badge bg="info" className="text-white">{comic.user_id?.userType || "N/A"}</Badge>
-                        </td>
-                        <td>{comic.subject}</td>
-                        <td>
-                          <div className="text-truncate" style={{ maxWidth: "150px" }} title={comic.title}>
-                            {comic.title}
-                          </div>
-                        </td>
-                        <td>
-                          <Button
-                            size="sm"
-                            variant="outline-primary"
-                            onClick={() => window.open(comic.pdfUrl, "_blank", "noopener,noreferrer")}
-                            disabled={!comic.pdfUrl}
-                          >
-                            <i className="bi bi-filetype-pdf me-1"></i>
-                            View Comic
-                          </Button>
-                        </td>
-                        <td>{getStatusBadge(comic.status)}</td>
-                        <td>{new Date(comic.createdAt).toLocaleDateString()}</td>
-                        <td>
-                          {comic.status === "pending" ? (
-                            <div className="d-flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="success"
-                                onClick={() => handleStatusChange(comic._id, "approved")}
-                              >
-                                <i className="bi bi-check-lg me-1"></i>
-                                Accept
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="danger"
-                                onClick={() => handleStatusChange(comic._id, "rejected")}
-                              >
-                                <i className="bi bi-x-lg me-1"></i>
-                                Decline
-                              </Button>
-                            </div>
-                          ) : (
-                            <div className="text-muted small">
-                              {comic.status === "approved" ? "Approved" : "Rejected"}
-                            </div>
-                          )}
-
-                          {(comic.status === "approved" || comic.status === "rejected") && (
-                            <Button
-                              size="sm"
-                              variant="outline-danger"
-                              onClick={() => openDeleteModal(comic._id)}
-                            >
-                              <i className="bi bi-trash3 me-1"></i>
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Card.Body>
-            </Card>
+            <div className="info-wrapper bg-white rounded-4 p-3">
+              <div className="main-heading mb-3">Creator Submissions -</div>
+              <div className='table-responsive table-custom-wrapper'>
+                <DataTable
+                  columns={columns}
+                  data={comics}
+                  highlightOnHover
+                  responsive
+                  pagination
+                  customStyles={dataTableCustomStyles}
+                  noDataComponent={<NoDataComponent />}
+                  striped
+                />
+              </div>
+              {updating && <p className="text-info">Updating status...</p>}
+            </div>
 
             {/* Delete Confirmation Modal */}
             <Modal show={showDeleteModal} centered onHide={handleClose}>
-              <Modal.Body className="text-center px-md-5 py-5">
-                <div
-                  className="icon-cover d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle mx-auto mb-3"
-                  style={{ height: '50px', width: '50px' }}
-                >
-                  <i className="bi bi-exclamation-triangle fs-4 text-danger"></i>
-                </div>
-                <div className="fs-18 fw-semibold lh-sm mb-3 pb-1">Are you sure you want to delete this comic?</div>
-                <div className="btn-wrapper d-flex flex-wrap justify-content-center gap-2">
-                  <Button variant="secondary" className="px-4 py-2" onClick={handleClose}>Cancel</Button>
-                  <Button
-                    variant="danger"
-                    className="px-4 py-2"
-                    onClick={handleDeleteConfirm}
-                    disabled={deleting}
-                  >
-                    {deleting ? "Deleting..." : "Delete"}
-                  </Button>
+              <Modal.Body>
+                <div className="content-wrapper text-center">
+                  <div className="icon-cover d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle mx-auto mb-3"
+                    style={{ height: '50px', width: '50px' }}>
+                    <i className="bi bi-trash3 fs-4 text-danger"></i>
+                  </div>
+                  <div className="fs-18 fw-semibold lh-sm">Are you sure you want to delete this comic?</div>
+                  <div className="btn-wrapper d-flex flex-wrap justify-content-center gap-2 mt-4">
+                    <Button variant="secondary" className="px-4 py-2" onClick={handleClose}>Cancel</Button>
+                    <Button
+                      variant="danger"
+                      className="px-4 py-2"
+                      onClick={handleDeleteConfirm}
+                      disabled={deleting}
+                    >
+                      {deleting ? "Deleting..." : "Delete"}
+                    </Button>
+                  </div>
                 </div>
               </Modal.Body>
             </Modal>

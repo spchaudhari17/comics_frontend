@@ -5,11 +5,15 @@
     // background: url('../../assets/images/bg-banner2.jpg') no-repeat;
     background-size: cover;
 
+    .logo-wrapper img {
+        width: 100px;
+    }
+
     .form-control,
     .form-select {
         border-color: $theme3;
         background-color: transparent;
-        min-height: 48px;
+        min-height: 45px;
     }
 
     .content-wrapper {
@@ -24,7 +28,7 @@
         }
 
         @include media-breakpoint-up(sm) {
-            padding: 2.75rem 2.5rem;
+            padding: 2.5rem 2.5rem;
         }
     }
 

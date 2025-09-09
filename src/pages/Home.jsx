@@ -2,10 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Home.scss';
 import Select from "react-select";
-import { Row, Col, Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { Row, Col, Form, OverlayTrigger, Tooltip, Modal, Button, Spinner, Alert } from 'react-bootstrap';
 import API from "../API/index";
 import { useDispatch } from "react-redux";
 import { setComicStatus } from '../redux/actions/comicActions';
+
+// Styles Images
+import MinimalistCartoon from "../assets/images/stylesImages/minimalist-cartoon.png";
+import RealisticPencil from "../assets/images/stylesImages/realistic-pencil.png";
+import WatercolorWash from "../assets/images/stylesImages/watercolor-wash.png";
+import TechnoNeon from "../assets/images/stylesImages/techno-neon.png";
+import PapercutLayers from "../assets/images/stylesImages/papercut-layers.png";
+import PixelSoft from "../assets/images/stylesImages/pixel-soft.png";
+import VectorPop from "../assets/images/stylesImages/vector-pop.png";
+import InkAndWash from "../assets/images/stylesImages/ink-and-wash.png";
+import ComicPanelClassic from "../assets/images/stylesImages/comic-panel-classic.png";
+import Realism from "../assets/images/stylesImages/realism.png";
 
 const Stepper = ({ currentStep }) => {
   const steps = [
@@ -70,6 +82,34 @@ export const Home = () => {
   const [loadingImage, setLoadingImage] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Style Images Modal
+  const [showStyleImgModal, setShowStyleImgModal] = useState(false);
+  const opneStyleImgModal = () => setShowStyleImgModal(true);
+  const closeStyleImgModal = () => setShowStyleImgModal(false);
+
+  // Example style → image mapping
+  const styleImages = {
+    "Minimalist Cartoon": MinimalistCartoon,
+    "Realistic Pencil": RealisticPencil,
+    "Watercolor Wash": WatercolorWash,
+    "Techno Neon": TechnoNeon,
+    "Papercut Layers": PapercutLayers,
+    "Pixel Soft": PixelSoft,
+    "Vector Pop": VectorPop,
+    "Ink & Wash": InkAndWash,
+    "Comic Panel Classic": ComicPanelClassic,
+    "Realism": Realism
+  };
+
+  const openStyleImgModal = () => {
+    if (styleType) {
+      setShowStyleImgModal(true);
+    } else {
+      alert("Please select a style first!");
+    }
+  };
+  // Example style → image mapping
 
   const resetAfterBackToPrompt = () => {
     // user goes back to prompt to edit/regenerate → clear images & pdf
@@ -216,7 +256,7 @@ export const Home = () => {
 
   return (
     <div className="homePage pt-4 pb-3">
-      <div className="container-xl">
+      <div className="container-xxl">
         <div className="custom-wrapper mx-auto" style={{ maxWidth: "1000px" }}>
           <div className="wrapper pb-1">
             <Stepper currentStep={step} />
@@ -315,22 +355,20 @@ export const Home = () => {
                   </Col>
                   <Col sm={6} md={4}>
                     <Form.Group>
-                      <Form.Label>Style</Form.Label>
+                      <Form.Label className="d-flex align-items-center gap-2">
+                        Choose Style
+                        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-info">Click to view style image</Tooltip>}>
+                          <i className="bi bi-info-circle text-primary" role="button" onClick={opneStyleImgModal}></i>
+                        </OverlayTrigger>
+                      </Form.Label>
                       <Form.Select
                         value={styleType}
                         onChange={(e) => setStyleType(e.target.value)}
                       >
                         <option value="" disabled>Select Style</option>
-                        <option value="Minimalist Cartoon">Minimalist Cartoon</option>
-                        <option value="Realistic Pencil">Realistic Pencil</option>
-                        <option value="Watercolor Wash">Classic Watercolor Wash</option>
-                        <option value="Techno Neon">Techno Neon</option>
-                        <option value="Papercut Layers">Papercut Layers</option>
-                        <option value="Pixel Soft">Pixel Soft</option>
-                        <option value="Vector Pop">Vector Pop</option>
-                        <option value="Ink & Wash">Ink & Wash</option>
-                        <option value="Comic Panel Classic">Comic Panel Classic</option>
-                        <option value="Realism">Realism</option>
+                        {Object.keys(styleImages).map((style) => (
+                          <option key={style} value={style}>{style}</option>
+                        ))}
                       </Form.Select>
                     </Form.Group>
                   </Col>
@@ -507,8 +545,6 @@ export const Home = () => {
               </div>
             )} */}
 
-
-
             {/* STEP 3: Publish */}
             {step === 3 && (
               <div className="text-center">
@@ -566,12 +602,27 @@ export const Home = () => {
                 </div>
               </div>
             )}
-
-
-
           </div>
         </div>
       </div>
+
+      {/* Style Images Modal */}
+      <Modal show={showStyleImgModal} onHide={closeStyleImgModal} centered>
+        <Modal.Header closeButton className="fs-16 fw-bold">Preview Image
+        </Modal.Header>
+        <Modal.Body className="p-3">
+          <div className="content-wrapper text-center">
+            {styleImages[styleType] ? (
+              <img src={styleImages[styleType]} alt={styleType} className="img-fluid rounded" />
+            ) : (
+              <div className="bg-theme1 border rounded-4 p-4">
+                <div className="icon mb-2"><i className="bi bi-image fs-2 lh-1"></i></div>
+                <div className="fs-16 text-muted fw-medium">No preview available</div>
+              </div>
+            )}
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
