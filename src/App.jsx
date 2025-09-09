@@ -10,6 +10,7 @@ import { ForgotPassword } from './pages/authentication/ForgotPassword';
 
 // Main Layout and Pages
 import { Layout } from './components/layouts/Layout';
+import { LandingHome } from './pages/LandingHome';
 import { Home } from './pages/Home';
 import { ComicSubmittedSuccessfully } from './pages/ComicSubmittedSuccessfully';
 import { PageNotFound } from './pages/PageNotFound';
@@ -35,6 +36,7 @@ function App() {
           {/* Main Layout Routes */}
           <Route path="/" element={<Layout />}>
             {/* <Route index element={<Dashboard />} /> */}
+            <Route path="landing-home" element={<LandingHome />} />
             <Route path="/super-admin" element={<SuperAdmin />} />
             <Route path="/my-comics" element={<MyComics />} />
             <Route path="home" element={<Home />} />
@@ -45,9 +47,7 @@ function App() {
       </BrowserRouter>
 
       <ToastContainers />
-
     </>
-
   );
 }
 
