@@ -1,25 +1,29 @@
 import React from 'react';
+import "./Home.scss";
 import { Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-export const LandingHome = () => {
+export const Home = () => {
+  const navigate = useNavigate();
   return (
-    <div className="LandingHome-page">
+    <div className="home-page">
       {/* Hero Banner */}
-      <section className="hero-banner-section bg-theme1 py-5">
-        <div className="container-xl py-5">
-          <div className="row align-items-center g-5">
-            <div className="col-lg-6">
-              <div className="heading display-5 fw-bold lh-1 mb-1">Turn Ideas Into Comics. <br />Learn. Teach. Earn.</div>
-              <div className="sub-title text-secondary">AI-generated educational comics and quizzes for schools, teachers, and curious minds.</div>
-              <div className="btn-wrapper d-flex flex-wrap gap-3 mt-4">
-                <Button variant='primary' className="btn-custom">Make Comics from Concepts</Button>
-                {/* <Button variant='primary' className="btn-custom">Browse Our Library</Button> */}
-                <Button variant='outline-secondary' className="btn-custom">Download App</Button>
+      <section className="hero-banner-section bg-theme1 d-flex align-items-center py-5">
+        <div className="container-xl position-relative py-4">
+          <div className="row align-items-center g-4">
+            <div className="col-md-6">
+              <div className="content-wrapper">
+                <div className="heading text-light fs-1 fw-bold lh-sm mb-3">Turn Ideas Into <span className="text-primary">Comics.</span> <br />Learn. Teach. Earn.</div>
+                <div className="sub-title text-white text-opacity-75">AI-generated educational comics and quizzes for schools, teachers, <br /> and curious minds.</div>
+                <div className="btn-wrapper d-flex flex-wrap gap-3 mt-4 pt-3">
+                  <Button variant='primary' className="btn-custom" onClick={() => navigate('/create-comic')}>Make Comics from Concepts</Button>
+                  <Button variant='warning' className="btn-custom">Browse Our Library</Button>
+                  <Button variant='info' className="btn-custom">Download App</Button>
+                </div>
               </div>
             </div>
-            <div className="col-lg-6 text-center">
-              <img src="https://images.unsplash.com/photo-...jpg?auto=format&fit=crop&w=600" className="img-fluid rounded shadow" alt="Comic Transformation" />
+            <div className="col-md-6 text-center">
+              <img src={require('../../assets/images/comic-process.png')} className="img-fluid rounded shadow" alt="Comic Transformation" />
             </div>
           </div>
         </div>
@@ -28,7 +32,7 @@ export const LandingHome = () => {
       {/* About Section */}
       <section className="py-5">
         <div className="container text-center">
-          <h2 className="fw-bold mb-3">About Kridemy</h2>
+          <div className="main-heading mb-3">About Kridemy</div>
           <p className="lead text-muted mb-4">
             Kridemy is an AI-powered education platform that helps you learn and teach complex academic concepts through fun, visually rich comic stories and gamified quizzes.
           </p>
@@ -44,7 +48,7 @@ export const LandingHome = () => {
       {/* What We Do */}
       <section className="py-5 bg-light">
         <div className="container">
-          <h2 className="fw-bold text-center mb-5">What We Do</h2>
+          <div className="main-heading text-center mb-3">What We Do</div>
           <div className="row g-4">
             <div className="col-md-6">
               <h5>AI Comic Generator</h5>

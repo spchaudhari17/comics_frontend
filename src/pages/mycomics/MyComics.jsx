@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Table, Button, Badge, Card, Row, Col } from "react-bootstrap";
-import { Loader } from "../../lib/loader"; // tumhare project me already hai
+import { Loader } from "../../lib/loader"; 
 import API from "../../API";
 
 const MyComics = () => {

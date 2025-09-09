@@ -10,13 +10,13 @@ import { ForgotPassword } from './pages/authentication/ForgotPassword';
 
 // Main Layout and Pages
 import { Layout } from './components/layouts/Layout';
-import { LandingHome } from './pages/LandingHome';
-import { Home } from './pages/Home';
+import { Home } from './pages/Homepage/Home';
 import { ComicSubmittedSuccessfully } from './pages/ComicSubmittedSuccessfully';
 import { PageNotFound } from './pages/PageNotFound';
 import OtpVerification from './pages/authentication/OtpVerification';
 import { SuperAdmin } from './pages/admin/SuperAdmin';
 import MyComics from './pages/mycomics/MyComics';
+import ComicGenerator from './pages/ComicGenerator/ComicGenerator';
 
 function App() {
   return (
@@ -25,7 +25,7 @@ function App() {
         <Routes>
           {/* Auth Routes */}
           {/* Redirect root to /login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* <Route path="/" element={<Navigate to="/login" replace />} /> */}
           <Route path="/login" element={<LogIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/OtpVerification" element={<OtpVerification />} />
@@ -35,11 +35,10 @@ function App() {
 
           {/* Main Layout Routes */}
           <Route path="/" element={<Layout />}>
-            {/* <Route index element={<Dashboard />} /> */}
-            <Route path="landing-home" element={<LandingHome />} />
+            <Route index element={<Home />} />
             <Route path="/super-admin" element={<SuperAdmin />} />
             <Route path="/my-comics" element={<MyComics />} />
-            <Route path="home" element={<Home />} />
+            <Route path="/create-comic" element={<ComicGenerator />} />
             <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>

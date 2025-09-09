@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Home.scss';
+import './ComicGenerator.scss';
 import Select from "react-select";
 import { Row, Col, Form, OverlayTrigger, Tooltip, Modal, Button, Spinner, Alert } from 'react-bootstrap';
-import API from "../API/index";
+import API from "../../API/index";
 import { useDispatch } from "react-redux";
-import { setComicStatus } from '../redux/actions/comicActions';
+import { setComicStatus } from '../../redux/actions/comicActions';
 
 // Styles Images
-import MinimalistCartoon from "../assets/images/stylesImages/minimalist-cartoon.png";
-import RealisticPencil from "../assets/images/stylesImages/realistic-pencil.png";
-import WatercolorWash from "../assets/images/stylesImages/watercolor-wash.png";
-import TechnoNeon from "../assets/images/stylesImages/techno-neon.png";
-import PapercutLayers from "../assets/images/stylesImages/papercut-layers.png";
-import PixelSoft from "../assets/images/stylesImages/pixel-soft.png";
-import VectorPop from "../assets/images/stylesImages/vector-pop.png";
-import InkAndWash from "../assets/images/stylesImages/ink-and-wash.png";
-import ComicPanelClassic from "../assets/images/stylesImages/comic-panel-classic.png";
-import Realism from "../assets/images/stylesImages/realism.png";
+import MinimalistCartoon from "../../assets/images/stylesImages/minimalist-cartoon.png";
+import RealisticPencil from "../../assets/images/stylesImages/realistic-pencil.png";
+import WatercolorWash from "../../assets/images/stylesImages/watercolor-wash.png";
+import TechnoNeon from "../../assets/images/stylesImages/techno-neon.png";
+import PapercutLayers from "../../assets/images/stylesImages/papercut-layers.png";
+import PixelSoft from "../../assets/images/stylesImages/pixel-soft.png";
+import VectorPop from "../../assets/images/stylesImages/vector-pop.png";
+import InkAndWash from "../../assets/images/stylesImages/ink-and-wash.png";
+import ComicPanelClassic from "../../assets/images/stylesImages/comic-panel-classic.png";
+import Realism from "../../assets/images/stylesImages/realism.png";
 
 const Stepper = ({ currentStep }) => {
   const steps = [
@@ -52,7 +52,7 @@ const Stepper = ({ currentStep }) => {
   );
 };
 
-export const Home = () => {
+export const ComicGenerator = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -254,6 +254,54 @@ export const Home = () => {
   }, []);
   // For react-select country selection
 
+  // FAQ states
+  const [faqs, setFaqs] = useState([]);
+  const [faqLoading, setFaqLoading] = useState(false);
+  const [faqError, setFaqError] = useState("");
+
+  // Did You Know states
+  const [facts, setFacts] = useState([]);
+  const [factLoading, setFactLoading] = useState(false);
+  const [factError, setFactError] = useState("");
+
+  // Handle Generate FAQs
+  const handleGenerateFAQs = async () => {
+    setFaqError("");
+    setFaqLoading(true);
+    try {
+      const { data } = await API.post("/user/generate-faqs", {
+        comicId,
+        story: pages, // pages ko bhejna better hai instead of story string
+      });
+      setFaqs(data.faqs || []);
+    } catch (err) {
+      console.error(err);
+      setFaqError(err?.response?.data?.error || "Failed to generate FAQs");
+    } finally {
+      setFaqLoading(false);
+    }
+  };
+
+  // Handle Generate Did You Know
+  const handleGenerateFacts = async () => {
+    setFactError("");
+    setFactLoading(true);
+    try {
+      const { data } = await API.post("/user/generate-didyouknow", {
+        comicId,
+        subject,
+        story: pages,
+      });
+      setFacts(data.didYouKnow || []);
+    } catch (err) {
+      console.error(err);
+      setFactError(err?.response?.data?.error || "Failed to generate facts");
+    } finally {
+      setFactLoading(false);
+    }
+  };
+
+
   return (
     <div className="homePage pt-4 pb-3">
       <div className="container-xxl">
@@ -442,7 +490,7 @@ export const Home = () => {
 
 
             {/* STEP 2: Preview images */}
-            {step === 2 && (
+            {/* {step === 2 && (
               <div>
                 <div className="fs-3 fw-bold mb-3">Preview My Comic</div>
                 {comicImages?.length === 0 ? (
@@ -473,9 +521,9 @@ export const Home = () => {
                   </Button>
                 </div>
               </div>
-            )}
+            )} */}
 
-            {/* {step === 2 && (
+            {step === 2 && (
               <div>
                 <div className="fs-3 fw-bold mb-3">Preview My Comic</div>
                 {comicImages?.length === 0 ? (
@@ -543,7 +591,7 @@ export const Home = () => {
                   </Button>
                 </div>
               </div>
-            )} */}
+            )}
 
             {/* STEP 3: Publish */}
             {step === 3 && (
@@ -572,6 +620,8 @@ export const Home = () => {
                     {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
                   </Button>
 
+
+
                   {quizError && <Alert variant="danger">{quizError}</Alert>}
 
                   {quizQuestions.length > 0 && (
@@ -586,6 +636,58 @@ export const Home = () => {
                           </ul>
                           <p className="text-success">✔ Correct: {q.correctAnswer}</p>
                           <p className="text-muted">Difficulty: {q.difficulty}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* FAQ Section */}
+                <div className="faq-wrapper mt-5 text-start">
+                  <h4>Generate FAQs for this Comic</h4>
+                  <Button
+                    variant="secondary"
+                    className="mb-3"
+                    onClick={handleGenerateFAQs}
+                    disabled={faqLoading || faqs.length > 0}
+                  >
+                    {faqLoading ? "Generating FAQs..." : "Generate FAQs"}
+                  </Button>
+
+                  {faqError && <Alert variant="danger">{faqError}</Alert>}
+
+                  {faqs.length > 0 && (
+                    <div className="faq-list mt-4">
+                      {faqs.map((f, idx) => (
+                        <div key={idx} className="mb-3 p-3 border rounded">
+                          <strong>Q{idx + 1}. {f.question}</strong>
+                          <p className="mb-0">Ans: {f.answer}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Did You Know Section */}
+                <div className="fact-wrapper mt-5 text-start">
+                  <h4>Generate Did You Know Facts</h4>
+                  <Button
+                    variant="warning"
+                    className="mb-3"
+                    onClick={handleGenerateFacts}
+                    disabled={factLoading || facts.length > 0}
+                  >
+                    {factLoading ? "Generating Facts..." : "Generate Facts"}
+                  </Button>
+
+                  {factError && <Alert variant="danger">{factError}</Alert>}
+
+                  {facts.length > 0 && (
+                    <div className="fact-list mt-4">
+                      {facts.map((f, idx) => (
+                        <div key={idx} className="mb-3 p-3 border rounded bg-light">
+                          <strong>Did you know?</strong>
+                          <p className="mb-0">{f.fact}</p>
                         </div>
                       ))}
                     </div>
@@ -627,4 +729,4 @@ export const Home = () => {
   );
 };
 
-export default Home;
+export default ComicGenerator;

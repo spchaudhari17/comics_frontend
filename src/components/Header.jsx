@@ -35,7 +35,7 @@ export const Header = () => {
       <nav className="navbar navbar-light bg-white border-bottom navbar-expand-lg py-1" data-bs-theme="light" style={{ minHeight: "61px" }}>
         <div className="container-xxl">
           {/* Logo */}
-          <Link className="navbar-brand logo-wrapper text-center" to="/home">
+          <Link className="navbar-brand logo-wrapper text-center" to={"/"}>
             <img src={require("../assets/images/logo2.png")} alt="Logo" className="img-fluid" />
           </Link>
 

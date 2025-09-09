@@ -53,7 +53,7 @@ export const SuperAdmin = () => {
       case "rejected":
         return <Badge bg="danger">Rejected</Badge>;
       case "pending":
-        return <Badge bg="warning" text="dark">Pending</Badge>;
+        return <Badge bg="warning">Pending</Badge>;
       default:
         return <Badge bg="secondary">Unknown</Badge>;
     }
@@ -145,16 +145,16 @@ export const SuperAdmin = () => {
     },
     {
       name: "Actions",
-      minWidth: '150px',
+      minWidth: '180px',
       cell: row => (
         <div className="d-flex align-items-center gap-2">
           {row.status === "pending" ? (
             <div className="d-flex gap-2">
-              <Button size="sm" variant="success" onClick={() => handleStatusChange(row._id, "approved")} >
-                <i className="bi bi-check-lg"></i> Accept
+              <Button size="sm" variant="success" className="px-2" onClick={() => handleStatusChange(row._id, "approved")} >
+                Accept
               </Button>
-              <Button size="sm" variant="danger" onClick={() => handleStatusChange(row._id, "rejected")} >
-                <i className="bi bi-x-lg"></i> Decline
+              <Button size="sm" variant="danger" className="px-2" onClick={() => handleStatusChange(row._id, "rejected")} >
+                Decline
               </Button>
             </div>
           ) : (
