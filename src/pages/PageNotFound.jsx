@@ -20,6 +20,6 @@ export const PageNotFound = () => {
           </div>
         </div>
       </div>
-    </div> 
+    </div>
   )
 }
