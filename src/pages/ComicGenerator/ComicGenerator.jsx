@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Home.scss';
+import './ComicGenerator.scss';
 import Select from "react-select";
 import { Row, Col, Form, OverlayTrigger, Tooltip, Modal, Button, Spinner, Alert } from 'react-bootstrap';
-import API from "../API/index";
+import API from "../../API/index";
 import { useDispatch } from "react-redux";
-import { setComicStatus } from '../redux/actions/comicActions';
+import { setComicStatus } from '../../redux/actions/comicActions';
 
 // Styles Images
-import MinimalistCartoon from "../assets/images/stylesImages/minimalist-cartoon.png";
-import RealisticPencil from "../assets/images/stylesImages/realistic-pencil.png";
-import WatercolorWash from "../assets/images/stylesImages/watercolor-wash.png";
-import TechnoNeon from "../assets/images/stylesImages/techno-neon.png";
-import PapercutLayers from "../assets/images/stylesImages/papercut-layers.png";
-import PixelSoft from "../assets/images/stylesImages/pixel-soft.png";
-import VectorPop from "../assets/images/stylesImages/vector-pop.png";
-import InkAndWash from "../assets/images/stylesImages/ink-and-wash.png";
-import ComicPanelClassic from "../assets/images/stylesImages/comic-panel-classic.png";
-import Realism from "../assets/images/stylesImages/realism.png";
+import MinimalistCartoon from "../../assets/images/stylesImages/minimalist-cartoon.png";
+import RealisticPencil from "../../assets/images/stylesImages/realistic-pencil.png";
+import WatercolorWash from "../../assets/images/stylesImages/watercolor-wash.png";
+import TechnoNeon from "../../assets/images/stylesImages/techno-neon.png";
+import PapercutLayers from "../../assets/images/stylesImages/papercut-layers.png";
+import PixelSoft from "../../assets/images/stylesImages/pixel-soft.png";
+import VectorPop from "../../assets/images/stylesImages/vector-pop.png";
+import InkAndWash from "../../assets/images/stylesImages/ink-and-wash.png";
+import ComicPanelClassic from "../../assets/images/stylesImages/comic-panel-classic.png";
+import Realism from "../../assets/images/stylesImages/realism.png";
 
 const Stepper = ({ currentStep }) => {
   const steps = [
@@ -52,7 +52,7 @@ const Stepper = ({ currentStep }) => {
   );
 };
 
-export const Home = () => {
+export const ComicGenerator = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -729,4 +729,4 @@ export const Home = () => {
   );
 };
 
-export default Home;
+export default ComicGenerator;

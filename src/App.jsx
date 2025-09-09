@@ -10,12 +10,12 @@ import { ForgotPassword } from './pages/authentication/ForgotPassword';
 
 // Main Layout and Pages
 import { Layout } from './components/layouts/Layout';
-import { Home } from './pages/Home';
 import { ComicSubmittedSuccessfully } from './pages/ComicSubmittedSuccessfully';
 import { PageNotFound } from './pages/PageNotFound';
 import OtpVerification from './pages/authentication/OtpVerification';
 import { SuperAdmin } from './pages/admin/SuperAdmin';
 import MyComics from './pages/mycomics/MyComics';
+import ComicGenerator from './pages/ComicGenerator/ComicGenerator';
 
 function App() {
   return (
@@ -37,7 +37,7 @@ function App() {
             {/* <Route index element={<Dashboard />} /> */}
             <Route path="/super-admin" element={<SuperAdmin />} />
             <Route path="/my-comics" element={<MyComics />} />
-            <Route path="home" element={<Home />} />
+            <Route path="/create-comic" element={<ComicGenerator />} />
             <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>

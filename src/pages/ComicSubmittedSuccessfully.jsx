@@ -14,7 +14,7 @@ export const ComicSubmittedSuccessfully = () => {
                         <div className="subtitle fs-14 text-muted">Your comic is now live. Share it with the world and let your audience enjoy your creativity.</div>
                     </div>
                     <div className="btn-wrapper">
-                        <Button variant="primary" type="submit" className="btn-custom font-roboto rounded-pill w-100 py-2" onClick={()=> navigate('/home')}><i className="bi bi-house-door-fill"></i> Back to Home</Button>
+                        <Button variant="primary" type="submit" className="btn-custom font-roboto rounded-pill w-100 py-2" onClick={()=> navigate('/create-comic')}><i className="bi bi-house-door-fill"></i> Back to Home</Button>
                     </div>
                 </div>
             </div>

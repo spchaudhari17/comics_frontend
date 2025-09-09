@@ -26,7 +26,7 @@ export const Header = () => {
   };
 
   const handleLogoClick = () => {
-    navigate("/home");
+    navigate("/create-comic");
   };
 
 

@@ -51,7 +51,7 @@ export const loginUser = (formData, navigate) => async (dispatch) => {
             localStorage.setItem("user", JSON.stringify(data.data));
 
             dispatch({ type: USER_LOGIN_SUCCESS, payload: data.data });
-            navigate("/home");
+            navigate("/create-comic");
         } else {
             dispatch({ type: USER_LOGIN_FAIL, payload: data.message });
         }
@@ -78,7 +78,7 @@ export const verifyOtp = (formData, navigate) => async (dispatch) => {
         localStorage.setItem("user", JSON.stringify(data.data));
 
         dispatch({ type: USER_VERIFY_OTP_SUCCESS, payload: data.data });
-        navigate("/home");
+        navigate("/create-comic");
 
     } catch (error) {
         dispatch({
