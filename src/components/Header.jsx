@@ -15,7 +15,7 @@ export const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
- const userInfo = localStorage.getItem("user")
+  const userInfo = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
 
@@ -25,82 +25,112 @@ export const Header = () => {
     navigate("/login");
   };
 
- const handleLogoClick = () => {
-    navigate("/home");
-  };
-
-
-
   return (
-    <nav className="navbar navbar-light bg-white border-bottom navbar-expand-lgg top-header sticky-top py-2" data-bs-theme="light" style={{ minHeight: "61px" }}>
-      <div className="container-xl gap-2 flex-nowrap">
-        <div className="left-sec d-flex align-items-center justify-content-start gap-3">
-          <div className="logo-wrapper text-center">
-            <img src={require('../assets/images/logo.png')}  onClick={handleLogoClick} alt="Logo" className="img-fluid" style={{ width: '136px', cursor: "pointer" }} />
+    <div className="top-header sticky-top shadow-sm">
+      <div className="announcement-bar bg-primary py-1">
+        <div className="container-xxl">
+          <div className="discription fs-14 text-white text-center">You're exploring the Beta version. Some features may be handled manually.</div>
+        </div>
+      </div>
+      <nav className="navbar navbar-light bg-white border-bottom navbar-expand-lg py-1" data-bs-theme="light" style={{ minHeight: "61px" }}>
+        <div className="container-xxl">
+          {/* Logo */}
+          <Link className="navbar-brand logo-wrapper text-center" to="/home">
+            <img src={require("../assets/images/logo2.png")} alt="Logo" className="img-fluid" />
+          </Link>
+
+          {/* Mobile toggle (targets offcanvas) */}
+          <button className="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasTopHeader" aria-controls="offcanvasTopHeader">
+            <span className="navbar-toggler-icon"></span>
+          </button>
+
+          {/* Offcanvas menu with overlay */}
+          <div className="offcanvas offcanvas-end" tabIndex="-1" id="offcanvasTopHeader" aria-labelledby="offcanvasTopHeaderLabel">
+            <div className="offcanvas-header">
+              <h5 className="offcanvas-title">Menu</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+
+            <div className="offcanvas-body">
+              <ul className="navbar-nav align-items-center justify-content-end flex-grow-1 gap-3">
+                <li className="nav-item">
+                  <Link to={'/'} className="nav-link p-0">About Us</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={'/'} className="nav-link p-0">Library</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={'/'} className="nav-link p-0">Create Comics</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={'/'} className="nav-link p-0">For Teachers</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={'/'} className="nav-link p-0">For Students</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={'/'} className="nav-link p-0">For Parents</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={'/'} className="nav-link p-0">Contact</Link>
+                </li>
+              </ul>
+              <ul className="navbar-nav align-items-center justify-content-end flex-grow-1 gap-3">
+                <li className="nav-item">
+                  <Link to={'/'} className="nav-link p-0">
+                    <img src={BellIcon} alt="Bell Icon" className="img-fluid" />
+                  </Link>
+                </li>
+
+                {userInfo && userInfo.userType === "admin" && (
+                  <li className="nav-item">
+                    <Link to={'/super-admin'} className="nav-link active p-0">
+                      <i className="bi bi-grid-fill"></i>
+                    </Link>
+                  </li>
+                )}
+
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
+                  <li className="nav-item">
+                    <Link to={'/my-comics'} className="nav-link p-0">
+                      <i className="bi bi-book-half"></i>
+                    </Link>
+                  </li>
+                )}
+
+                {/* <div className="divider vr d-none d-md-block me-2"></div> */}
+
+                <Dropdown align="end" className="account-menu">
+                  <Dropdown.Toggle variant="white" className="bg-transparent border-0 p-0">
+                    <div className="chip-wrapper">
+                      <div className="chip-img bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center rounded-circle overflow-hidden">
+                        {/* <div className="user-shortname fs-16 fw-medium text-black text-opacity-75 text-uppercase">K</div> */}
+                        <img className="w-100 h-100" src={require("../assets/images/dummy-user.jpeg")} alt="User" />
+                      </div>
+                    </div>
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu className="text-theme3 shadow-sm rounded-3">
+                    <div className="user-info text-theme3 pb-1 px-3">
+                      <div className="user-info text-start text-truncate">
+                        <div className="username fs-14 fw-semibold text-black text-opacity-75 text-capitalize">Test User</div>
+                        <div className="user-email fs-12 text-muted text-lowercase text-truncate">testuser@virtualemployee.com</div>
+                      </div>
+                    </div>
+                    <Dropdown.Divider className="my-1" />
+                    <Dropdown.Item className="text-theme3">
+                      <img src={UserIcon} alt="User Icon" className="img-fluid" /> Profile
+                    </Dropdown.Item>
+                    <Dropdown.Divider className="my-1" />
+                    <Dropdown.Item onClick={handleLogout} className="text-theme3">
+                      <img src={LogoutIcon} alt="Logout Icon" className="img-fluid" /> Log out
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </ul>
+            </div>
           </div>
         </div>
-
-        <ul className="right-sec d-flex align-items-center justify-content-end gap-1 m-0 p-0">
-          <li className="nav-item dropdown">
-            <NavLink to={'/'} className="nav-link p-2">
-              <img src={BellIcon} alt="Bell Icon" className="img-fluid" style={{ minWidth: '24px' }} />
-            </NavLink>
-          </li>
-
-          {userInfo && userInfo.userType === "admin" && (
-            <li className="nav-item dropdown">
-              <NavLink to={'/super-admin'} className="nav-link wactive p-2">
-                 <MdDashboard size={24} color="#333" />
-              </NavLink>
-            </li>
-          )}
-          
-          {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
-            <li className="nav-item dropdown">
-              <NavLink to={'/my-comics'} className="nav-link wactive p-2">
-                 <MdMenuBook size={24} color="#333" />
-              </NavLink>
-            </li>
-          )}
-
-
-          <div className="divider vr d-none d-md-block me-2"></div>
-          <Dropdown align="end" className="account-menu">
-            <Dropdown.Toggle variant="white" className="bg-transparent border-0 p-0" id="dropdown-basic">
-              <div className="chip-wrapper d-flex align-items-center gap-2 text-truncate">
-                <div className="chip-img bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center rounded-circle overflow-hidden">
-                  {/* <div className="user-shortname fs-16 fw-medium text-black text-opacity-75 text-uppercase">K</div> */}
-                  <img className="w-100 h-100" src={require("../assets/images/dummy-user.jpeg")} alt="User" />
-                </div>
-                {/* <div className="user-info text-start text-truncate">
-                  <div className="username fs-14 fw-medium text-black text-opacity-75 text-capitalize">Test User</div>
-                  <div className="user-email fs-12 text-muted text-lowercase text-truncate">testuser@virtualemployee.com</div>
-                </div> */}
-              </div>
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu className="text-theme3 shadow-sm rounded-3">
-              <Dropdown.Item className="text-theme3">
-                <img src={UserIcon} alt="User Icon" className="img-fluid" /> Profile
-              </Dropdown.Item>
-              <Dropdown.Divider />
-              <Dropdown.Item className="text-theme3">
-                <img src={CreditCardIcon} alt="Credit Card Icon" className="img-fluid" /> History
-              </Dropdown.Item>
-              <Dropdown.Divider />
-              <Dropdown.Item onClick={handleLogout} className="text-theme3">
-                <img src={LogoutIcon} alt="Logout Icon" className="img-fluid" /> Log out
-              </Dropdown.Item>
-              <Dropdown.Divider />
-              <div className="fs-12 d-flex align-items-center px-3">
-                <Link to={'#'} className="text-theme3 text-decoration-none p-0">Terms of Service</Link>
-                <span><i className="bi bi-dot fs-4 lh-1"></i></span>
-                <Link to={'#'} className="text-theme3 text-decoration-none p-0">Privacy</Link>
-              </div>
-            </Dropdown.Menu>
-          </Dropdown>
-        </ul>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 };

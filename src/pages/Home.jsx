@@ -1,11 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Row, Col, Form, Button, Spinner, Alert } from 'react-bootstrap';
 import './Home.scss';
+import Select from "react-select";
+import { Row, Col, Form, OverlayTrigger, Tooltip, Modal, Button, Spinner, Alert } from 'react-bootstrap';
 import API from "../API/index";
 import { useDispatch } from "react-redux";
 import { setComicStatus } from '../redux/actions/comicActions';
 
+// Styles Images
+import MinimalistCartoon from "../assets/images/stylesImages/minimalist-cartoon.png";
+import RealisticPencil from "../assets/images/stylesImages/realistic-pencil.png";
+import WatercolorWash from "../assets/images/stylesImages/watercolor-wash.png";
+import TechnoNeon from "../assets/images/stylesImages/techno-neon.png";
+import PapercutLayers from "../assets/images/stylesImages/papercut-layers.png";
+import PixelSoft from "../assets/images/stylesImages/pixel-soft.png";
+import VectorPop from "../assets/images/stylesImages/vector-pop.png";
+import InkAndWash from "../assets/images/stylesImages/ink-and-wash.png";
+import ComicPanelClassic from "../assets/images/stylesImages/comic-panel-classic.png";
+import Realism from "../assets/images/stylesImages/realism.png";
 
 const Stepper = ({ currentStep }) => {
   const steps = [
@@ -18,8 +30,7 @@ const Stepper = ({ currentStep }) => {
   return (
     <div className="stepper-wrapper position-relative mb-5">
       <div className="stepper-line position-absolute start-0 end-0 z-0" />
-      <div
-        className="stepper-line stepper-line-progress position-absolute bg-primary z-1"
+      <div className="stepper-line stepper-line-progress position-absolute bg-primary z-1"
         style={{
           width: `${(currentStep / (steps.length - 1)) * 100}%`,
           transition: "width 0.3s ease",
@@ -27,10 +38,7 @@ const Stepper = ({ currentStep }) => {
       />
       <div className="stepper d-flex justify-content-between position-relative z-1">
         {steps.map((label, index) => (
-          <div
-            key={index}
-            className={`step text-center position-relative ${index === currentStep ? "active" : ""} ${index < currentStep ? "completed" : ""}`}
-          >
+          <div key={index} className={`step text-center position-relative ${index === currentStep ? "active" : ""} ${index < currentStep ? "completed" : ""}`}>
             <div className="step-number d-flex align-items-center justify-content-center">
               {index + 1}
             </div>
@@ -56,6 +64,11 @@ export const Home = () => {
   // business state
   const [comicId, setComicId] = useState(null);
   const [pages, setPages] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState({});
+  const [classGrade, setClassGrade] = useState("");
+  const [themeType, setThemeType] = useState("");
+  const [styleType, setStyleType] = useState("");
   const [comicTitle, setComicTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [subject, setSubject] = useState("");
@@ -69,6 +82,34 @@ export const Home = () => {
   const [loadingImage, setLoadingImage] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Style Images Modal
+  const [showStyleImgModal, setShowStyleImgModal] = useState(false);
+  const opneStyleImgModal = () => setShowStyleImgModal(true);
+  const closeStyleImgModal = () => setShowStyleImgModal(false);
+
+  // Example style → image mapping
+  const styleImages = {
+    "Minimalist Cartoon": MinimalistCartoon,
+    "Realistic Pencil": RealisticPencil,
+    "Watercolor Wash": WatercolorWash,
+    "Techno Neon": TechnoNeon,
+    "Papercut Layers": PapercutLayers,
+    "Pixel Soft": PixelSoft,
+    "Vector Pop": VectorPop,
+    "Ink & Wash": InkAndWash,
+    "Comic Panel Classic": ComicPanelClassic,
+    "Realism": Realism
+  };
+
+  const openStyleImgModal = () => {
+    if (styleType) {
+      setShowStyleImgModal(true);
+    } else {
+      alert("Please select a style first!");
+    }
+  };
+  // Example style → image mapping
 
   const resetAfterBackToPrompt = () => {
     // user goes back to prompt to edit/regenerate → clear images & pdf
@@ -200,6 +241,18 @@ export const Home = () => {
     }
   };
 
+  // For react-select country selection
+  useEffect(() => {
+    fetch(
+      "https://valid.layercode.workers.dev/list/countries?format=select&flags=true&value=code"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setCountries(data.countries);
+        setSelectedCountry(data.userSelectValue);
+      });
+  }, []);
+  // For react-select country selection
 
   // FAQ states
   const [faqs, setFaqs] = useState([]);
@@ -251,7 +304,7 @@ export const Home = () => {
 
   return (
     <div className="homePage pt-4 pb-3">
-      <div className="container-xl">
+      <div className="container-xxl">
         <div className="custom-wrapper mx-auto" style={{ maxWidth: "1000px" }}>
           <div className="wrapper pb-1">
             <Stepper currentStep={step} />
@@ -278,19 +331,96 @@ export const Home = () => {
                 <div className="heading-wrapper text-dark mb-4">
                   <div className="fs-3 fw-bold">Write your story</div>
                 </div>
-                <Row className="g-3 g-md-4">
-                  <Col md={4}>
+                <Row className="g-3">
+                  <Col sm={6} md={4}>
                     <Form.Group>
-                      <Form.Label>Comic Title</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={comicTitle}
-                        onChange={(e) => setComicTitle(e.target.value)}
-                        placeholder="e.g. The Science"
+                      <Form.Label>Country</Form.Label>
+                      <Select className="custom-select"
+                        options={countries}
+                        value={selectedCountry}
+                        onChange={(selectedOption) => setSelectedCountry(selectedOption)}
+                        placeholder="Select a country"
+                        isSearchable
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
+                  <Col sm={6} md={4}>
+                    <Form.Group>
+                      <Form.Label>Class/Grade</Form.Label>
+                      <Form.Select
+                        value={classGrade}
+                        onChange={(e) => setClassGrade(e.target.value)}
+                      >
+                        <option value="" disabled>Select Class/Grade</option>
+                        <option value="1st Standard">1st Standard</option>
+                        <option value="2nd Standard">2nd Standard</option>
+                        <option value="3rd Standard">3rd Standard</option>
+                        <option value="4th Standard">4th Standard</option>
+                        <option value="5th Standard">5th Standard</option>
+                        <option value="6th Standard">6th Standard</option>
+                        <option value="7th Standard">7th Standard</option>
+                        <option value="8th Standard">8th Standard</option>
+                        <option value="9th Standard">9th Standard</option>
+                        <option value="10th Standard">10th Standard</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col sm={6} md={4}>
+                    <Form.Group>
+                      <Form.Label>Subject</Form.Label>
+                      <Form.Select
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                      >
+                        <option value="" disabled>Select subject</option>
+                        <option value="Science">Science</option>
+                        <option value="Mythic">Mythic</option>
+                        <option value="Fables">Classic Fables</option>
+                        <option value="Motivation">Motivation</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col sm={6} md={4}>
+                    <Form.Group>
+                      <Form.Label>Theme</Form.Label>
+                      <Form.Select
+                        value={themeType}
+                        onChange={(e) => setThemeType(e.target.value)}
+                      >
+                        <option value="" disabled>Select Theme</option>
+                        <option value="Mythical Realism">Mythical Realism</option>
+                        <option value="Mentor & Apprentice">Mentor & Apprentice</option>
+                        <option value="Time Traveler’s Log">Classic Time Traveler’s Log</option>
+                        <option value="Slice of Life">Slice of Life</option>
+                        <option value="Dream World Quest">Dream World Quest</option>
+                        <option value="Eco Mission">Eco Mission</option>
+                        <option value="Inventor’s Diary">Inventor’s Diary</option>
+                        <option value="Classroom Simulator">Classroom Simulator</option>
+                        <option value="Logic Duel">Logic Duel</option>
+                        <option value="Learning Tournament">Learning Tournament</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col sm={6} md={4}>
+                    <Form.Group>
+                      <Form.Label className="d-flex align-items-center gap-2">
+                        Choose Style
+                        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-info">Click to view style image</Tooltip>}>
+                          <i className="bi bi-info-circle text-primary" role="button" onClick={opneStyleImgModal}></i>
+                        </OverlayTrigger>
+                      </Form.Label>
+                      <Form.Select
+                        value={styleType}
+                        onChange={(e) => setStyleType(e.target.value)}
+                      >
+                        <option value="" disabled>Select Style</option>
+                        {Object.keys(styleImages).map((style) => (
+                          <option key={style} value={style}>{style}</option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col sm={6} md={4}>
                     <Form.Group>
                       <Form.Label>Author</Form.Label>
                       <Form.Control
@@ -301,19 +431,15 @@ export const Home = () => {
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
+                  <Col xs={12}>
                     <Form.Group>
-                      <Form.Label>Subject</Form.Label>
-                      <Form.Select
-                        value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
-                      >
-                        <option value="">Select subject</option>
-                        <option value="Science">Science</option>
-                        <option value="Mythic">Mythic</option>
-                        <option value="Fables">Classic Fables</option>
-                        <option value="Motivation">Motivation</option>
-                      </Form.Select>
+                      <Form.Label>Comic Title</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={comicTitle}
+                        onChange={(e) => setComicTitle(e.target.value)}
+                        placeholder="e.g. The Science"
+                      />
                     </Form.Group>
                   </Col>
                   <Col xs={12}>
@@ -467,8 +593,6 @@ export const Home = () => {
               </div>
             )}
 
-
-
             {/* STEP 3: Publish */}
             {step === 3 && (
               <div className="text-center">
@@ -580,12 +704,27 @@ export const Home = () => {
                 </div>
               </div>
             )}
-
-
-
           </div>
         </div>
       </div>
+
+      {/* Style Images Modal */}
+      <Modal show={showStyleImgModal} onHide={closeStyleImgModal} centered>
+        <Modal.Header closeButton className="fs-16 fw-bold">Preview Image
+        </Modal.Header>
+        <Modal.Body className="p-3">
+          <div className="content-wrapper text-center">
+            {styleImages[styleType] ? (
+              <img src={styleImages[styleType]} alt={styleType} className="img-fluid rounded" />
+            ) : (
+              <div className="bg-theme1 border rounded-4 p-4">
+                <div className="icon mb-2"><i className="bi bi-image fs-2 lh-1"></i></div>
+                <div className="fs-16 text-muted fw-medium">No preview available</div>
+              </div>
+            )}
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

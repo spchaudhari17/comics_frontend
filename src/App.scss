@@ -8,7 +8,7 @@
 /* ----------------------------------
 5. Custom Variables and colors
 ---------------------------------- */
-@import "./assets/style/custom-variables.scss";
+@import "./assets/styles/custom-variables.scss";
 
 
 /* ----------------------------------
@@ -73,6 +73,7 @@
 html,
 body {
   background-color: #F2F4F7;
+  font-size: 14px;
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
   // overflow-x: hidden;
@@ -89,10 +90,10 @@ body {
 
 .main-heading {
   color: #101828;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   // font-size: clamp(22px, 3vw, 30px);
   font-family: "Inter", sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   line-height: normal;
 }
 
@@ -123,17 +124,30 @@ body {
   }
 }
 
-.btn {
+.btn:not(.btn-sm) {
   min-height: 40px;
 }
 
 .btn-custom {
   font-size: 16px;
   // font-weight: 500;
-  min-height: 48px;
+  min-height: 45px;
   min-width: 180px;
   padding: 6px 1.5rem;
   transition: all 0.3s;
+}
+
+.modal-content {
+  border: 0;
+  border-radius: 16px;
+
+  .modal-body {
+    padding: 26px 1rem;
+
+    @include media-breakpoint-up(lg) {
+      padding: 36px;
+    }
+  }
 }
 
 .child-modal-backdrop {
@@ -160,7 +174,7 @@ body {
 .form-select {
   color: var(--bs-body-color);
   font-size: 14px;
-  min-height: 48px;
+  min-height: 45px;
 }
 
 .form-control::placeholder {
@@ -254,16 +268,63 @@ input[type="time"]:invalid:before {
 .table-custom-wrapper {
   border: 1px solid var(--bs-border-color);
   border-radius: 8px;
+
+  .badge {
+    min-width: 75px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+    border-radius: 4px;
+  }
+}
+
+// react-select npm customisation
+.custom-select {
+
+  .css-13cymwt-control,
+  .css-t3ipsp-control {
+    border-color: $input-border-color;
+    color: var(--bs-body-color);
+    font-size: 14px;
+    min-height: 45px;
+    box-shadow: none;
+  }
+
+  .css-13cymwt-control:hover {
+    border-color: $input-border-color;
+
+  }
+
+  .css-t3ipsp-control,
+  .css-t3ipsp-control:hover {
+    border-color: rgba($primary, 0.5);
+    box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+  }
 }
 
 // Start: Top Header Css
 .top-header {
-  .nav-link {
-    &.active {
-      background-color: $theme2;
-      border-radius: 6px;
+  .logo-wrapper img {
+    width: 140px;
+  }
+
+  .navbar-nav {
+    .nav-link {
+      &.active {
+        color: $primary;
+      }
+
+      img {
+        width: 24px;
+      }
+
+      i {
+        font-size: 20px;
+      }
     }
   }
+
+
   .dropdown {
     list-style-type: none;
   }
@@ -271,7 +332,7 @@ input[type="time"]:invalid:before {
   .account-menu {
     .dropdown-menu {
       top: 9px !important;
-      width: 200px;
+      width: 220px;
 
       .dropdown-item {
         display: flex;

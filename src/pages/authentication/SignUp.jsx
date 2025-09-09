@@ -79,13 +79,13 @@ export const SignUp = () => {
 
     return (
         <div className='auth-page SignUp-page d-flex justify-content-center align-items-center min-vh-100 py-4'>
-            <div className="container-xl" style={{ maxWidth: '750px' }}>
-                <div className="content-wrapper bg-theme1 border rounded-3">
-                    <div className="logo-wrapper text-center mb-4 pb-3">
-                        <img src={require('../../assets/images/logo.png')} alt="Logo" className="img-fluid" style={{ width: '136px' }} />
+            <div className="container-xxl" style={{ maxWidth: '750px' }}>
+                <div className="content-wrapper bg-theme1 border">
+                    <div className="logo-wrapper text-center mb-4 pb-1">
+                        <img src={require('../../assets/images/logo.png')} alt="Logo" className="img-fluid" />
                     </div>
                     <div className="heading-wrapper text-dark mb-4">
-                        <div className="fs-2 fw-bold font-roboto lh-sm mb-1">Create an account</div>
+                        <div className="fs-4 fw-bold font-roboto lh-sm mb-1">Create an account</div>
                         <div className="subtitle fs-14 text-muted">Enter all required details below to create your account!</div>
                     </div>
 

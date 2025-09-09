@@ -1,18 +1,24 @@
-@import "../../assets/style/custom-variables.scss";
+@import "../../assets/styles/custom-variables.scss";
 
 // Authentication Page CSS
 .auth-page {
     // background: url('../../assets/images/bg-banner2.jpg') no-repeat;
     background-size: cover;
 
+    .logo-wrapper img {
+        width: 100px;
+    }
+
     .form-control,
     .form-select {
         border-color: $theme3;
         background-color: transparent;
+        min-height: 45px;
     }
 
     .content-wrapper {
         padding: 2.25rem 1rem;
+        border-radius: 20px;
 
         @include media-breakpoint-up(xl) {
             min-height: 550px;
@@ -22,7 +28,7 @@
         }
 
         @include media-breakpoint-up(sm) {
-            padding: 2.75rem 2.5rem;
+            padding: 2.5rem 2.5rem;
         }
     }
 

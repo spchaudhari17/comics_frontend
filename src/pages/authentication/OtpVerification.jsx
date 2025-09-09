@@ -29,12 +29,12 @@ const OtpVerification = () => {
 
   return (
     <div className="auth-page otp-page d-flex justify-content-center align-items-center min-vh-100 py-4">
-      <div className="container-xl">
+      <div className="container-xxl">
         <div
           className="card border-0 rounded-3 shadow w-100 mx-auto px-3 px-sm-5 py-5"
           style={{ maxWidth: '550px' }}
         >
-          <div className="fs-2 fw-bold text-center lh-1 mb-4">OTP Verification</div>
+          <div className="fs-4 fw-bold font-roboto lh-sm mb-3">OTP Verification</div>
 
           <Form onSubmit={handleVerify}>
             {error && <div className="alert alert-danger">{error}</div>}
