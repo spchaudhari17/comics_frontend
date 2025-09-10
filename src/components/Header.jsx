@@ -3,13 +3,9 @@ import { Dropdown } from "react-bootstrap";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import BellIcon from "../assets/images/icons/bell.svg";
 import UserIcon from "../assets/images/icons/user.svg";
-import CreditCardIcon from "../assets/images/icons/credit-card.svg";
 import LogoutIcon from "../assets/images/icons/log-out.svg";
 import { logoutUser } from "../redux/actions/userActions";
 import { useDispatch } from "react-redux";
-import { MdMenuBook } from "react-icons/md";
-
-import { MdDashboard } from "react-icons/md";
 
 export const Header = () => {
   const dispatch = useDispatch();
@@ -27,9 +23,9 @@ export const Header = () => {
 
   return (
     <div className="top-header sticky-top shadow-sm">
-      <div className="announcement-bar bg-primary py-1">
+      <div className="announcement-bar bg-primary py-2">
         <div className="container-xxl">
-          <div className="discription fs-14 text-white text-center">You're exploring the Beta version. Some features may be handled manually.</div>
+          <div className="discription fs-12 text-white text-center">You're exploring the <span className="fw-semibold text-danger">Beta version</span>. Some features may be handled manually.</div>
         </div>
       </div>
       <nav className="navbar navbar-light bg-white border-bottom navbar-expand-lg py-1" data-bs-theme="light" style={{ minHeight: "61px" }}>
@@ -52,7 +48,7 @@ export const Header = () => {
             </div>
 
             <div className="offcanvas-body">
-              <ul className="navbar-nav align-items-center justify-content-end flex-grow-1 gap-3">
+              <ul className="navbar-nav menu-link-nav align-items-center justify-content-end flex-grow-1 gap-3">
                 <li className="nav-item">
                   <Link to={'/'} className="nav-link p-0">About Us</Link>
                 </li>
@@ -75,7 +71,7 @@ export const Header = () => {
                   <Link to={'/'} className="nav-link p-0">Contact</Link>
                 </li>
               </ul>
-              <ul className="navbar-nav align-items-center justify-content-end flex-grow-1 gap-3">
+              <ul className="navbar-nav icons-nav align-items-center justify-content-end flex-grow-1 gap-3">
                 <li className="nav-item">
                   <Link to={'/'} className="nav-link p-0">
                     <img src={BellIcon} alt="Bell Icon" className="img-fluid" />
@@ -84,7 +80,7 @@ export const Header = () => {
 
                 {userInfo && userInfo.userType === "admin" && (
                   <li className="nav-item">
-                    <Link to={'/super-admin'} className="nav-link active p-0">
+                    <Link to={'/super-admin'} className="nav-link p-0">
                       <i className="bi bi-grid-fill"></i>
                     </Link>
                   </li>
@@ -99,33 +95,40 @@ export const Header = () => {
                 )}
 
                 {/* <div className="divider vr d-none d-md-block me-2"></div> */}
-
-                <Dropdown align="end" className="account-menu">
-                  <Dropdown.Toggle variant="white" className="bg-transparent border-0 p-0">
-                    <div className="chip-wrapper">
-                      <div className="chip-img bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center rounded-circle overflow-hidden">
-                        {/* <div className="user-shortname fs-16 fw-medium text-black text-opacity-75 text-uppercase">K</div> */}
-                        <img className="w-100 h-100" src={require("../assets/images/dummy-user.jpeg")} alt="User" />
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") ? (
+                  <Dropdown align="end" className="account-menu">
+                    <Dropdown.Toggle variant="white" className="bg-transparent border-0 p-0">
+                      <div className="chip-wrapper">
+                        <div className="chip-img bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center rounded-circle overflow-hidden">
+                          {/* <div className="user-shortname fs-16 fw-medium text-black text-opacity-75 text-uppercase">K</div> */}
+                          <img className="w-100 h-100" src={require("../assets/images/avatar.png")} alt="User" />
+                        </div>
                       </div>
-                    </div>
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu className="text-theme3 shadow-sm rounded-3">
-                    <div className="user-info text-theme3 pb-1 px-3">
-                      <div className="user-info text-start text-truncate">
-                        <div className="username fs-14 fw-semibold text-black text-opacity-75 text-capitalize">Test User</div>
-                        <div className="user-email fs-12 text-muted text-lowercase text-truncate">testuser@virtualemployee.com</div>
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu className="text-theme3 shadow-sm rounded-3">
+                      <div className="user-info text-theme3 pb-1 px-3">
+                        <div className="user-info text-start text-truncate">
+                          <div className="username fs-14 fw-semibold text-black text-opacity-75 text-capitalize">Test User</div>
+                          <div className="user-email fs-12 text-muted text-lowercase text-truncate">testuser@virtualemployee.com</div>
+                        </div>
                       </div>
-                    </div>
-                    <Dropdown.Divider className="my-1" />
-                    <Dropdown.Item className="text-theme3">
-                      <img src={UserIcon} alt="User Icon" className="img-fluid" /> Profile
-                    </Dropdown.Item>
-                    <Dropdown.Divider className="my-1" />
-                    <Dropdown.Item onClick={handleLogout} className="text-theme3">
-                      <img src={LogoutIcon} alt="Logout Icon" className="img-fluid" /> Log out
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
+                      <Dropdown.Divider className="my-1" />
+                      <Dropdown.Item className="text-theme3">
+                        <img src={UserIcon} alt="User Icon" className="img-fluid" /> Profile
+                      </Dropdown.Item>
+                      <Dropdown.Divider className="my-1" />
+                      <Dropdown.Item onClick={handleLogout} className="text-theme3">
+                        <img src={LogoutIcon} alt="Logout Icon" className="img-fluid" /> Log out
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                ):(
+                  <li className="nav-item">
+                    <Link to={'/login'} className="nav-link p-0">
+                      <img src={UserIcon} alt="User Icon" className="img-fluid" />
+                    </Link>
+                  </li>
+                )}
               </ul>
             </div>
           </div>

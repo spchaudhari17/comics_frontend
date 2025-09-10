@@ -6,9 +6,6 @@ $enable-negative-margins: true;
 $theme1: #FDFCF5;
 $theme2: #F9E2C5;
 $theme3: #A2845E;
-$theme4: #F9FAFC;
-$theme5: #EAECF0;
-$gray: #bac1cc;
 
 $sidebar-bg: #064cb8;
 $primary: #B88746;
@@ -21,9 +18,10 @@ $placeholder-clr: #667085;
 
 $body-color: #344054;
 $btn-border-radius: 0.30rem;
-$input-border-color: $gray;
+$input-border-color: #bac1cc;
 $input-border-radius: 0.30rem;
 // $font-size-base: 0.875rem;
+$font-family-base: "Inter", sans-serif;
 $btn-padding-x: 1rem;
 
 
@@ -45,7 +43,4 @@ $theme-colors: map-merge($theme-colors,
     ("theme1": $theme1,
       "theme2": $theme2,
       "theme3": $theme3,
-      "theme4": $theme4,
-      "theme5": $theme5,
-      "gray": $gray,
     ));

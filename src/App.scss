@@ -88,21 +88,26 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
-.main-heading {
-  color: #101828;
-  font-size: 1.25rem;
-  // font-size: clamp(22px, 3vw, 30px);
-  font-family: "Inter", sans-serif;
-  font-weight: 600;
+.label-heading {
+  color: $primary;
+  font-size: 14px;
+  font-weight: 500;
   line-height: normal;
+  text-transform: uppercase;
 }
 
 .main-heading {
   color: #101828;
   font-size: 1.25rem;
   // font-size: clamp(22px, 3vw, 30px);
-  font-family: "Inter", sans-serif;
   font-weight: 600;
+  line-height: normal;
+}
+
+.section-heading {
+  color: #101828;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 700;
   line-height: normal;
 }
 
@@ -148,6 +153,10 @@ body {
   min-width: 180px;
   padding: 6px 1.5rem;
   transition: all 0.3s;
+
+  @include media-breakpoint-up(lg) {
+    min-height: 50px;
+  }
 }
 
 .modal-content {
@@ -323,7 +332,10 @@ input[type="time"]:invalid:before {
 
   .navbar-nav {
     .nav-link {
-      &.active {
+      color: $body-color;
+
+      &.active,
+      &:hover {
         color: $primary;
       }
 
@@ -337,14 +349,15 @@ input[type="time"]:invalid:before {
     }
   }
 
-
-  .dropdown {
-    list-style-type: none;
+  .icons-nav {
+    .nav-link {
+      color: $secondary;
+    }
   }
 
   .account-menu {
     .dropdown-menu {
-      top: 9px !important;
+      top: 8px !important;
       width: 220px;
 
       .dropdown-item {
