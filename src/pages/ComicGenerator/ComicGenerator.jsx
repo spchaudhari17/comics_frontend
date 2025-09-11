@@ -303,8 +303,8 @@ export const ComicGenerator = () => {
 
 
   return (
-    <div className="homePage pt-4 pb-3">
-      <div className="container-xxl">
+    <div className="homePage py-5">
+      <div className="container-xl">
         <div className="custom-wrapper mx-auto" style={{ maxWidth: "1000px" }}>
           <div className="wrapper pb-1">
             <Stepper currentStep={step} />

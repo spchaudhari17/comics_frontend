@@ -72,7 +72,7 @@
 
 html,
 body {
-  background-color: #F2F4F7;
+  // background-color: #F2F4F7;
   font-size: 14px;
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
@@ -380,8 +380,199 @@ input[type="time"]:invalid:before {
 
 .main-content-wrapper {
   width: 100%;
-  min-height: 100vh;
+  min-height: 30vh;
   transition: all 0.3s;
 }
 
 // End: Top Header CSS
+
+// Start: Footer Section CSS
+footer {
+  .social-sec {
+    img {
+      width: 30px;
+      border-radius: 7px;
+      transition: all .5s;
+
+      &:hover {
+        transform: rotate(360deg);
+      }
+    }
+  }
+
+  .nav {
+    .nav-link {
+      color: $body-color;
+      padding: 0;
+      position: relative;
+      transition: all .5s;
+
+      &:hover {
+        color: $primary;
+        margin-left: 6px;
+      }
+
+      &:before {
+        content: '\F280';
+        font-family: 'bootstrap-icons';
+        margin-right: 5px;
+      }
+    }
+  }
+}
+
+// End: Footer Section CSS
+
+// Start: Common Breadcrumb Banner Section
+.breadcrumb-banner-section {
+  background: url('./assets/images/comic-banner-2.jpg') no-repeat;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  min-height: 20vh;
+  overflow: hidden;
+  position: relative;
+
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+// End: Common Breadcrumb Banner Section
+
+// Start: About Us Page CSS
+.about-cmpny-sec {
+  .img-frame {
+    width: 92%;
+    height: 92%;
+    border: 12px solid $theme2;
+  }
+}
+
+// Counters
+.counters-section {
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: 0.10;
+    background-image: url('./assets/images/pattern.jpeg');
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .counter-item {
+    color: $white;
+    text-align: center;
+
+    img {
+      width: 100px;
+    }
+
+    .counter-label {
+      color: $white;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      margin: 0;
+    }
+  }
+}
+
+// testimonials section
+.testimonials-section {
+  .custom-swiper {
+    .swiper-wrapper {
+      margin-bottom: 60px;
+    }
+
+    .swiper-pagination {
+      bottom: 0;
+    }
+
+    .testimonial-card {
+      position: relative;
+
+      &:after {
+        position: absolute;
+        content: "";
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 33px 0 0 27px;
+        border-color: transparent transparent transparent $white;
+        top: calc(99% - 1px);
+        transform: rotate(90deg);
+        z-index: 2;
+        border-bottom-right-radius: 4px;
+      }
+    }
+  }
+}
+
+/* team */
+.our-team-sec {
+  .img-wrapper:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 5px;
+    background: transparent;
+    border: 1px solid $theme3;
+    /* opacity: .1; */
+    transform: rotate(-2deg);
+    z-index: 1;
+    transition: all .7s;
+
+    @include media-breakpoint-up(lg) {
+      transform: rotate(-5deg);
+    }
+  }
+
+  .team-wrapper:hover .img-wrapper:after {
+    border-color: $warning;
+    opacity: 1;
+    transform: rotate(0deg) !important;
+  }
+
+  .social-wrapper a {
+    color: $primary;
+    transition: all .3s;
+
+    &:hover {
+      color: $warning;
+    }
+  }
+}
+
+// End: About Us Page CSS
+
+// Start: Contact Us Page CSS
+.ContactUs-Page {
+  .multiple-cards-wrapper {
+    grid-template-columns: 1fr;
+
+    /* Stack on mobile */
+    @include media-breakpoint-up(sm) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .info-box {
+      min-height: 200px;
+    }
+  }
+}
+
+// End: Contact Us Page CSS

@@ -175,7 +175,7 @@ export const SuperAdmin = () => {
 
   return (
     <div className="super-admin-page pt-4 pb-3">
-      <div className="container-xxl">
+      <div className="container-xl">
         {loading ? (
           <Loader />
         ) : error ? (

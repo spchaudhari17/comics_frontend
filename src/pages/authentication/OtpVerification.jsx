@@ -29,7 +29,7 @@ const OtpVerification = () => {
 
   return (
     <div className="auth-page otp-page d-flex justify-content-center align-items-center min-vh-100 py-4">
-      <div className="container-xxl">
+      <div className="container-xl">
         <div
           className="card border-0 rounded-3 shadow w-100 mx-auto px-3 px-sm-5 py-5"
           style={{ maxWidth: '550px' }}
