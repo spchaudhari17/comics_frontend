@@ -27,10 +27,10 @@ export const Home = () => {
                     <i class="bi bi-easel"></i> Make Comics from Concepts
                   </Button>
                   <Button variant='warning' className="btn-custom">
-                    <i class="bi bi-folder2-open fs-18"></i> Browse Our Library
+                    <i className="bi bi-folder2-open fs-18"></i> Browse Our Library
                   </Button>
                   <Button variant='success' className="btn-custom">
-                    <i class="bi bi-google-play"></i> Download App
+                    <i className="bi bi-google-play"></i> Download App
                   </Button>
                 </div>
               </div>
@@ -45,7 +45,7 @@ export const Home = () => {
       </section>
 
       {/* About Section */}
-      <section className="about-section bg-white py-5">
+      <section className="about-section bg-light py-5">
         <div className="container-xl my-md-4">
           <Row className="align-items-center g-5">
             <Col md={6} className="left-section">
@@ -90,7 +90,7 @@ export const Home = () => {
                 <div className="icon text-center mb-4">
                   <img src={require('../../assets/images/ai-generator.png')} alt="AI Generator" className="img-fluid" />
                 </div>
-                <div class="title-name fs-5 fw-bold text-black mb-2">AI Comic Generator</div>
+                <div className="title-name fs-5 fw-bold text-black mb-2">AI Comic Generator</div>
                 <div className="description text-muted">Turn any topic into a fully-illustrated, age-appropriate comic. Add narration, select a visual style, and let AI do the rest.</div>
               </div>
             </Col>
@@ -99,7 +99,7 @@ export const Home = () => {
                 <div className="icon text-center mb-4">
                   <img src={require('../../assets/images/quiz-engine.png')} alt="Quiz Engine" className="img-fluid" />
                 </div>
-                <div class="title-name fs-5 fw-bold text-black mb-2">Quiz Engine</div>
+                <div className="title-name fs-5 fw-bold text-black mb-2">Quiz Engine</div>
                 <div className="description text-muted">Automatically generates interactive, difficulty-ranked quizzes from each comic, including FAQ and “Did You Know” sections.</div>
               </div>
             </Col>
@@ -108,7 +108,7 @@ export const Home = () => {
                 <div className="icon text-center mb-4">
                   <img src={require('../../assets/images/create-platform.png')} alt="Creator Platform" className="img-fluid" />
                 </div>
-                <div class="title-name fs-5 fw-bold text-black mb-2">Creator Platform for Teachers</div>
+                <div className="title-name fs-5 fw-bold text-black mb-2">Creator Platform for Teachers</div>
                 <div className="description text-muted">Publish your own comics, monitor student impact, and earn from your content.</div>
               </div>
             </Col>
@@ -117,7 +117,7 @@ export const Home = () => {
                 <div className="icon text-center mb-4">
                   <img src={require('../../assets/images/safe-learning.png')} alt="Safe Learning" className="img-fluid" />
                 </div>
-                <div class="title-name fs-5 fw-bold text-black mb-2">Safe, Modular Learning</div>
+                <div className="title-name fs-5 fw-bold text-black mb-2">Safe, Modular Learning</div>
                 <div className="description text-muted">COPPA/FERPA-considerate with school-friendly dashboards and privacy-aware moderation.</div>
               </div>
             </Col>
@@ -224,7 +224,7 @@ export const Home = () => {
                 <div className="icon animate-bounce mb-4">
                   <img src={require('../../assets/images/teacher.png')} alt="Teacher" className="img-fluid" />
                 </div>
-                <div class="title-name fs-5 fw-bold text-black mb-1">For Teachers</div>
+                <div className="title-name fs-5 fw-bold text-black mb-1">For Teachers</div>
                 <div className="description text-muted mb-3">Kridemy empowers educators to <span className="text-black fw-semibold">create, customize, and earn</span> from interactive comic lessons.</div>
                 <div className="list-wrapper">
                   <div className="fs-6 fw-semibold text-warning mb-2">Features:</div>
@@ -236,7 +236,7 @@ export const Home = () => {
                     <li>Revenue-share model for approved comics</li>
                     <li>Use in-class or assign as homework</li>
                   </ul>
-                  <div className="fs-12 text-primary"><i class="bi bi-stars"></i> Pilot-ready platform — contact us for school deployments.</div>
+                  <div className="fs-12 text-primary"><i className="bi bi-stars"></i> Pilot-ready platform — contact us for school deployments.</div>
                 </div>
               </div>
             </Col>
@@ -245,7 +245,7 @@ export const Home = () => {
                 <div className="icon animate-bounce mb-4">
                   <img src={require('../../assets/images/students.png')} alt="Students" className="img-fluid" />
                 </div>
-                <div class="title-name fs-5 fw-bold text-black mb-1">For Students</div>
+                <div className="title-name fs-5 fw-bold text-black mb-1">For Students</div>
                 <div className="description text-muted mb-3">Whether you love comics, hate textbooks, or just want to learn faster — Kridemy is made for you.</div>
                 <div className="list-wrapper">
                   <div className="fs-6 fw-semibold text-warning mb-2">What you get:</div>
@@ -265,7 +265,7 @@ export const Home = () => {
                 <div className="icon animate-bounce mb-4">
                   <img src={require('../../assets/images/parents.png')} alt="parents" className="img-fluid" />
                 </div>
-                <div class="title-name fs-5 fw-bold text-black mb-1">For Parents</div>
+                <div className="title-name fs-5 fw-bold text-black mb-1">For Parents</div>
                 <div className="description text-muted mb-3">Finally — screen time that actually teaches.</div>
                 <div className="list-wrapper">
                   <div className="fs-6 fw-semibold text-warning mb-2">Why parents love Kridemy:</div>
@@ -295,8 +295,8 @@ export const Home = () => {
                 </div>
 
                 <div className="fs-18 fw-medium text-primary gap-4">
-                  <div className="mb-2"><i class="bi bi-stars"></i> No sign-in required for basic use</div>
-                  <div><i class="bi bi-stars"></i> One-tap install from browser (PWA supported)</div>
+                  <div className="mb-2"><i className="bi bi-stars"></i> No sign-in required for basic use</div>
+                  <div><i className="bi bi-stars"></i> One-tap install from browser (PWA supported)</div>
                 </div>
 
                 <div className="app-btn-wrapper d-flex flex-wrap justify-content-center justify-content-lg-start gap-3 mt-5">

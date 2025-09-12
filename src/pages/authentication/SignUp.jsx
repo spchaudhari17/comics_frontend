@@ -79,7 +79,7 @@ export const SignUp = () => {
 
     return (
         <div className='auth-page SignUp-page d-flex justify-content-center align-items-center min-vh-100 py-4'>
-            <div className="container-xxl" style={{ maxWidth: '750px' }}>
+            <div className="container-xl" style={{ maxWidth: '750px' }}>
                 <div className="content-wrapper bg-theme1 border">
                     <div className="logo-wrapper text-center mb-4 pb-1">
                         <img src={require('../../assets/images/logo.png')} onClick={() => navigate("/")} style={{ cursor: "pointer" }} alt="Logo" className="img-fluid" />

@@ -1,6 +1,6 @@
 import React from "react";
 import { Dropdown } from "react-bootstrap";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import BellIcon from "../assets/images/icons/bell.svg";
 import UserIcon from "../assets/images/icons/user.svg";
 import LogoutIcon from "../assets/images/icons/log-out.svg";
@@ -24,12 +24,12 @@ export const Header = () => {
   return (
     <div className="top-header sticky-top shadow-sm">
       <div className="announcement-bar bg-primary py-2">
-        <div className="container-xxl">
+        <div className="container-xl">
           <div className="discription fs-12 text-white text-center">You're exploring the <span className="fw-semibold text-danger">Beta version</span>. Some features may be handled manually.</div>
         </div>
       </div>
       <nav className="navbar navbar-light bg-white border-bottom navbar-expand-lg py-1" data-bs-theme="light" style={{ minHeight: "61px" }}>
-        <div className="container-xxl">
+        <div className="container-xl">
           {/* Logo */}
           <Link className="navbar-brand logo-wrapper text-center" to={"/"}>
             <img src={require("../assets/images/logo2.png")} alt="Logo" className="img-fluid" />
@@ -41,10 +41,10 @@ export const Header = () => {
           </button>
 
           {/* Offcanvas menu with overlay */}
-          <div className="offcanvas offcanvas-end" tabIndex="-1" id="offcanvasTopHeader" aria-labelledby="offcanvasTopHeaderLabel">
-            <div className="offcanvas-header">
-              <h5 className="offcanvas-title">Menu</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          <div className="offcanvas bg-theme2 offcanvas-start border-0" tabIndex="-1" id="offcanvasTopHeader" aria-labelledby="offcanvasTopHeaderLabel">
+            <div className="offcanvas-header bg-primary">
+              <h5 className="offcanvas-title text-white">Menu</h5>
+              <button type="button" className="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
 
             <div className="offcanvas-body">
@@ -52,7 +52,7 @@ export const Header = () => {
                 {!userInfo && (
                   <>
                     <li className="nav-item">
-                      <Link to={'/'} className="nav-link p-0">About Us</Link>
+                      <Link to={'/about'} className="nav-link p-0">About Us</Link>
                     </li>
                     <li className="nav-item">
                       <Link to={'/'} className="nav-link p-0">Library</Link>
@@ -137,8 +137,9 @@ export const Header = () => {
                   </Dropdown>
                 ) : (
                   <li className="nav-item">
-                    <Link to={'/login'} className="nav-link p-0">
+                    <Link to={'/login'} className="nav-link d-flex align-items-center gap-2 p-0">
                       <img src={UserIcon} alt="User Icon" className="img-fluid" />
+                      <span className="text-body d-block d-lg-none">Login/Register</span>
                     </Link>
                   </li>
                 )}

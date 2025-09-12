@@ -11,6 +11,8 @@ import { ForgotPassword } from './pages/authentication/ForgotPassword';
 // Main Layout and Pages
 import { Layout } from './components/layouts/Layout';
 import { Home } from './pages/Homepage/Home';
+import { AboutUs } from './pages/AboutUs';
+import { ContactUs } from './pages/ContactUs';
 import { ComicSubmittedSuccessfully } from './pages/ComicSubmittedSuccessfully';
 import { PageNotFound } from './pages/PageNotFound';
 import OtpVerification from './pages/authentication/OtpVerification';
@@ -18,6 +20,7 @@ import { SuperAdmin } from './pages/admin/SuperAdmin';
 import MyComics from './pages/mycomics/MyComics';
 import ComicGenerator from './pages/ComicGenerator/ComicGenerator';
 import Parent from './pages/parentsPages/Parent';
+import Privacy from './pages/PrivacyPolicy/Privacy';
 
 function App() {
   return (
@@ -37,10 +40,12 @@ function App() {
           {/* Main Layout Routes */}
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
-            <Route path="/super-admin" element={<SuperAdmin />} />
-            <Route path="/my-comics" element={<MyComics />} />
-            <Route path="/parents" element={<Parent />} />
-            <Route path="/create-comic" element={<ComicGenerator />} />
+            <Route path="about" element={<AboutUs />} />
+            <Route path="contact" element={<ContactUs />} />
+            <Route path="super-admin" element={<SuperAdmin />} />
+            <Route path="my-comics" element={<MyComics />} />
+            <Route path="create-comic" element={<ComicGenerator />} />
+            <Route path="privacy-policy" element={<Privacy />} />
             <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>

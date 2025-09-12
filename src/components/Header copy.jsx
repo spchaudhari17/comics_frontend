@@ -33,7 +33,7 @@ export const Header = () => {
 
   return (
     <nav className="navbar navbar-light bg-white border-bottom navbar-expand-lgg top-header sticky-top py-2" data-bs-theme="light" style={{ minHeight: "61px" }}>
-      <div className="container-xxl gap-2 flex-nowrap">
+      <div className="container-xl gap-2 flex-nowrap">
         <div className="left-sec d-flex align-items-center justify-content-start gap-3">
           <div className="logo-wrapper text-center">
             <img src={require('../assets/images/logo2.png')} onClick={handleLogoClick} alt="Logo" className="img-fluid pointer" />
