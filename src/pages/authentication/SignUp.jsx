@@ -82,7 +82,7 @@ export const SignUp = () => {
             <div className="container-xxl" style={{ maxWidth: '750px' }}>
                 <div className="content-wrapper bg-theme1 border">
                     <div className="logo-wrapper text-center mb-4 pb-1">
-                        <img src={require('../../assets/images/logo.png')} alt="Logo" className="img-fluid" />
+                        <img src={require('../../assets/images/logo.png')} onClick={() => navigate("/")} style={{ cursor: "pointer" }} alt="Logo" className="img-fluid" />
                     </div>
                     <div className="heading-wrapper text-dark mb-4">
                         <div className="fs-4 fw-bold font-roboto lh-sm mb-1">Create an account</div>
@@ -145,22 +145,9 @@ export const SignUp = () => {
                                     />
                                 </Form.Group>
                             </Col>
-                            <Col md={6}>
-                                <Form.Group controlId="UserType">
-                                    <Form.Label>User Type<span className="text-danger">*</span></Form.Label>
-                                    <Form.Select
-                                        value={formData.userType}
-                                        onChange={(e) => setFormData({ ...formData, userType: e.target.value })}
-                                        required
-                                    >
-                                        <option value="" disabled>Select user type</option>
-                                        <option value="Student">Student</option>
-                                        <option value="Teacher">Teacher</option>
-                                        <option value="Content Creater">Content Creater</option>
-                                    </Form.Select>
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
+
+
+                            {/* <Col md={6}>
                                 <Form.Group controlId="PhoneNumber">
                                     <Form.Label>Phone Number<span className="text-danger">*</span></Form.Label>
                                     <PhoneInput
@@ -174,7 +161,8 @@ export const SignUp = () => {
                                         required
                                     />
                                 </Form.Group>
-                            </Col>
+                            </Col> */}
+
                             <Col md={6}>
                                 <Form.Group controlId="formPassword">
                                     <Form.Label>Password<span className="text-danger">*</span></Form.Label>
@@ -199,6 +187,7 @@ export const SignUp = () => {
                                     </div>
                                 </Form.Group>
                             </Col>
+
                             <Col md={6}>
                                 <Form.Group controlId="ConfirmPassword">
                                     <Form.Label>Confirm Password<span className="text-danger">*</span></Form.Label>
@@ -221,6 +210,22 @@ export const SignUp = () => {
                                                 : <i className="bi bi-eye-fill fs-16"></i>}
                                         </span>
                                     </div>
+                                </Form.Group>
+                            </Col>
+
+                            <Col md={6}>
+                                <Form.Group controlId="UserType">
+                                    <Form.Label>User Type<span className="text-danger">*</span></Form.Label>
+                                    <Form.Select
+                                        value={formData.userType}
+                                        onChange={(e) => setFormData({ ...formData, userType: e.target.value })}
+                                        required
+                                    >
+                                        <option value="" disabled>Select user type</option>
+                                        <option value="Student">Student</option>
+                                        <option value="Teacher">Teacher</option>
+                                        <option value="Content Creater">Content Creater</option>
+                                    </Form.Select>
                                 </Form.Group>
                             </Col>
                         </Row>

@@ -5,6 +5,11 @@ import { useNavigate, Link } from 'react-router-dom';
 
 export const Home = () => {
   const navigate = useNavigate();
+   const userInfo = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : null;
+
+
 
   return (
     <div className="home-page">
@@ -17,7 +22,8 @@ export const Home = () => {
                 <div className="heading text-light fs-1 fw-bold lh-sm mb-3">Turn Ideas Into <span className="text-primary">Comics.</span> <br />Learn. Teach. Earn.</div>
                 <div className="sub-title text-white text-opacity-75">AI-generated educational comics and quizzes for schools, teachers, <br /> and curious minds.</div>
                 <div className="btn-wrapper d-flex flex-column flex-sm-row flex-sm-wrap gap-2 gap-md-3 mt-4 pt-md-3">
-                  <Button variant='primary' className="btn-custom" onClick={() => navigate('/create-comic')}>
+                  <Button variant='primary' className="btn-custom"
+                   onClick={() => navigate(userInfo ? "/create-comic" : "/login")}>
                     <i class="bi bi-easel"></i> Make Comics from Concepts
                   </Button>
                   <Button variant='warning' className="btn-custom">
@@ -53,7 +59,7 @@ export const Home = () => {
                 <li>Revenue for Teachers</li>
               </ul>
               <div className="btn-wrapper d-flex flex-wrap gap-3 mt-4 pt-3">
-                <Button variant='primary' className="btn-custom" onClick={() => navigate('/create-comic')}>
+                <Button variant='primary' className="btn-custom" onClick={() => navigate('/')}>
                   Learn More <i className="bi bi-arrow-right"></i>
                 </Button>
               </div>
@@ -198,7 +204,7 @@ export const Home = () => {
             </Col>
           </Row>
           <div className="btn-wrapper text-center mt-5">
-            <Button variant='primary' className="btn-custom" onClick={() => navigate('/create-comic')}>
+            <Button variant='primary' className="btn-custom" onClick={() => navigate('/')}>
               Start Creating <i className="bi bi-arrow-right"></i>
             </Button>
           </div>

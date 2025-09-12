@@ -17,6 +17,7 @@ import OtpVerification from './pages/authentication/OtpVerification';
 import { SuperAdmin } from './pages/admin/SuperAdmin';
 import MyComics from './pages/mycomics/MyComics';
 import ComicGenerator from './pages/ComicGenerator/ComicGenerator';
+import Parent from './pages/parentsPages/Parent';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
             <Route index element={<Home />} />
             <Route path="/super-admin" element={<SuperAdmin />} />
             <Route path="/my-comics" element={<MyComics />} />
+            <Route path="/parents" element={<Parent />} />
             <Route path="/create-comic" element={<ComicGenerator />} />
             <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
             <Route path="*" element={<PageNotFound />} />

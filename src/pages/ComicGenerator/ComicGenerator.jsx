@@ -2,22 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ComicGenerator.scss';
 import Select from "react-select";
-import { Row, Col, Form, OverlayTrigger, Tooltip, Modal, Button, Spinner, Alert } from 'react-bootstrap';
+import { Row, Col, Form, OverlayTrigger, Tooltip, Modal, Button, Spinner, Alert, Toast } from 'react-bootstrap';
 import API from "../../API/index";
 import { useDispatch } from "react-redux";
 import { setComicStatus } from '../../redux/actions/comicActions';
 
-// Styles Images
-import MinimalistCartoon from "../../assets/images/stylesImages/minimalist-cartoon.png";
-import RealisticPencil from "../../assets/images/stylesImages/realistic-pencil.png";
-import WatercolorWash from "../../assets/images/stylesImages/watercolor-wash.png";
-import TechnoNeon from "../../assets/images/stylesImages/techno-neon.png";
-import PapercutLayers from "../../assets/images/stylesImages/papercut-layers.png";
-import PixelSoft from "../../assets/images/stylesImages/pixel-soft.png";
-import VectorPop from "../../assets/images/stylesImages/vector-pop.png";
-import InkAndWash from "../../assets/images/stylesImages/ink-and-wash.png";
-import ComicPanelClassic from "../../assets/images/stylesImages/comic-panel-classic.png";
-import Realism from "../../assets/images/stylesImages/realism.png";
 
 const Stepper = ({ currentStep }) => {
   const steps = [
@@ -77,6 +66,7 @@ export const ComicGenerator = () => {
   const [comicImages, setComicImages] = useState([]); // array of imageUrl
   const [pdfUrl, setPdfUrl] = useState("");
 
+
   // ui state
   const [loadingPrompt, setLoadingPrompt] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
@@ -87,20 +77,6 @@ export const ComicGenerator = () => {
   const [showStyleImgModal, setShowStyleImgModal] = useState(false);
   const opneStyleImgModal = () => setShowStyleImgModal(true);
   const closeStyleImgModal = () => setShowStyleImgModal(false);
-
-  // Example style → image mapping
-  const styleImages = {
-    "Minimalist Cartoon": MinimalistCartoon,
-    "Realistic Pencil": RealisticPencil,
-    "Watercolor Wash": WatercolorWash,
-    "Techno Neon": TechnoNeon,
-    "Papercut Layers": PapercutLayers,
-    "Pixel Soft": PixelSoft,
-    "Vector Pop": VectorPop,
-    "Ink & Wash": InkAndWash,
-    "Comic Panel Classic": ComicPanelClassic,
-    "Realism": Realism
-  };
 
   const openStyleImgModal = () => {
     if (styleType) {
@@ -129,6 +105,10 @@ export const ComicGenerator = () => {
         author,
         subject,
         story,
+        themeId: themes.find(t => t.name === themeType)?._id,
+        styleId: styles.find(s => s.name === styleType)?._id,
+        grade: classGrade,
+        country: selectedCountry?.value
       });
 
       if (!data?.pages || !Array.isArray(data.pages)) {
@@ -210,7 +190,7 @@ export const ComicGenerator = () => {
   };
 
   // helpers
-  const isStep0Valid = story?.trim()?.length > 0 && comicTitle.trim() && author.trim() && subject.trim();
+  const isStep0Valid = story?.trim()?.length > 0 && comicTitle.trim() && subject.trim();
 
 
   // quiz states
@@ -301,6 +281,49 @@ export const ComicGenerator = () => {
     }
   };
 
+  const [themes, setThemes] = useState([]);
+  const [styles, setStyles] = useState([]);
+  const [subjectsList, setSubjectsList] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [themesRes, stylesRes, subjectsRes] = await Promise.all([
+          API.get("/user/getAllThemes"),
+          API.get("/user/getAllStyles"),
+          API.get("/user/getallSubject"),
+        ]);
+
+        setThemes(themesRes.data || []);
+        setStyles(stylesRes.data || []);
+        const subjectNames = subjectsRes.data.map(sub => sub.name);
+        setSubjectsList(subjectNames);
+      } catch (err) {
+        console.error("Error fetching themes, styles, or subjects:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
+
+
+
+
+
+  // Theme Description Modal
+  const [showThemeModal, setShowThemeModal] = useState(false);
+  const openThemeModal = () => {
+    if (themeType) {
+      setShowThemeModal(true);
+    } else {
+      // alert("Please select a theme first!");
+
+    }
+  };
+  const closeThemeModal = () => setShowThemeModal(false);
+
 
   return (
     <div className="homePage pt-4 pb-3">
@@ -352,21 +375,26 @@ export const ComicGenerator = () => {
                         onChange={(e) => setClassGrade(e.target.value)}
                       >
                         <option value="" disabled>Select Class/Grade</option>
-                        <option value="1st Standard">1st Standard</option>
-                        <option value="2nd Standard">2nd Standard</option>
-                        <option value="3rd Standard">3rd Standard</option>
-                        <option value="4th Standard">4th Standard</option>
-                        <option value="5th Standard">5th Standard</option>
-                        <option value="6th Standard">6th Standard</option>
-                        <option value="7th Standard">7th Standard</option>
-                        <option value="8th Standard">8th Standard</option>
-                        <option value="9th Standard">9th Standard</option>
-                        <option value="10th Standard">10th Standard</option>
+                        <option value="1st Standard">1st Grade </option>
+                        <option value="2nd Standard">2nd Grade</option>
+                        <option value="3rd Standard">3rd Grade</option>
+                        <option value="4th Standard">4th Grade</option>
+                        <option value="5th Standard">5th Grade</option>
+                        <option value="6th Standard">6th Grade</option>
+                        <option value="7th Standard">7th Grade</option>
+                        <option value="8th Standard">8th Grade</option>
+                        <option value="9th Standard">9th Grade</option>
+                        <option value="10th Standard">10th Grade</option>
+                        <option value="11th Standard">11th Grade</option>
+                        <option value="12th Standard">12th Grade</option>
+
                       </Form.Select>
                     </Form.Group>
                   </Col>
                   <Col sm={6} md={4}>
-                    <Form.Group>
+
+                    {/* old subjects */}
+                    {/* <Form.Group>
                       <Form.Label>Subject</Form.Label>
                       <Form.Select
                         value={subject}
@@ -378,35 +406,64 @@ export const ComicGenerator = () => {
                         <option value="Fables">Classic Fables</option>
                         <option value="Motivation">Motivation</option>
                       </Form.Select>
+                    </Form.Group> */}
+
+
+                    <Form.Group>
+                      <Form.Label>Subject</Form.Label>
+                      <Form.Select
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                      >
+                        <option value="" disabled>Select subject</option>
+                        {subjectsList.map((subName, idx) => (
+                          <option key={idx} value={subName}>{subName}</option>
+                        ))}
+                      </Form.Select>
                     </Form.Group>
+
+
+
                   </Col>
                   <Col sm={6} md={4}>
+
+
+
                     <Form.Group>
-                      <Form.Label>Theme</Form.Label>
+                      <Form.Label className="d-flex align-items-center gap-2">
+                        Theme
+                        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-theme">Click to view theme description</Tooltip>}>
+                          <i className="bi bi-info-circle text-primary" role="button" onClick={openThemeModal}></i>
+                        </OverlayTrigger>
+                      </Form.Label>
                       <Form.Select
                         value={themeType}
                         onChange={(e) => setThemeType(e.target.value)}
                       >
                         <option value="" disabled>Select Theme</option>
-                        <option value="Mythical Realism">Mythical Realism</option>
-                        <option value="Mentor & Apprentice">Mentor & Apprentice</option>
-                        <option value="Time Traveler’s Log">Classic Time Traveler’s Log</option>
-                        <option value="Slice of Life">Slice of Life</option>
-                        <option value="Dream World Quest">Dream World Quest</option>
-                        <option value="Eco Mission">Eco Mission</option>
-                        <option value="Inventor’s Diary">Inventor’s Diary</option>
-                        <option value="Classroom Simulator">Classroom Simulator</option>
-                        <option value="Logic Duel">Logic Duel</option>
-                        <option value="Learning Tournament">Learning Tournament</option>
+                        {themes.map((theme) => (
+                          <option key={theme._id} value={theme.name}>{theme.name}</option>
+                        ))}
                       </Form.Select>
                     </Form.Group>
+
+
+
                   </Col>
                   <Col sm={6} md={4}>
+
                     <Form.Group>
                       <Form.Label className="d-flex align-items-center gap-2">
                         Choose Style
-                        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-info">Click to view style image</Tooltip>}>
-                          <i className="bi bi-info-circle text-primary" role="button" onClick={opneStyleImgModal}></i>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip id="tooltip-info">Click to view style image</Tooltip>}
+                        >
+                          <i
+                            className="bi bi-info-circle text-primary"
+                            role="button"
+                            onClick={opneStyleImgModal}
+                          ></i>
                         </OverlayTrigger>
                       </Form.Label>
                       <Form.Select
@@ -414,13 +471,14 @@ export const ComicGenerator = () => {
                         onChange={(e) => setStyleType(e.target.value)}
                       >
                         <option value="" disabled>Select Style</option>
-                        {Object.keys(styleImages).map((style) => (
-                          <option key={style} value={style}>{style}</option>
+                        {styles.map((style) => (
+                          <option key={style._id} value={style.name}>{style.name}</option>
                         ))}
                       </Form.Select>
                     </Form.Group>
+
                   </Col>
-                  <Col sm={6} md={4}>
+                  {/* <Col sm={6} md={4}>
                     <Form.Group>
                       <Form.Label>Author</Form.Label>
                       <Form.Control
@@ -430,8 +488,8 @@ export const ComicGenerator = () => {
                         placeholder="e.g. redu_AI"
                       />
                     </Form.Group>
-                  </Col>
-                  <Col xs={12}>
+                  </Col> */}
+                  <Col sm={6} md={4}>
                     <Form.Group>
                       <Form.Label>Comic Title</Form.Label>
                       <Form.Control
@@ -530,7 +588,7 @@ export const ComicGenerator = () => {
                   <Alert variant="warning">No images to show. Please go back and regenerate.</Alert>
                 ) : (
                   <Row>
-                  
+
                     <Col md={3} className="border-end pe-3" style={{ maxHeight: "500px", overflowY: "auto" }}>
                       <div className="d-flex flex-column gap-2">
                         {comicImages.map((img, idx) => (
@@ -550,7 +608,7 @@ export const ComicGenerator = () => {
                       </div>
                     </Col>
 
-               
+
                     <Col md={9} className="d-flex justify-content-center align-items-center">
                       {selectedImage ? (
                         <img
@@ -710,21 +768,31 @@ export const ComicGenerator = () => {
 
       {/* Style Images Modal */}
       <Modal show={showStyleImgModal} onHide={closeStyleImgModal} centered>
-        <Modal.Header closeButton className="fs-16 fw-bold">Preview Image
-        </Modal.Header>
-        <Modal.Body className="p-3">
-          <div className="content-wrapper text-center">
-            {styleImages[styleType] ? (
-              <img src={styleImages[styleType]} alt={styleType} className="img-fluid rounded" />
-            ) : (
-              <div className="bg-theme1 border rounded-4 p-4">
-                <div className="icon mb-2"><i className="bi bi-image fs-2 lh-1"></i></div>
-                <div className="fs-16 text-muted fw-medium">No preview available</div>
-              </div>
-            )}
-          </div>
+        <Modal.Header closeButton className="fs-16 fw-bold">Preview Image</Modal.Header>
+        <Modal.Body className="p-3 text-center">
+          {styles.find((s) => s.name === styleType)?.image ? (
+            <img
+              src={styles.find((s) => s.name === styleType)?.image}
+              alt={styleType}
+              className="img-fluid rounded"
+            />
+          ) : (
+            <div className="bg-theme1 border rounded-4 p-4">
+              <div className="icon mb-2"><i className="bi bi-image fs-2 lh-1"></i></div>
+              <div className="fs-16 text-muted fw-medium">No preview available</div>
+            </div>
+          )}
         </Modal.Body>
       </Modal>
+
+      {/* Theme Description Modal */}
+      <Modal show={showThemeModal} onHide={closeThemeModal} centered>
+        <Modal.Header closeButton className="fs-16 fw-bold">Theme Description</Modal.Header>
+        <Modal.Body className="p-3 text-center">
+          {themes.find(t => t.name === themeType)?.description || "No description available"}
+        </Modal.Body>
+      </Modal>
+
     </div>
   );
 };

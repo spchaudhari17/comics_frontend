@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Table, Button, Badge, Card, Row, Col } from "react-bootstrap";
 import { Loader } from "../../lib/loader"; 
 import API from "../../API";
@@ -53,7 +52,7 @@ const MyComics = () => {
   return (
     <>
 
-      {/* <div className="my-comics-page pt-4 pb-3">
+      <div className="my-comics-page pt-4 pb-3">
         <div className="container-xxl">
           {loading ? (
             <Loader />
@@ -154,7 +153,7 @@ const MyComics = () => {
                                 onClick={() =>
                                   window.open(comic.pdfUrl, "_blank", "noopener,noreferrer")
                                 }
-                                disabled={!comic.pdfUrl}
+                                // disabled={!comic.pdfUrl}
                               >
                                 <i className="bi bi-filetype-pdf me-1"></i>
                                 View
@@ -176,9 +175,9 @@ const MyComics = () => {
             </>
           )}
         </div>
-      </div> */}
+      </div>
 
-      <h1>under maintenance my comics page</h1>
+      {/* <h1>under maintenance my comics page</h1> */}
 
     </>
   );

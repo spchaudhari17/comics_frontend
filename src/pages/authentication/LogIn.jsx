@@ -28,7 +28,7 @@ export const LogIn = () => {
             <div className="container-xxl" style={{ maxWidth: '550px' }}>
                 <div className="content-wrapper bg-theme1 border">
                     <div className="logo-wrapper text-center mb-4">
-                        <img src={require('../../assets/images/logo.png')} alt="Logo" className="img-fluid" />
+                        <img src={require('../../assets/images/logo.png')} onClick={()=>navigate("/")} style={{ cursor: "pointer" }} alt="Logo" className="img-fluid" />
                     </div>
                     <div className="heading-wrapper text-dark mb-4">
                         <div className="fs-4 fw-bold font-roboto lh-sm mb-1">Welcome!</div>

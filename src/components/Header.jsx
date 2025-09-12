@@ -49,34 +49,45 @@ export const Header = () => {
 
             <div className="offcanvas-body">
               <ul className="navbar-nav menu-link-nav align-items-center justify-content-end flex-grow-1 gap-3">
-                <li className="nav-item">
-                  <Link to={'/'} className="nav-link p-0">About Us</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={'/'} className="nav-link p-0">Library</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={'/'} className="nav-link p-0">Create Comics</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={'/'} className="nav-link p-0">For Teachers</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={'/'} className="nav-link p-0">For Students</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={'/'} className="nav-link p-0">For Parents</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={'/'} className="nav-link p-0">Contact</Link>
-                </li>
+                {!userInfo && (
+                  <>
+                    <li className="nav-item">
+                      <Link to={'/'} className="nav-link p-0">About Us</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to={'/'} className="nav-link p-0">Library</Link>
+                    </li>
+
+                    <li className="nav-item">
+                      <Link to={'/'} className="nav-link p-0">For Teachers</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to={'/'} className="nav-link p-0">For Students</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to={'/'} className="nav-link p-0">For Parents</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to={'/'} className="nav-link p-0">Contact</Link>
+                    </li>
+                  </>
+                )
+                }
+
+                {
+                  userInfo && (
+                    <>
+                      <li className="nav-item">
+                        <Link to={'/create-comic'} className="nav-link p-0">Create Comics</Link>
+                      </li>
+                    </>
+                  )
+                }
               </ul>
+
               <ul className="navbar-nav icons-nav align-items-center justify-content-end flex-grow-1 gap-3">
-                <li className="nav-item">
-                  <Link to={'/'} className="nav-link p-0">
-                    <img src={BellIcon} alt="Bell Icon" className="img-fluid" />
-                  </Link>
-                </li>
+
+
 
                 {userInfo && userInfo.userType === "admin" && (
                   <li className="nav-item">
@@ -85,6 +96,8 @@ export const Header = () => {
                     </Link>
                   </li>
                 )}
+
+
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                   <li className="nav-item">
@@ -122,7 +135,7 @@ export const Header = () => {
                       </Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
-                ):(
+                ) : (
                   <li className="nav-item">
                     <Link to={'/login'} className="nav-link p-0">
                       <img src={UserIcon} alt="User Icon" className="img-fluid" />
