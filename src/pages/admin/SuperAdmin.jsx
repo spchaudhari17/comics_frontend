@@ -144,6 +144,24 @@ export const SuperAdmin = () => {
       minWidth: '120px',
     },
     {
+      name: "Country",
+      minWidth: "180px",
+      cell: row => (
+        row.country ? (
+          <div className="d-flex align-items-center gap-2">
+            <img
+              src={`https://flagcdn.com/24x18/${row.country.toLowerCase()}.png`}
+              alt={row.country}
+              style={{ borderRadius: "2px" }}
+            />
+            <span className="text-capitalize">{row.country}</span>
+          </div>
+        ) : "N/A"
+      ),
+    },
+
+
+    {
       name: "Actions",
       minWidth: '180px',
       cell: row => (
