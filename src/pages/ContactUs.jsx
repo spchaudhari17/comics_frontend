@@ -20,7 +20,7 @@ export const ContactUs = () => {
             </section>
 
             {/* Contact Form Section */}
-            {/* <section className="contact-form-sec py-5">
+            <section className="contact-form-sec py-5">
                 <div className="container-xl my-md-4">
                     <div className="heading-wrapper text-center mx-auto mb-4 pb-2 pb-md-4" style={{ maxWidth: '600px' }}>
                         <div className="label-heading mb-2">Need Help?</div>
@@ -98,7 +98,7 @@ export const ContactUs = () => {
                         </Col>
                     </Row>
                 </div>
-            </section> */}
+            </section>
 
             {/* Location Map Section */}
             <section className="location-map" >
