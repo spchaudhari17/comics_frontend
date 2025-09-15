@@ -82,8 +82,8 @@ export const Footer = () => {
             <div className="copyright-sec bg-primary py-3">
                 <div className="container">
                     <div className="copyright-wrapper text-center text-white">
-                        <div className="copyright-text">&copy; copyright 2025 <Link to={'/'} className="text-danger fw-semibold">kridemy.com</Link>. "All rights reserved".</div>
-                        <div className="designedBy">Web design by Sham Insights LLC.</div>
+                        <div className="copyright-text">© 2025 Sham Insights LLC. All rights reserved.</div>
+                        {/* <div className="designedBy">Web design by Sham Insights LLC.</div> */}
                     </div>
                 </div>
             </div>

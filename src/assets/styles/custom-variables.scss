@@ -6,6 +6,7 @@ $enable-negative-margins: true;
 $theme1: #FDFCF5;
 $theme2: #F9E2C5;
 $theme3: #A2845E;
+$theme4: #1a2028;
 
 $sidebar-bg: #064cb8;
 $primary: #B88746;
@@ -43,4 +44,5 @@ $theme-colors: map-merge($theme-colors,
     ("theme1": $theme1,
       "theme2": $theme2,
       "theme3": $theme3,
+      "theme4": $theme4,
     ));

@@ -81,7 +81,7 @@ export const ContactUs = () => {
                                 </div>
                                 <div className="form-group">
                                     <Form.Select className="border bg-light px-3 py-3" required>
-                                        <option value="" disabled>Select who are you?</option>
+                                        <option value="" selected disabled>Who are you ?</option>
                                         <option value="Student">Student</option>
                                         <option value="Teacher">Teacher</option>
                                         <option value="Parent">Parent</option>

@@ -68,7 +68,7 @@ export const Header = () => {
                       <Link to={'/'} className="nav-link p-0">For Parents</Link>
                     </li>
                     <li className="nav-item">
-                      <Link to={'/'} className="nav-link p-0">Contact</Link>
+                      <Link to={'/contact'} className="nav-link p-0">Contact</Link>
                     </li>
                   </>
                 )
@@ -86,9 +86,6 @@ export const Header = () => {
               </ul>
 
               <ul className="navbar-nav icons-nav align-items-center justify-content-end flex-grow-1 gap-3">
-
-
-
                 {userInfo && userInfo.userType === "admin" && (
                   <li className="nav-item">
                     <Link to={'/super-admin'} className="nav-link p-0">
@@ -96,8 +93,6 @@ export const Header = () => {
                     </Link>
                   </li>
                 )}
-
-
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                   <li className="nav-item">
