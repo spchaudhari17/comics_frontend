@@ -594,9 +594,9 @@ export const ComicGenerator = () => {
                       <Button variant="primary" onClick={() => navigate("/my-comics")}>
                         Go to My Comics
                       </Button>
-                      <Button variant="secondary" onClick={() => setStep(0)}>
+                      {/* <Button variant="secondary" onClick={() => setStep(0)}>
                         Create New Comic
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 )}

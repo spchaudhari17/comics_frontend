@@ -49,7 +49,7 @@ export const Header = () => {
 
             <div className="offcanvas-body">
               <ul className="navbar-nav menu-link-nav align-items-center justify-content-end flex-grow-1 gap-3">
-                {!userInfo && (
+                { (
                   <>
                     <li className="nav-item">
                       <Link to={'/about'} className="nav-link p-0">About Us</Link>
@@ -75,11 +75,23 @@ export const Header = () => {
                 }
 
                 {
-                  userInfo && (
+                   (
                     <>
                       <li className="nav-item">
-                        <Link to={'/create-comic'} className="nav-link p-0">Create Comics</Link>
+                        <button
+                          className="nav-link p-0 btn btn-link text-decoration-none"
+                          onClick={() => {
+                            if (!userInfo) {
+                              navigate("/login"); // agar login nahi hai to login page bhejo
+                            } else {
+                              navigate("/create-comic"); // agar login hai to create comic page bhejo
+                            }
+                          }}
+                        >
+                          Create Comics
+                        </button>
                       </li>
+
                     </>
                   )
                 }
