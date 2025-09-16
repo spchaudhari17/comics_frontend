@@ -65,6 +65,7 @@ export const ComicGenerator = () => {
   const [prompt, setPrompt] = useState(""); // stringified JSON for display/edit
   const [comicImages, setComicImages] = useState([]); // array of imageUrl
   const [pdfUrl, setPdfUrl] = useState("");
+  const [concept, setConcept] = useState("");
 
 
   // ui state
@@ -72,6 +73,8 @@ export const ComicGenerator = () => {
   const [loadingImage, setLoadingImage] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [existingComic, setExistingComic] = useState(null);
+
 
   // Style Images Modal
   const [showStyleImgModal, setShowStyleImgModal] = useState(false);
@@ -104,12 +107,21 @@ export const ComicGenerator = () => {
         title: comicTitle,
         author,
         subject,
+        subjectId: subject,
+        concept,
         story,
         themeId: themes.find(t => t.name === themeType)?._id,
         styleId: styles.find(s => s.name === styleType)?._id,
         grade: classGrade,
         country: selectedCountry?.value
       });
+
+      // ✅ check if comic already exists
+      if (data.alreadyExists) {
+        setExistingComic(data.comic);   // <-- save existing comic details in state
+        // setStep("exists");              // <-- jump to special step
+        return;
+      }
 
       if (!data?.pages || !Array.isArray(data.pages)) {
         throw new Error("Invalid response: pages missing");
@@ -297,7 +309,8 @@ export const ComicGenerator = () => {
         setThemes(themesRes.data || []);
         setStyles(stylesRes.data || []);
         const subjectNames = subjectsRes.data.map(sub => sub.name);
-        setSubjectsList(subjectNames);
+        // setSubjectsList(subjectNames);
+        setSubjectsList(subjectsRes.data || []);
       } catch (err) {
         console.error("Error fetching themes, styles, or subjects:", err);
       }
@@ -347,6 +360,9 @@ export const ComicGenerator = () => {
                 {errorMsg}
               </Alert>
             )}
+
+
+
 
             {/* STEP 0: Story */}
             {step === 0 && (
@@ -416,8 +432,11 @@ export const ComicGenerator = () => {
                         onChange={(e) => setSubject(e.target.value)}
                       >
                         <option value="" disabled>Select subject</option>
-                        {subjectsList.map((subName, idx) => (
+                        {/* {subjectsList.map((subName, idx) => (
                           <option key={idx} value={subName}>{subName}</option>
+                        ))} */}
+                        {subjectsList.map((sub) => (
+                          <option key={sub._id} value={sub._id}>{sub.name}</option>
                         ))}
                       </Form.Select>
                     </Form.Group>
@@ -489,6 +508,7 @@ export const ComicGenerator = () => {
                       />
                     </Form.Group>
                   </Col> */}
+
                   <Col sm={6} md={4}>
                     <Form.Group>
                       <Form.Label>Comic Title</Form.Label>
@@ -500,6 +520,19 @@ export const ComicGenerator = () => {
                       />
                     </Form.Group>
                   </Col>
+
+                  <Col sm={6} md={4}>
+                    <Form.Group>
+                      <Form.Label>Concept</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={concept}
+                        onChange={(e) => setConcept(e.target.value)}
+                        placeholder="e.g. photosynthesis"
+                      />
+                    </Form.Group>
+                  </Col>
+
                   <Col xs={12}>
                     <Form.Group>
                       <Form.Label>Write Story</Form.Label>
@@ -518,6 +551,57 @@ export const ComicGenerator = () => {
                     {loadingPrompt ? (<><Spinner size="sm" className="me-2" />Generating prompt...</>) : "Convert to Prompt"}
                   </Button>
                 </div>
+
+                {/* STEP: Comic already exists */}
+                {existingComic && (
+                  <div>
+                    <Alert variant="info">
+                      A comic for this concept already exists. Here are the details:
+                    </Alert>
+
+                    <table className="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>Country</th>
+                          <th>Class / Grade</th>
+                          <th>Subject</th>
+                          <th>Title</th>
+                          <th>Concept</th>
+                          <th>PDF</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>{existingComic.country}</td>
+                          <td>{existingComic.grade}</td>
+                          <td>{existingComic.subject}</td>
+                          <td>{existingComic.title}</td>
+                          <td>{existingComic.concept}</td>
+                          <td>
+                            {existingComic.pdfUrl ? (
+                              <a href={existingComic.pdfUrl} target="_blank" rel="noopener noreferrer">
+                                View PDF
+                              </a>
+                            ) : (
+                              "Not published yet"
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div className="d-flex gap-3 mt-3">
+                      <Button variant="primary" onClick={() => navigate("/my-comics")}>
+                        Go to My Comics
+                      </Button>
+                      <Button variant="secondary" onClick={() => setStep(0)}>
+                        Create New Comic
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+
               </Form>
             )}
 
