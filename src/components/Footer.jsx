@@ -61,11 +61,11 @@ export const Footer = () => {
                                 </Form.Group>
                             </Form>
 
-                            <div className="contact-number mb-2 pb-1">
+                            {/* <div className="contact-number mb-2 pb-1">
                                 <Link to={'tel:+1 8482398363'} className="d-inline-flex align-items-center gap-2 text-body text-decoration-none">
                                     <i class="bi bi-telephone-fill fs-5 lh-1"></i> +1 8482398363
                                 </Link>
-                            </div>
+                            </div> */}
                             <div className="contact-email mb-2 pb-1">
                                 <Link to={'mailto:customercare@kridemy.com'} className="d-inline-flex align-items-center gap-2 text-body text-decoration-none">
                                     <i class="bi bi-envelope-fill fs-5 lh-1"></i> customercare@kridemy.com

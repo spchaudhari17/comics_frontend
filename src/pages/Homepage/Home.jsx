@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 export const Home = () => {
   const navigate = useNavigate();
-   const userInfo = localStorage.getItem("user")
+  const userInfo = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
 
@@ -23,13 +23,14 @@ export const Home = () => {
                 <div className="sub-title text-white text-opacity-75">AI-generated educational comics and quizzes for schools, teachers, <br /> and curious minds.</div>
                 <div className="btn-wrapper d-flex flex-column flex-sm-row flex-sm-wrap gap-2 gap-md-3 mt-4 pt-md-3">
                   <Button variant='primary' className="btn-custom"
-                   onClick={() => navigate(userInfo ? "/create-comic" : "/login")}>
+                    onClick={() => navigate(userInfo ? "/create-comic" : "/login")}>
                     <i class="bi bi-easel"></i> Make Comics from Concepts
                   </Button>
-                  <Button variant='warning' className="btn-custom">
-                    <i className="bi bi-folder2-open fs-18"></i> Browse Our Library
+                  <Button variant='warning' className="btn-custom" onClick={() => navigate("/comics")}>
+                    <i className="bi bi-folder2-open fs-18">
+                    </i> Browse Our Library
                   </Button>
-                  <Button variant='success' className="btn-custom">
+                  <Button variant='success' className="btn-custom" onClick={() => (window.location.href = 'https://play.google.com/store/games', '_blank')}>
                     <i className="bi bi-google-play"></i> Download App
                   </Button>
                 </div>
@@ -236,7 +237,7 @@ export const Home = () => {
                     <li>Revenue-share model for approved comics</li>
                     <li>Use in-class or assign as homework</li>
                   </ul>
-                  <div className="fs-12 text-primary"><i className="bi bi-stars"></i> Pilot-ready platform — contact us for school deployments.</div>
+                  <div className="fs-12 text-primary pointer" onClick={()=> navigate('/contact')}><i className="bi bi-stars"></i> Pilot-ready platform — contact us for school deployments.</div>
                 </div>
               </div>
             </Col>
@@ -300,9 +301,9 @@ export const Home = () => {
                 </div>
 
                 <div className="app-btn-wrapper d-flex flex-wrap justify-content-center justify-content-lg-start gap-3 mt-5">
-                  <Link to={'https://appstoreconnect.apple.com/login'} target="_blank">
+                  {/* <Link to={'https://appstoreconnect.apple.com/login'} target="_blank">
                     <img src={require('../../assets/images/app-store.png')} className="img-fluid" alt='App Store' />
-                  </Link>
+                  </Link> */}
                   <Link className="text-md-end" to={'https://play.google.com/store/games'} target="_blank">
                     <img src={require('../../assets/images/play-store.png')} className="img-fluid" alt='Google Play Store' />
                   </Link>
