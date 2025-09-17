@@ -49,23 +49,23 @@ export const Header = () => {
 
             <div className="offcanvas-body">
               <ul className="navbar-nav menu-link-nav align-items-center justify-content-end flex-grow-1 gap-3">
-                { (
+                {(
                   <>
                     <li className="nav-item">
                       <Link to={'/about'} className="nav-link p-0">About Us</Link>
                     </li>
                     <li className="nav-item">
-                      <Link to={'/'} className="nav-link p-0">Library</Link>
+                      <Link to={'/our-library'} className="nav-link p-0">Library</Link>
                     </li>
 
                     <li className="nav-item">
-                      <Link to={'/'} className="nav-link p-0">For Teachers</Link>
+                      <Link to={'/for-teacher'} className="nav-link p-0">For Teachers</Link>
                     </li>
                     <li className="nav-item">
-                      <Link to={'/'} className="nav-link p-0">For Students</Link>
+                      <Link to={'/for-student'} className="nav-link p-0">For Students</Link>
                     </li>
                     <li className="nav-item">
-                      <Link to={'/'} className="nav-link p-0">For Parents</Link>
+                      <Link to={'/for-parent'} className="nav-link p-0">For Parents</Link>
                     </li>
                     <li className="nav-item">
                       <Link to={'/contact'} className="nav-link p-0">Contact</Link>
@@ -75,7 +75,7 @@ export const Header = () => {
                 }
 
                 {
-                   (
+                  (
                     <>
                       <li className="nav-item">
                         <button

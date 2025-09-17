@@ -403,7 +403,8 @@ export const ComicGenerator = () => {
                         <option value="10th Standard">10th Grade</option>
                         <option value="11th Standard">11th Grade</option>
                         <option value="12th Standard">12th Grade</option>
-
+                        <option value="UG">UG</option>
+                        <option value="PG">PG</option>
                       </Form.Select>
                     </Form.Group>
                   </Col>
@@ -451,7 +452,7 @@ export const ComicGenerator = () => {
                     <Form.Group>
                       <Form.Label className="d-flex align-items-center gap-2">
                         Theme
-                        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-theme">Click to view theme description</Tooltip>}>
+                        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-theme">Select a theme and then click to view</Tooltip>}>
                           <i className="bi bi-info-circle text-primary" role="button" onClick={openThemeModal}></i>
                         </OverlayTrigger>
                       </Form.Label>
@@ -476,7 +477,7 @@ export const ComicGenerator = () => {
                         Choose Style
                         <OverlayTrigger
                           placement="top"
-                          overlay={<Tooltip id="tooltip-info">Click to view style image</Tooltip>}
+                          overlay={<Tooltip id="tooltip-info">Select a style and then click to view style</Tooltip>}
                         >
                           <i
                             className="bi bi-info-circle text-primary"

@@ -22,6 +22,10 @@ import ComicGenerator from './pages/ComicGenerator/ComicGenerator';
 import Parent from './pages/parentsPages/Parent';
 import Privacy from './pages/PrivacyPolicy/Privacy';
 import ComicsList from './pages/ComicsList/ComicsList';
+import ParentsLanding from './pages/Homepage/Parent/ParentsLanding';
+import StudentLanding from './pages/Homepage/Student/StudentLanding';
+import TeacherLanding from './pages/Homepage/Teacher/TeacherLanding';
+import FAQLanding from './pages/Homepage/Faq/FAQLanding';
 
 function App() {
   return (
@@ -43,11 +47,16 @@ function App() {
             <Route index element={<Home />} />
             <Route path="about" element={<AboutUs />} />
             <Route path="contact" element={<ContactUs />} />
+            <Route path="for-teacher" element={<TeacherLanding />} />
+            <Route path="for-student" element={<StudentLanding />} />
+            <Route path="for-parent" element={<ParentsLanding />} />
+            <Route path="for-faq" element={<FAQLanding />} />
+            <Route path="our-library" element={<ComicsList />} />
+            
             <Route path="super-admin" element={<SuperAdmin />} />
             <Route path="my-comics" element={<MyComics />} />
             <Route path="create-comic" element={<ComicGenerator />} />
             <Route path="privacy-policy" element={<Privacy />} />
-            <Route path="comics" element={<ComicsList />} />
             <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
