@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 export const Home = () => {
   const navigate = useNavigate();
-   const userInfo = localStorage.getItem("user")
+  const userInfo = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
 
@@ -23,11 +23,12 @@ export const Home = () => {
                 <div className="sub-title text-white text-opacity-75">AI-generated educational comics and quizzes for schools, teachers, <br /> and curious minds.</div>
                 <div className="btn-wrapper d-flex flex-column flex-sm-row flex-sm-wrap gap-2 gap-md-3 mt-4 pt-md-3">
                   <Button variant='primary' className="btn-custom"
-                   onClick={() => navigate(userInfo ? "/create-comic" : "/login")}>
+                    onClick={() => navigate(userInfo ? "/create-comic" : "/login")}>
                     <i class="bi bi-easel"></i> Make Comics from Concepts
                   </Button>
-                  <Button variant='warning' className="btn-custom">
-                    <i className="bi bi-folder2-open fs-18"></i> Browse Our Library
+                  <Button variant='warning' className="btn-custom" onClick={() => navigate("/comics")}>
+                    <i className="bi bi-folder2-open fs-18">
+                    </i> Browse Our Library
                   </Button>
                   <Button variant='success' className="btn-custom">
                     <i className="bi bi-google-play"></i> Download App

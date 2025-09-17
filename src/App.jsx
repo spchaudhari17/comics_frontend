@@ -21,6 +21,7 @@ import MyComics from './pages/mycomics/MyComics';
 import ComicGenerator from './pages/ComicGenerator/ComicGenerator';
 import Parent from './pages/parentsPages/Parent';
 import Privacy from './pages/PrivacyPolicy/Privacy';
+import ComicsList from './pages/ComicsList/ComicsList';
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
             <Route path="my-comics" element={<MyComics />} />
             <Route path="create-comic" element={<ComicGenerator />} />
             <Route path="privacy-policy" element={<Privacy />} />
+            <Route path="comics" element={<ComicsList />} />
             <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
