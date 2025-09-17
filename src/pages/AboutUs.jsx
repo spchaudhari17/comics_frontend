@@ -169,7 +169,7 @@ export const AboutUs = () => {
             </section>
 
             {/* Testimonials Section */}
-            <section className="testimonials-section bg-theme2 py-5">
+            {/* <section className="testimonials-section bg-theme2 py-5">
                 <div className="container-xl my-md-4">
                     <div className="heading-wrapper text-center mx-auto mb-4 pb-2 pb-md-4" style={{ maxWidth: '600px' }}>
                         <h1 className="section-heading mb-2">Our Testimonials</h1>
@@ -214,13 +214,13 @@ export const AboutUs = () => {
                         ))}
                     </Swiper>
                 </div>
-            </section>
+            </section> */}
 
             {/* Our Team Section */}
             <section className="our-team-sec bg-white py-5">
                 <div className="container-xl my-md-4">
                     <div className="heading-wrapper text-center mx-auto mb-4 pb-2 pb-md-4" style={{ maxWidth: '600px' }}>
-                        <h1 className="section-heading mb-2">Met Expert Team</h1>
+                        <h1 className="section-heading mb-2">Meet The Expert Team</h1>
                         <div className="sub-title text-muted">Lorem Ipsum is simply dummy text of the printing and
                             typesetting industry. Lorem Ipsum has been the industry's</div>
                     </div>
@@ -232,8 +232,8 @@ export const AboutUs = () => {
                                     <img src={require('../assets/images/team1.jpeg')} className="img-fluid" alt="Team Member" />
                                 </div>
                                 <div className="team-info text-center mt-3">
-                                    <div className="name fs-18 fw-semibold text-black text-capitalize mb-1">Ajinkya Vidhate</div>
-                                    <div className="designation small text-muted text-capitalize mb-2">Founder (Supply chain, education tech, analytics)</div>
+                                    <div className="name fs-18 fw-semibold text-black text-capitalize mb-1">Ajinkya Sham Vidhate</div>
+                                    <div className="designation small text-muted text-capitalize mb-2">PMP® | MBA in Logistics & Supply Chain Management | M.S. in Supply Chain Analytics</div>
                                     <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                         <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                         <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>

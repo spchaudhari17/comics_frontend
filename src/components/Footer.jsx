@@ -16,11 +16,11 @@ export const Footer = () => {
                                 <span className="fw-semibold">Kridemy</span> an AI-powered education platform that helps you learn and teach complex academic concepts through fun.
                             </div>
                             <div className="social-sec d-flex align-items-center justify-content-center justify-content-md-start gap-3 mb-2">
-                                <Link to={"https://www.facebook.com"} target='_blank'><img src={require('../assets/images/facebook.png')} className="img-fluid" alt="Facebook" /></Link>
-                                <Link to={"https://Twitter.com"} target='_blank'><img src={require('../assets/images/twitter.png')} className="img-fluid" alt="Twitter" /></Link>
-                                <Link to={"https://www.instagram.com"} target='_blank'><img src={require('../assets/images/instagram.png')} className="img-fluid" alt="Instagram" /></Link>
-                                <Link to={"https://www.linkedin.com"} target='_blank'><img src={require('../assets/images/linkedin.png')} className="img-fluid" alt="Linkedin" /></Link>
-                                <Link to={"https://www.reddit.com"} target='_blank'><img src={require('../assets/images/reddit.png')} className="img-fluid" alt="Reddit" /></Link>
+                                <Link to={"https://x.com/kridemy"} target='_blank'><img src={require('../assets/images/x.png')} className="img-fluid" alt="X" /></Link>
+                                <Link to={"https://www.instagram.com/kridemy/"} target='_blank'><img src={require('../assets/images/instagram.png')} className="img-fluid" alt="Instagram" /></Link>
+                                <Link to={"https://www.linkedin.com/company/kridemy/"} target='_blank'><img src={require('../assets/images/linkedin.png')} className="img-fluid" alt="Linkedin" /></Link>
+                                <Link to={"https://www.tiktok.com/@kridemy?lang=en"} target='_blank'><img src={require('../assets/images/tiktok.png')} className="img-fluid" alt="Tiktok" /></Link>
+                                <Link to={"https://www.reddit.com/r/Kridemy/"} target='_blank'><img src={require('../assets/images/reddit.png')} className="img-fluid" alt="Reddit" /></Link>
                             </div>
                         </div>
                     </Col>

@@ -59,7 +59,7 @@ export const Home = () => {
                 <li>Revenue for Teachers</li>
               </ul>
               <div className="btn-wrapper d-flex flex-wrap gap-3 mt-4 pt-3">
-                <Button variant='primary' className="btn-custom" onClick={() => navigate('/')}>
+                <Button variant='primary' className="btn-custom" onClick={() => navigate('/about')}>
                   Learn More <i className="bi bi-arrow-right"></i>
                 </Button>
               </div>
@@ -82,7 +82,7 @@ export const Home = () => {
         <div className="container-xl my-md-4">
           <div className="heading-wrapper text-center mx-auto mb-4 pb-2 pb-md-4" style={{ maxWidth: '600px' }}>
             <div className="section-heading mb-2">What We Do</div>
-            <div className="sub-title text-muted">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</div>
+            {/* <div className="sub-title text-muted">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</div> */}
           </div>
           <Row className="g-3 g-xl-4">
             <Col sm={6} lg={3}>
@@ -130,7 +130,7 @@ export const Home = () => {
         <div className="container-xl my-md-4">
           <div className="heading-wrapper text-center mx-auto mb-4 pb-2 pb-md-4" style={{ maxWidth: '600px' }}>
             <div className="section-heading mb-2">How It Works</div>
-            <div className="sub-title text-muted">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</div>
+            {/* <div className="sub-title text-muted">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</div> */}
           </div>
           <Row className="g-3 g-xl-4">
             <Col md={4} sm={6}>
@@ -215,8 +215,8 @@ export const Home = () => {
       <section className="whoom-to-experience-section how-it-works-section bg-success bg-opacity-10 py-5">
         <div className="container-xl my-md-4">
           <div className="heading-wrapper text-center mx-auto mb-4 pb-2 pb-md-4" style={{ maxWidth: '600px' }}>
-            <div className="section-heading mb-2">Whoom to Experience</div>
-            <div className="sub-title text-muted">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</div>
+            <div className="section-heading mb-2">Who Kridemy Is For</div>
+            {/* <div className="sub-title text-muted">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</div> */}
           </div>
           <Row className="g-3 g-xl-4">
             <Col md={6} lg={4}>

@@ -45,7 +45,7 @@ export const ContactUs = () => {
                                     </div>
                                     <div className="details">
                                         <div className="fs-16 fw-semibold text-black mb-1">Call Us On</div>
-                                        <p className="fs-14 text-muted m-0">+91 986 888 0000</p>
+                                        {/* <p className="fs-14 text-muted m-0">+91 986 888 0000</p> */}
                                     </div>
                                 </div>
                                 <div className="info-box h-100 animate-bounce d-flex flex-column align-items-center justify-content-center text-center border rounded-4 shadow px-3 py-4">
@@ -63,7 +63,7 @@ export const ContactUs = () => {
                                     </div>
                                     <div className="details">
                                         <div className="fs-16 fw-semibold text-black mb-1">Our Location</div>
-                                        <p className="fs-14 text-muted m-0">66 Broklyn Street New York</p>
+                                        <p className="fs-14 text-muted m-0">New Brunswick, New Jersey, USA</p>
                                     </div>
                                 </div>
                             </div>
