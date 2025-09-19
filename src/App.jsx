@@ -26,6 +26,7 @@ import ParentsLanding from './pages/Homepage/Parent/ParentsLanding';
 import StudentLanding from './pages/Homepage/Student/StudentLanding';
 import TeacherLanding from './pages/Homepage/Teacher/TeacherLanding';
 import FAQLanding from './pages/Homepage/Faq/FAQLanding';
+import AllUsers from './pages/admin/AllUsers';
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
             <Route path="our-library" element={<ComicsList />} />
             
             <Route path="super-admin" element={<SuperAdmin />} />
+            <Route path="allUsers" element={<AllUsers />} />
             <Route path="my-comics" element={<MyComics />} />
             <Route path="create-comic" element={<ComicGenerator />} />
             <Route path="privacy-policy" element={<Privacy />} />

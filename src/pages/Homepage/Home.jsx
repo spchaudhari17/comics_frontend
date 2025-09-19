@@ -26,7 +26,7 @@ export const Home = () => {
                     onClick={() => navigate(userInfo ? "/create-comic" : "/login")}>
                     <i class="bi bi-easel"></i> Make Comics from Concepts
                   </Button>
-                  <Button variant='warning' className="btn-custom" onClick={() => navigate("/comics")}>
+                  <Button variant='warning' className="btn-custom" onClick={() => navigate("/our-library")}>
                     <i className="bi bi-folder2-open fs-18">
                     </i> Browse Our Library
                   </Button>
