@@ -871,12 +871,40 @@ export const ComicGenerator = () => {
       </Modal>
 
       {/* Theme Description Modal */}
-      <Modal show={showThemeModal} onHide={closeThemeModal} centered>
-        <Modal.Header closeButton className="fs-16 fw-bold">Theme Description</Modal.Header>
-        <Modal.Body className="p-3 text-center">
-          {themes.find(t => t.name === themeType)?.description || "No description available"}
+      <Modal show={showThemeModal} onHide={() => setShowThemeModal(false)} size="lg" centered >
+        <Modal.Header closeButton>
+          <Modal.Title>{themeType} Theme</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body className="p-4 text-start">
+          <h5 className="mb-3">Description</h5>
+          <p>{themes.find(t => t.name === themeType)?.description || "No description available"}</p>
+
+          {themes.find(t => t.name === themeType)?.examplePages?.length > 0 && (
+            <>
+              <h5 className="mt-4 mb-2">Example Pages</h5>
+              <div className="example-pages">
+                {themes.find(t => t.name === themeType).examplePages.map((ex, idx) => (
+                  <pre
+                    key={idx}
+                    className="p-3 mb-3 border rounded bg-light"
+                    style={{
+                      whiteSpace: "pre-wrap",
+                      fontFamily: "monospace",
+                      fontSize: "0.95rem",
+                      width: "100%",     // 👈 full width use kare
+                      overflowX: "auto", // agar line lambi ho to side scroll ho
+                    }}
+                  >
+                    {ex}
+                  </pre>
+                ))}
+              </div>
+            </>
+          )}
         </Modal.Body>
       </Modal>
+
 
     </div>
   );

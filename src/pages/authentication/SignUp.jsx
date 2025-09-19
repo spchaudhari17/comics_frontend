@@ -224,7 +224,7 @@ export const SignUp = () => {
                                         <option value="" disabled>Select user type</option>
                                         <option value="Student">Student</option>
                                         <option value="Teacher">Teacher</option>
-                                        <option value="Content Creater">Content Creater</option>
+                        
                                     </Form.Select>
                                 </Form.Group>
                             </Col>
