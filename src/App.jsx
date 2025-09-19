@@ -51,7 +51,7 @@ function App() {
             <Route path="for-teacher" element={<TeacherLanding />} />
             <Route path="for-student" element={<StudentLanding />} />
             <Route path="for-parent" element={<ParentsLanding />} />
-            <Route path="for-faq" element={<FAQLanding />} />
+            <Route path="faq" element={<FAQLanding />} />
             <Route path="our-library" element={<ComicsList />} />
             
             <Route path="super-admin" element={<SuperAdmin />} />

@@ -30,7 +30,7 @@ export const Home = () => {
                     <i className="bi bi-folder2-open fs-18">
                     </i> Browse Our Library
                   </Button>
-                  <Button variant='success' className="btn-custom" onClick={() => (window.location.href = 'https://play.google.com/store/games', '_blank')}>
+                  <Button variant='success' className="btn-custom" onClick={() => window.open('https://play.google.com/store/games', '_blank')}>
                     <i className="bi bi-google-play"></i> Download App
                   </Button>
                 </div>
