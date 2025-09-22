@@ -6,11 +6,13 @@ import { Row, Col, Form, OverlayTrigger, Tooltip, Modal, Button, Spinner, Alert,
 import API from "../../API/index";
 import { useDispatch } from "react-redux";
 import { setComicStatus } from '../../redux/actions/comicActions';
+import { useLocation } from "react-router-dom";
 
 
 const Stepper = ({ currentStep }) => {
   const steps = [
     "Write a story",
+    "Concept Breakdown",
     "Convert into Prompt",
     "Preview My Comic",
     "Publish My Comic",
@@ -44,6 +46,45 @@ const Stepper = ({ currentStep }) => {
 export const ComicGenerator = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
+  const resumeComicId = location.state?.comicId;
+
+
+useEffect(() => {
+  if (resumeComicId) {
+    const loadComic = async () => {
+      try {
+        const { data } = await API.get(`/user/comics/${resumeComicId}`);
+        setComicId(resumeComicId);
+
+        // Title, concept, subject, story load karo
+        if (data.comic?.title) setComicTitle(data.comic.title);
+        if (data.comic?.concept) setConcept(data.comic.concept);
+        if (data.comic?.subject) setSubject(data.comic.subject);
+        if (data.comic?.story) setStory(data.comic.story);
+
+        // Prompt load karo
+        if (data.comic?.prompt) {
+          setPrompt(JSON.stringify(JSON.parse(data.comic.prompt), null, 2));
+        }
+
+        // Agar breakdown parts aaye
+        if (data.parts) {
+          setParts(data.parts);
+        }
+
+        // ✅ Direct Step 1 pe le jao
+        setStep(1);
+      } catch (err) {
+        console.error("Failed to load draft comic:", err);
+        setErrorMsg("Could not load draft comic. Please try again.");
+      }
+    };
+
+    loadComic();
+  }
+}, [resumeComicId]);
+
 
   // flow state
   const [step, setStep] = useState(0);
@@ -66,6 +107,9 @@ export const ComicGenerator = () => {
   const [comicImages, setComicImages] = useState([]); // array of imageUrl
   const [pdfUrl, setPdfUrl] = useState("");
   const [concept, setConcept] = useState("");
+  const [series, setSeries] = useState(null);
+  const [parts, setParts] = useState([]);
+  const [completedParts, setCompletedParts] = useState([]);
 
 
   // ui state
@@ -116,21 +160,18 @@ export const ComicGenerator = () => {
         country: selectedCountry?.value
       });
 
-      // ✅ check if comic already exists
       if (data.alreadyExists) {
-        setExistingComic(data.comic);   // <-- save existing comic details in state
-        // setStep("exists");              // <-- jump to special step
+        setExistingComic(data.series); // series already exists
         return;
       }
 
-      if (!data?.pages || !Array.isArray(data.pages)) {
-        throw new Error("Invalid response: pages missing");
+      if (!data?.parts || !Array.isArray(data.parts)) {
+        throw new Error("Invalid response: no parts found");
       }
 
-      setComicId(data.comicId || null);
-      setPages(data.pages);
-      setPrompt(JSON.stringify(data.pages, null, 2));
-      nextStep();
+      setSeries(data.series);
+      setParts(data.parts);
+      setStep(1); // go to breakdown step
     } catch (err) {
       console.error(err);
       setErrorMsg(err?.response?.data?.error || "Prompt refinement failed.");
@@ -138,6 +179,7 @@ export const ComicGenerator = () => {
       setLoadingPrompt(false);
     }
   };
+
 
   // STEP 2: Prompt → Images (backend returns array of { page, imageUrl })
   const handleGenerateComic = async (e) => {
@@ -196,10 +238,38 @@ export const ComicGenerator = () => {
   };
 
   // STEP 4: to publish comic
+  // 1️⃣ LocalStorage se restore on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("currentSeries");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setSeries(parsed.series);
+      setParts(parsed.parts);
+      setCompletedParts(parsed.completedParts || []);
+    }
+  }, []);
+
+  // 2️⃣ LocalStorage me save whenever parts/completedParts change
+  useEffect(() => {
+    if (parts.length > 0) {
+      localStorage.setItem(
+        "currentSeries",
+        JSON.stringify({ series, parts, completedParts })
+      );
+    }
+  }, [series, parts, completedParts]);
+
+  // 3️⃣ handlePublish update
   const handlePublish = () => {
     dispatch(setComicStatus(comicId, "published"));
-    navigate("/comic-successful");
+
+    // mark current part as completed
+    setCompletedParts((prev) => [...new Set([...prev, comicId])]);
+
+    // ✅ redirect back to Concept Breakdown (Step 1)
+    setStep(1);
   };
+
 
   // helpers
   const isStep0Valid = story?.trim()?.length > 0 && comicTitle.trim() && subject.trim();
@@ -212,26 +282,28 @@ export const ComicGenerator = () => {
   const [quizError, setQuizError] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
 
+  const [quizData, setQuizData] = useState({});
+  const [faqData, setFaqData] = useState({});
+  const [factData, setFactData] = useState({});
+
 
   // Generate Quiz
   const handleGenerateQuiz = async () => {
-    setQuizError("");
     setQuizLoading(true);
     try {
-      const { data } = await API.post("/user/generate-quiz", {
-        comicId,
-        script: story,
-      });
-
-      setQuizId(data.quizId);
-      setQuizQuestions(data.questions);
+      const { data } = await API.post("/user/generate-quiz", { comicId, script: story });
+      setQuizData(prev => ({
+        ...prev,
+        [comicId]: data.questions || []
+      }));
     } catch (err) {
-      console.error(err);
       setQuizError(err?.response?.data?.error || "Failed to generate quiz");
     } finally {
       setQuizLoading(false);
     }
   };
+
+
 
   // For react-select country selection
   useEffect(() => {
@@ -258,40 +330,43 @@ export const ComicGenerator = () => {
 
   // Handle Generate FAQs
   const handleGenerateFAQs = async () => {
-    setFaqError("");
     setFaqLoading(true);
     try {
-      const { data } = await API.post("/user/generate-faqs", {
-        comicId,
-        story: pages, // pages ko bhejna better hai instead of story string
-      });
-      setFaqs(data.faqs || []);
+      const { data } = await API.post("/user/generate-faqs", { comicId, story: pages });
+      setFaqData(prev => ({
+        ...prev,
+        [comicId]: data.faqs || []
+      }));
     } catch (err) {
-      console.error(err);
       setFaqError(err?.response?.data?.error || "Failed to generate FAQs");
     } finally {
       setFaqLoading(false);
     }
   };
 
+
+
   // Handle Generate Did You Know
   const handleGenerateFacts = async () => {
-    setFactError("");
     setFactLoading(true);
     try {
       const { data } = await API.post("/user/generate-didyouknow", {
         comicId,
         subject,
-        story: pages,
+        story,
       });
-      setFacts(data.didYouKnow || []);
+      setFactData(prev => ({
+        ...prev,
+        [comicId]: data.didYouKnow || []
+      }));
     } catch (err) {
-      console.error(err);
       setFactError(err?.response?.data?.error || "Failed to generate facts");
     } finally {
       setFactLoading(false);
     }
   };
+
+
 
   const [themes, setThemes] = useState([]);
   const [styles, setStyles] = useState([]);
@@ -608,133 +683,249 @@ export const ComicGenerator = () => {
 
             {/* STEP 1: Prompt */}
             {step === 1 && (
-              <Form onSubmit={handleGenerateComic}>
-                <div className="fs-5 fw-semibold mb-2">Story Prompt</div>
-                <Form.Group className="mb-3">
-                  <Form.Control
-                    as="textarea"
-                    rows={10}
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    spellCheck={false}
-                    style={{ fontFamily: "monospace" }}
-                  />
-                </Form.Group>
-                <div className="btn-wrapper mt-4 d-flex gap-3">
-                  <Button variant="secondary" onClick={() => { prevStep(); resetAfterBackToPrompt(); }}>
-                    Back
-                  </Button>
-                  <Button type="submit" disabled={!prompt || loadingImage}>
-                    {loadingImage ? (<><Spinner size="sm" className="me-2" />Generating comic...</>) : "Generate My Comic"}
-                  </Button>
-                </div>
-              </Form>
-            )}
-
-
-            {/* STEP 2: Preview images */}
-            {/* {step === 2 && (
               <div>
-                <div className="fs-3 fw-bold mb-3">Preview My Comic</div>
-                {comicImages?.length === 0 ? (
-                  <Alert variant="warning">No images to show. Please go back and regenerate.</Alert>
+                <div className="fs-3 fw-bold mb-3">Concept Breakdown</div>
+                <p className="text-muted">Your concept has been divided into the following parts:</p>
+
+                {parts.length === 0 ? (
+                  <Alert variant="warning">No parts returned from backend.</Alert>
                 ) : (
-                  <div className="d-flex flex-wrap gap-3 justify-content-center">
-                    {comicImages.map((img, idx) => (
-                      <img
-                        key={idx}
-                        src={img}
-                        alt={`comic-${idx}`}
-                        style={{
-                          width: "300px",
-                          height: "auto",
-                          border: "2px solid #ccc",
-                          borderRadius: "8px",
-                        }}
-                      />
-                    ))}
+                  <div className="d-flex flex-column gap-3">
+
+                    {/* {parts.map((p) => (
+                      <div key={p.part} className="p-3 border rounded bg-light">
+                        <h5>Part {p.part}: {p.title}</h5>
+                        <p><strong>Key Terms:</strong> {p.keyTerms.join(", ")}</p>
+                        <p><strong>From:</strong> {p.start} <strong>→</strong> {p.end}</p>
+
+                        <Button
+                          variant="primary"
+                          onClick={async () => {
+                            try {
+                              const { data } = await API.get(`/user/comics/${p.comicId}`);
+                              setComicId(p.comicId);
+
+                              // ✅ Prompt parse karke textarea me daalo
+                              if (data.comic?.prompt) {
+                                setPrompt(JSON.stringify(JSON.parse(data.comic.prompt), null, 2));
+                              } else {
+                                setPrompt(""); // fallback
+                              }
+
+                              // ✅ Pages abhi khali hain (kyunki images generate nahi hue),
+                              // lekin prompt ke andar sab detail hai
+                              setPages(data.pages || []);
+
+                              setStep(2); // move to Prompt editor
+                            } catch (err) {
+                              console.error("Failed to fetch comic:", err);
+                              setErrorMsg("Could not load comic script. Please try again.");
+                            }
+                          }}
+                        >
+                          Generate Comic for Part {p.part}
+                        </Button>
+
+
+                      </div>
+                    ))} */}
+
+                    {parts.map((p) => {
+                      const isDone = completedParts.includes(p.comicId);
+
+                      return (
+                        <div key={p.part} className="p-3 border rounded bg-light">
+                          <h5>
+                            Part {p.part}: {p.title}{" "}
+                            {isDone && <span className="badge bg-success">Done</span>}
+                          </h5>
+                          <p><strong>Key Terms:</strong> {p.keyTerms.join(", ")}</p>
+                          <p><strong>From:</strong> {p.start} → {p.end}</p>
+
+                          {!isDone && (
+                            <Button
+                              variant="primary"
+                              onClick={async () => {
+                                try {
+                                  const { data } = await API.get(`/user/comics/${p.comicId}`);
+
+                                  // ✅ reset states for new part
+                                  setComicId(p.comicId);
+                                  setComicImages([]);
+                                  setSelectedImage(null);
+                                  setPdfUrl("");
+                                  setPrompt("");
+                                  setPages([]);
+
+                                  if (data.comic?.prompt) {
+                                    setPrompt(JSON.stringify(JSON.parse(data.comic.prompt), null, 2));
+                                  }
+
+                                  // Pages abhi generate nahi hue (empty array rahega)
+                                  // user ko pehle "Generate My Comic" click karna padega
+                                  setStep(2);
+                                } catch (err) {
+                                  console.error("Failed to fetch comic:", err);
+                                  setErrorMsg("Could not load comic script. Please try again.");
+                                }
+                              }}
+                            >
+                              Generate Comic for Part {p.part}
+                            </Button>
+
+                          )}
+
+                          {isDone && (
+                            <Button
+                              variant="outline-secondary"
+                              disabled
+                            >
+                              Already Generated
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+
+
+
                   </div>
                 )}
-                <div className="btn-wrapper mt-4 d-flex gap-3 justify-content-center">
-                  <Button variant="warning" onClick={() => { setStep(1); resetAfterBackToPrompt(); }}>
-                    Edit / Regenerate
-                  </Button>
-                  <Button variant="success" onClick={handlePublishComic} disabled={publishing}>
-                    {publishing ? (<><Spinner size="sm" className="me-2" />Publishing...</>) : "Publish My Comic"}
-                  </Button>
+
+                <div className="btn-wrapper mt-4 d-flex gap-3">
+                  <Button variant="secondary" onClick={() => setStep(0)}>Back</Button>
                 </div>
               </div>
-            )} */}
+            )}
 
+            {/* STEP 2: Preview images */}
+            {/* STEP 2: Preview images */}
             {step === 2 && (
               <div>
                 <div className="fs-3 fw-bold mb-3">Preview My Comic</div>
-                {comicImages?.length === 0 ? (
-                  <Alert variant="warning">No images to show. Please go back and regenerate.</Alert>
-                ) : (
-                  <Row>
 
-                    <Col md={3} className="border-end pe-3" style={{ maxHeight: "500px", overflowY: "auto" }}>
-                      <div className="d-flex flex-column gap-2">
-                        {comicImages.map((img, idx) => (
+                {/* Agar abhi tak images nahi bani */}
+                {comicImages?.length === 0 ? (
+                  <Form onSubmit={handleGenerateComic}>
+                    <div className="fs-5 fw-semibold mb-2">Comic Script JSON</div>
+                    <Form.Group className="mb-3">
+                      <Form.Control
+                        as="textarea"
+                        rows={10}
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        spellCheck={false}
+                        style={{ fontFamily: "monospace" }}
+                      />
+                    </Form.Group>
+
+                    <div className="btn-wrapper mt-4 d-flex gap-3">
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          setStep(1);
+                          resetAfterBackToPrompt();
+                        }}
+                      >
+                        Back
+                      </Button>
+
+                      <Button type="submit" disabled={!prompt || loadingImage}>
+                        {loadingImage ? (
+                          <>
+                            <Spinner size="sm" className="me-2" /> Generating comic...
+                          </>
+                        ) : (
+                          "Generate My Comic"
+                        )}
+                      </Button>
+                    </div>
+                  </Form>
+                ) : (
+                  /* Agar images generate ho chuki hain */
+                  <>
+                    <Row>
+                      {/* Thumbnails sidebar */}
+                      <Col
+                        md={3}
+                        className="border-end pe-3"
+                        style={{ maxHeight: "500px", overflowY: "auto" }}
+                      >
+                        <div className="d-flex flex-column gap-2">
+                          {comicImages.map((img, idx) => (
+                            <img
+                              key={idx}
+                              src={img}
+                              alt={`comic-${idx}`}
+                              onClick={() => setSelectedImage(img)}
+                              className={`img-thumbnail ${selectedImage === img ? "border-primary border-3" : ""
+                                }`}
+                              style={{
+                                cursor: "pointer",
+                                objectFit: "cover",
+                                height: "80px",
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </Col>
+
+                      {/* Big preview */}
+                      <Col
+                        md={9}
+                        className="d-flex justify-content-center align-items-center"
+                      >
+                        {selectedImage ? (
                           <img
-                            key={idx}
-                            src={img}
-                            alt={`comic-${idx}`}
-                            onClick={() => setSelectedImage(img)}
-                            className={`img-thumbnail ${selectedImage === img ? "border-primary border-3" : ""}`}
+                            src={selectedImage}
+                            alt="selected-comic"
                             style={{
-                              cursor: "pointer",
-                              objectFit: "cover",
-                              height: "80px",
+                              maxWidth: "100%",
+                              maxHeight: "500px",
+                              borderRadius: "8px",
+                              border: "2px solid #ccc",
                             }}
                           />
-                        ))}
-                      </div>
-                    </Col>
+                        ) : (
+                          <p className="text-muted">
+                            Click on a thumbnail to preview the image.
+                          </p>
+                        )}
+                      </Col>
+                    </Row>
 
-
-                    <Col md={9} className="d-flex justify-content-center align-items-center">
-                      {selectedImage ? (
-                        <img
-                          src={selectedImage}
-                          alt="selected-comic"
-                          style={{
-                            maxWidth: "100%",
-                            maxHeight: "500px",
-                            borderRadius: "8px",
-                            border: "2px solid #ccc",
-                          }}
-                        />
-                      ) : (
-                        <p className="text-muted">Click on a thumbnail to preview the image.</p>
-                      )}
-                    </Col>
-                  </Row>
+                    {/* Buttons */}
+                    <div className="btn-wrapper mt-4 d-flex gap-3 justify-content-center">
+                      <Button
+                        variant="warning"
+                        onClick={() => {
+                          setStep(1);
+                          resetAfterBackToPrompt();
+                        }}
+                      >
+                        Edit / Regenerate
+                      </Button>
+                      <Button
+                        variant="success"
+                        onClick={handlePublishComic}
+                        disabled={publishing}
+                      >
+                        {publishing ? (
+                          <>
+                            <Spinner size="sm" className="me-2" /> Creating PDF...
+                          </>
+                        ) : (
+                          "Generate Comic PDF"
+                        )}
+                      </Button>
+                    </div>
+                  </>
                 )}
-
-                <div className="btn-wrapper mt-4 d-flex gap-3 justify-content-center">
-                  <Button
-                    variant="warning"
-                    onClick={() => {
-                      setStep(1);
-                      resetAfterBackToPrompt();
-                    }}
-                  >
-                    Edit / Regenerate
-                  </Button>
-                  <Button variant="success" onClick={handlePublishComic} disabled={publishing}>
-                    {publishing ? (
-                      <>
-                        <Spinner size="sm" className="me-2" /> Publishing...
-                      </>
-                    ) : (
-                      "Publish My Comic"
-                    )}
-                  </Button>
-                </div>
               </div>
             )}
+
+
+
 
             {/* STEP 3: Publish */}
             {step === 3 && (
@@ -757,17 +948,14 @@ export const ComicGenerator = () => {
                     variant="info"
                     className="mb-3"
                     onClick={handleGenerateQuiz}
-                    // disabled={quizLoading}
-                    disabled={quizLoading || quizQuestions.length > 0}
+                    disabled={quizLoading || quizData[comicId]?.length > 0}
                   >
                     {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
                   </Button>
 
-
-
                   {quizError && <Alert variant="danger">{quizError}</Alert>}
 
-                  {quizQuestions.length > 0 && (
+                  {/* {quizQuestions.length > 0 && (
                     <div className="quiz-questions mt-4">
                       {quizQuestions.map((q, idx) => (
                         <div key={idx} className="mb-4 p-3 border rounded">
@@ -781,8 +969,27 @@ export const ComicGenerator = () => {
                           <p className="text-muted">Difficulty: {q.difficulty}</p>
                         </div>
                       ))}
+
+                    </div>
+                  )} */}
+
+                  {quizData[comicId]?.length > 0 && (
+                    <div className="quiz-questions mt-4">
+                      {quizData[comicId].map((q, idx) => (
+                        <div key={idx} className="mb-4 p-3 border rounded">
+                          <strong>Q{idx + 1}. {q.question}</strong>
+                          <ul className="mt-2">
+                            {q.options.map((opt, i) => (
+                              <li key={i}>{opt}</li>
+                            ))}
+                          </ul>
+                          <p className="text-success">✔ Correct: {q.correctAnswer}</p>
+                          <p className="text-muted">Difficulty: {q.difficulty}</p>
+                        </div>
+                      ))}
                     </div>
                   )}
+
                 </div>
 
                 {/* FAQ Section */}
@@ -792,23 +999,39 @@ export const ComicGenerator = () => {
                     variant="secondary"
                     className="mb-3"
                     onClick={handleGenerateFAQs}
-                    disabled={faqLoading || faqs.length > 0}
+                    disabled={faqLoading || faqData[comicId]?.length > 0}
                   >
                     {faqLoading ? "Generating FAQs..." : "Generate FAQs"}
                   </Button>
 
                   {faqError && <Alert variant="danger">{faqError}</Alert>}
 
-                  {faqs.length > 0 && (
+                  {faqData[comicId]?.length > 0 && (
                     <div className="faq-list mt-4">
-                      {faqs.map((f, idx) => (
-                        <div key={idx} className="mb-3 p-3 border rounded">
-                          <strong>Q{idx + 1}. {f.question}</strong>
-                          <p className="mb-0">Ans: {f.answer}</p>
+                      {faqData[comicId].map((f, idx) => (
+                        <div key={idx} className="mb-4 p-3 border rounded bg-light">
+                          <div className="d-flex flex-column flex-md-row gap-3 align-items-start">
+                            {f.imageUrl && (
+                              <img
+                                src={f.imageUrl}
+                                alt={`faq-${idx}`}
+                                className="img-fluid rounded"
+                                style={{ maxWidth: "200px", border: "1px solid #ddd" }}
+                              />
+                            )}
+                            <div>
+                              <strong>Q{idx + 1}. {f.question}</strong>
+                              <p className="mb-1">Ans: {f.answer}</p>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
                   )}
+
+
+
+
                 </div>
 
                 {/* Did You Know Section */}
@@ -818,23 +1041,38 @@ export const ComicGenerator = () => {
                     variant="warning"
                     className="mb-3"
                     onClick={handleGenerateFacts}
-                    disabled={factLoading || facts.length > 0}
+                    disabled={factLoading || factData[comicId]?.length > 0}
                   >
                     {factLoading ? "Generating Facts..." : "Generate Facts"}
                   </Button>
 
                   {factError && <Alert variant="danger">{factError}</Alert>}
 
-                  {facts.length > 0 && (
+                  {factData[comicId]?.length > 0 && (
                     <div className="fact-list mt-4">
-                      {facts.map((f, idx) => (
-                        <div key={idx} className="mb-3 p-3 border rounded bg-light">
-                          <strong>Did you know?</strong>
-                          <p className="mb-0">{f.fact}</p>
+                      {factData[comicId].map((f, idx) => (
+                        <div key={idx} className="mb-4 p-3 border rounded bg-light">
+                          <div className="d-flex flex-column flex-md-row gap-3 align-items-start">
+                            {f.imageUrl && (
+                              <img
+                                src={f.imageUrl}
+                                alt={`fact-${idx}`}
+                                className="img-fluid rounded"
+                                style={{ maxWidth: "200px", border: "1px solid #ddd" }}
+                              />
+                            )}
+                            <div>
+                              <strong>💡 Did you know?</strong>
+                              <p className="mb-0">{f.fact}</p>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
                   )}
+
+
+
                 </div>
 
                 <div className="d-flex gap-3 justify-content-center mt-4">
