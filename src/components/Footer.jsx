@@ -33,6 +33,7 @@ export const Footer = () => {
                                 <li className="nav-item"><Link to={'/contact'} className="nav-link">Contact Us</Link></li>
                                 <li className="nav-item"><Link to={'/faq'} className="nav-link">FAQ</Link></li>
                                 <li className="nav-item"><Link to={'/privacy-policy'} className="nav-link">Privacy Policy</Link></li>
+                                <li className="nav-item"><Link to={'/terms-and-condition'} className="nav-link">Terms and Condition</Link></li>
                             </ul>
                         </div>
                     </Col>

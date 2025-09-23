@@ -3,19 +3,27 @@ import { Accordion } from "react-bootstrap";
 
 const FAQLanding = () => {
     return (
-        <div className="ForTeachers-Page py-4">
-            <div className="container-xl">
-                <div className="heading-wrapper text-center mx-auto mb-4 pb-md-3">
-                    <div className="section-heading mb-2">Kridemy – Frequently Asked Questions (FAQ)</div>
-                    <div className="label-heading">Stay Informed. Stay Engaged. Support Smarter Learning</div>
+        <div className="ForTeachers-Page pb-5">
+            {/* Breadcrumb Banner Section */}
+            <section className="breadcrumb-banner-section py-5">
+                <div className="container-xl position-relative z-1">
+                    <div className="page-header text-white text-uppercase text-center">
+                        <div className="section-heading text-white mb-2">Frequently Asked Questions (FAQ)</div>
+                        <div className="label-heading mb-3">Stay Informed. Stay Engaged. Support Smarter Learning</div>
+                    </div>
                 </div>
+            </section>
 
+            <div className="container-xl">
                 {/* For Students */}
-                <div className="info-wrapper">
+                <div className="info-wrapper mt-5">
                     <Accordion defaultActiveKey="0" alwaysOpen flush className="">
                         {/* For Students Section */}
-                        <div className="bg-theme1 border rounded-4 d-flex flex-column gap-3 mb-4 px-3 px-md-4 py-4">
-                            <div className="fs-4 fw-bold text-warning">For Students -</div>
+                        <div data-aos="flip-up" className="bg-theme1 border rounded-4 d-flex flex-column gap-3 mb-4 px-3 px-md-4 py-4">
+                            <div className="d-flex flex-wrap align-items-center gap-1">
+                                <img src={require('../../../assets/images/activity-images/activity-img13.png')} alt="Student" className="img-fluid" style={{ width: "50px" }} />
+                                <div className="fs-4 fw-bold text-warning">For Students -</div>
+                            </div>
                             <Accordion.Item eventKey="0" className="border">
                                 <Accordion.Header>
                                     <span className="fs-16 fw-medium text-theme4">1. What is Kridemy?</span>
@@ -122,8 +130,11 @@ const FAQLanding = () => {
                         </div>
 
                         {/* For Teachers Section */}
-                        <div className="bg-theme1 border rounded-4 d-flex flex-column gap-3 mb-4 px-3 px-md-4 py-4">
-                            <div className="fs-4 fw-bold text-warning">For Teachers -</div>
+                        <div data-aos="flip-up" className="bg-theme1 border rounded-4 d-flex flex-column gap-3 mb-4 px-3 px-md-4 py-4">
+                            <div className="d-flex flex-wrap align-items-center gap-1">
+                                <img src={require('../../../assets/images/activity-images/activity-img7.png')} alt="Teacher" className="img-fluid" style={{ width: "50px" }} />
+                                <div className="fs-4 fw-bold text-warning">For Teachers -</div>
+                            </div>
                             <Accordion.Item eventKey="5" className="border">
                                 <Accordion.Header>
                                     <span className="fs-16 fw-medium text-theme4">7. What can teachers do on Kridemy?</span>
@@ -199,8 +210,11 @@ const FAQLanding = () => {
                         </div>
 
                         {/* For Parents Section */}
-                        <div className="bg-theme1 border rounded-4 d-flex flex-column gap-3 mb-4 px-3 px-md-4 py-4">
-                            <div className="fs-4 fw-bold text-warning">For Parents -</div>
+                        <div data-aos="flip-up" className="bg-theme1 border rounded-4 d-flex flex-column gap-3 mb-4 px-3 px-md-4 py-4">
+                            <div className="d-flex flex-wrap align-items-center gap-1">
+                                <img src={require('../../../assets/images/activity-images/parent-mode.png')} alt="Parent" className="img-fluid" style={{ width: "50px" }} />
+                                <div className="fs-4 fw-bold text-warning ms-1">For Parents -</div>
+                            </div>
                             <Accordion.Item eventKey="9" className="border">
                                 <Accordion.Header>
                                     <span className="fs-16 fw-medium text-theme4">11. Is Kridemy safe for my child?</span>
@@ -288,9 +302,11 @@ const FAQLanding = () => {
                         </div>
 
                         {/* General / Technical FAQs Section */}
-                        <div className="bg-theme1 border rounded-4 d-flex flex-column gap-3 mb-4 px-3 px-md-4 py-4">
-                            <div className="fs-4 fw-bold text-warning">General / Technical FAQs -</div>
-                            {/* Q14 */}
+                        <div data-aos="flip-up" className="bg-theme1 border rounded-4 d-flex flex-column gap-3 mb-4 px-3 px-md-4 py-4">
+                            <div className="d-flex flex-wrap align-items-center gap-1">
+                                <img src={require('../../../assets/images/activity-images/activity-img8.png')} alt="FAQ's" className="img-fluid" style={{ width: "50px" }} />
+                                <div className="fs-4 fw-bold text-warning">General / Technical FAQs -</div>
+                            </div>
                             <Accordion.Item eventKey="14" className="border">
                                 <Accordion.Header>
                                     <span className="fs-16 fw-medium text-theme4">16. Is Kridemy free to use?</span>
@@ -347,6 +363,10 @@ const FAQLanding = () => {
                             </Accordion.Item>
                         </div>
                     </Accordion>
+
+                    <div className="img-wrapper text-center mb-3">
+                        <img src={require('../../../assets/images/activity-images/thankyou.png')} alt="Thankyou" className="img-fluid animate-bounce-effect" style={{ width: "250px" }} />
+                    </div>
                 </div>
             </div>
         </div>

@@ -3,12 +3,18 @@ import { Link } from 'react-router-dom';
 
 const Privacy = () => {
     return (
-        <div className="privacy-policy-page py-4">
-            <div className="container-xl">
-                <div className="heading-wrapper text-center mx-auto mb-4" style={{ maxWidth: '600px' }}>
-                    <div className="section-heading">Privacy Policy</div>
+        <div className="privacy-policy-page pb-5">
+            {/* Breadcrumb Banner Section */}
+            <section className="breadcrumb-banner-section py-5">
+                <div className="container-xl position-relative z-1">
+                    <div className="page-header text-white text-uppercase text-center">
+                        <div className="section-heading text-white mb-2">Privacy Policy</div>
+                        {/* <div className="label-heading mb-3">Stay Informed. Stay Engaged. Support Smarter Learning</div> */}
+                    </div>
                 </div>
+            </section>
 
+            <div className="container-xl mt-5">
                 <div className="content-wrapper">
                     <div className="wrapper mb-4">
                         <div className="description mb-2">
@@ -23,7 +29,7 @@ const Privacy = () => {
 
                     <div className="all-sections-wrapper d-flex flex-column gap-3">
                         {/* 1. Information We Collect */}
-                        <div className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
+                        <div data-aos="flip-up" className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
                             <div className="main-heading mb-3">1. Information We Collect</div>
                             <div className="cover-wrapper mb-4">
                                 <div className="fs-16 fw-bold text-warning mb-2">In the App</div>
@@ -49,7 +55,7 @@ const Privacy = () => {
                         </div>
 
                         {/* 2. How We Use Information */}
-                        <div className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
+                        <div data-aos="flip-up" className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
                             <div className="main-heading mb-3">2. How We Use Information</div>
                             <ul className="list-disc d-flex flex-column gap-2 m-0">
                                 <li>Delivering educational content and age-appropriate experiences.</li>
@@ -65,7 +71,7 @@ const Privacy = () => {
                         </div>
 
                         {/* 3. Advertising & Google AdMob */}
-                        <div className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
+                        <div data-aos="flip-up" className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
                             <div className="main-heading mb-3">3. Advertising & Google AdMob</div>
                             <p>Our app uses Google AdMob to serve ads. To protect children’s privacy:</p>
                             <ul className="list-disc d-flex flex-column gap-2 m-0">
@@ -78,7 +84,7 @@ const Privacy = () => {
                         </div>
 
                         {/* 4. Children’s Privacy */}
-                        <div className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
+                        <div data-aos="flip-up" className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
                             <div className="main-heading mb-3">4. Children’s Privacy</div>
                             <ul className="list-disc d-flex flex-column gap-2 m-0">
                                 <li>Parental consent required for subscription features under age 13 (U.S.), 16 (EU), 18 (India).</li>
@@ -88,7 +94,7 @@ const Privacy = () => {
                         </div>
 
                         {/* 5. Data Security */}
-                        <div className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
+                        <div data-aos="flip-up" className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
                             <div className="main-heading mb-3">5. Data Security</div>
                             <p className="mb-0">
                                 We use encryption, secure servers, and limited access controls to
@@ -98,7 +104,7 @@ const Privacy = () => {
                         </div>
 
                         {/* 6. Data Retention */}
-                        <div className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
+                        <div data-aos="flip-up" className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
                             <div className="main-heading mb-3">6. Data Retention</div>
                             <ul className="list-disc d-flex flex-column gap-2 m-0">
                                 <li><strong>Free users:</strong> Username and age stored locally, deleted by uninstalling the app.</li>
@@ -108,7 +114,7 @@ const Privacy = () => {
                         </div>
 
                         {/* 7. Your Rights */}
-                        <div className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
+                        <div data-aos="flip-up" className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
                             <div className="main-heading mb-3">7. Your Rights</div>
                             <ul className="list-disc d-flex flex-column gap-2 m-0">
                                 <li>Access your data.</li>
@@ -119,7 +125,7 @@ const Privacy = () => {
                         </div>
 
                         {/* 8. Third-Party Services */}
-                        <div className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
+                        <div data-aos="flip-up" className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
                             <div className="main-heading mb-3">8. Third-Party Services</div>
                             <p className="mb-0">
                                 Aside from Google AdMob (ads) and payment processors (for subscriptions),
@@ -129,7 +135,7 @@ const Privacy = () => {
                         </div>
 
                         {/* 9. Contact Us */}
-                        <div className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
+                        <div data-aos="flip-up" className="info-wrapper bg-theme1 border rounded-4 px-3 px-md-4 py-4">
                             <div className="main-heading mb-3">9. Contact Us</div>
                             <div className="mb-3">If you have any questions about this Privacy Policy, contact us:</div>
                             <p className="mb-0">
@@ -139,6 +145,10 @@ const Privacy = () => {
                                 Email: <Link to={"mailto:customercare@kridemy.com"} className="text-blue-600 underline">customercare@kridemy.com</Link> <br />
                                 Address: 156 Easton Ave, New Brunswick, NJ, USA 08901
                             </p>
+                        </div>
+
+                        <div className="img-wrapper text-center mb-3">
+                            <img src={require('../../assets/images/activity-images/thankyou.png')} alt="Thankyou" className="img-fluid animate-bounce-effect" style={{ width: "250px" }} />
                         </div>
                     </div>
                 </div>

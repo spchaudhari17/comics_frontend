@@ -65,7 +65,7 @@ export const AboutUs = () => {
                     <div className="page-header text-white text-uppercase text-center">
                         <div className="section-heading text-white mb-2">About Us</div>
                         <ul className="list-unstyled d-flex justify-content-center gap-2 mb-0">
-                            <li><Link to="index.html" className="text-white">Home</Link></li>
+                            <li className="text-white">Home</li>
                             <li><span>/</span></li>
                             <li className="text-warning">About</li>
                         </ul>

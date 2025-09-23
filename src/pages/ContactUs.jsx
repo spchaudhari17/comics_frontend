@@ -11,7 +11,7 @@ export const ContactUs = () => {
                     <div className="page-header text-white text-uppercase text-center">
                         <div className="section-heading text-white mb-2">Contact Us</div>
                         <ul className="list-unstyled d-flex justify-content-center gap-2 mb-0">
-                            <li><Link to="index.html" className="text-white">Home</Link></li>
+                            <li className="text-white">Home</li>
                             <li><span>/</span></li>
                             <li className="text-warning">Contact</li>
                         </ul>
@@ -30,7 +30,7 @@ export const ContactUs = () => {
                     <Row className="gx-3 gx-md-4 gx-lg-5 gy-5">
                         <Col lg={6}>
                             <div className="multiple-cards-wrapper h-100 d-grid gap-4 grid-cols-1 grid-md-cols-2">
-                                <div className="info-box h-100 animate-bounce d-flex flex-column align-items-center justify-content-center text-center border rounded-4 shadow px-3 py-4">
+                                <div className="info-box h-100 animate-bounce-effect d-flex flex-column align-items-center justify-content-center text-center border rounded-4 shadow px-3 py-4">
                                     <div className="icon d-flex align-items-center justify-content-center bg-primary bg-opacity-25 rounded-circle mb-4" style={{ height: '50px', width: '50px' }}>
                                         <i className="fs-4 bi bi-globe text-primary"></i>
                                     </div>
@@ -39,7 +39,7 @@ export const ContactUs = () => {
                                         <p className="fs-14 text-muted m-0">https://kridemy.com/</p>
                                     </div>
                                 </div>
-                                <div className="info-box h-100 animate-bounce d-flex flex-column align-items-center justify-content-center text-center border rounded-4 shadow px-3 py-4">
+                                <div className="info-box h-100 animate-bounce-effect d-flex flex-column align-items-center justify-content-center text-center border rounded-4 shadow px-3 py-4">
                                     <div className="icon d-flex align-items-center justify-content-center bg-success bg-opacity-25 rounded-circle mb-4" style={{ height: '50px', width: '50px' }}>
                                         <i className="fs-4 bi bi-headset text-success"></i>
                                     </div>
@@ -48,7 +48,7 @@ export const ContactUs = () => {
                                         {/* <p className="fs-14 text-muted m-0">+91 986 888 0000</p> */}
                                     </div>
                                 </div>
-                                <div className="info-box h-100 animate-bounce d-flex flex-column align-items-center justify-content-center text-center border rounded-4 shadow px-3 py-4">
+                                <div className="info-box h-100 animate-bounce-effect d-flex flex-column align-items-center justify-content-center text-center border rounded-4 shadow px-3 py-4">
                                     <div className="icon d-flex align-items-center justify-content-center bg-info bg-opacity-25 rounded-circle mb-4" style={{ height: '50px', width: '50px' }}>
                                         <i className="fs-4 bi bi-envelope-fill text-info"></i>
                                     </div>
@@ -57,7 +57,7 @@ export const ContactUs = () => {
                                         <p className="fs-14 text-muted m-0">customercare@kridemy.com</p>
                                     </div>
                                 </div>
-                                <div className="info-box h-100 animate-bounce d-flex flex-column align-items-center justify-content-center text-center border rounded-4 shadow px-3 py-4">
+                                <div className="info-box h-100 animate-bounce-effect d-flex flex-column align-items-center justify-content-center text-center border rounded-4 shadow px-3 py-4">
                                     <div className="icon d-flex align-items-center justify-content-center bg-danger bg-opacity-25 rounded-circle mb-4" style={{ height: '50px', width: '50px' }}>
                                         <i className="fs-4 bi bi-geo-alt-fill text-danger"></i>
                                     </div>
