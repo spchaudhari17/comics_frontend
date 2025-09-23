@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Badge, Card, Row, Col } from "react-bootstrap";
-import { Loader } from "../../lib/loader"; 
+import { Loader } from "../../lib/loader";
 import API from "../../API";
+import { useNavigate } from "react-router-dom";
 
 const MyComics = () => {
+  const navigate = useNavigate()
+
   const [comics, setComics] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -146,19 +149,48 @@ const MyComics = () => {
                             <td>{getStatusBadge(comic.status)}</td>
                             <td>{getComicStatusBadge(comic.comicStatus)}</td>
                             <td>{new Date(comic.createdAt).toLocaleDateString()}</td>
-                            <td>
+                            {/* <td>
                               <Button
                                 size="sm"
                                 variant="outline-primary"
                                 onClick={() =>
                                   window.open(comic.pdfUrl, "_blank", "noopener,noreferrer")
                                 }
-                                // disabled={!comic.pdfUrl}
+                                
                               >
                                 <i className="bi bi-filetype-pdf me-1"></i>
                                 View
                               </Button>
+                            </td> */}
+
+                            <td>
+                              {comic.comicStatus === "draft" ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline-warning"
+                                  onClick={() =>
+                                    navigate("/create-comic", { state: { comicId: comic._id } })
+                                  }
+                                >
+                                  <i className="bi bi-pencil-square me-1"></i>
+                                  Resume
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline-primary"
+                                  onClick={() =>
+                                    window.open(comic.pdfUrl, "_blank", "noopener,noreferrer")
+                                  }
+                                  disabled={!comic.pdfUrl}
+                                >
+                                  <i className="bi bi-filetype-pdf me-1"></i>
+                                  View
+                                </Button>
+                              )}
                             </td>
+
+
                           </tr>
                         ))
                       ) : (
