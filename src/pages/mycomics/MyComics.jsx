@@ -141,18 +141,12 @@ const MyComics = () => {
             <Card>
               <Card.Header className="d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">My Comics</h5>
-                <Button 
-                  variant="primary" 
-                  size="sm"
-                  onClick={() => navigate("/create-comic")}
-                >
-                  Create New Comic
-                </Button>
+                
               </Card.Header>
               <Card.Body>
                 {Object.keys(seriesGroups).map(seriesId => (
                   <div key={seriesId} className="mb-4">
-                    {seriesId !== 'single' && (
+                    {/* {seriesId !== 'single' && (
                       <div className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
                         <h6 className="mb-0">
                           Series: {seriesGroups[seriesId][0]?.seriesTitle || 'Untitled Series'}
@@ -165,7 +159,7 @@ const MyComics = () => {
                           View Series
                         </Button>
                       </div>
-                    )}
+                    )} */}
                     
                     <Table responsive striped hover className="mb-0">
                       <thead>
@@ -233,11 +227,7 @@ const MyComics = () => {
                                     <i className="bi bi-filetype-pdf me-1"></i>
                                     View PDF
                                   </Button>
-                                  {seriesId !== 'single' && comic.partNumber && (
-                                    <Badge bg="secondary" className="ms-1">
-                                      Part {comic.partNumber}
-                                    </Badge>
-                                  )}
+                                  
                                 </div>
                               )}
                             </td>
@@ -248,15 +238,7 @@ const MyComics = () => {
                   </div>
                 ))}
 
-                {comics.length === 0 && (
-                  <div className="text-center py-5">
-                    <h5>No comics found</h5>
-                    <p className="text-muted">Start by creating your first comic!</p>
-                    <Button variant="primary" onClick={() => navigate("/create-comic")}>
-                      Create New Comic
-                    </Button>
-                  </div>
-                )}
+                
               </Card.Body>
             </Card>
           </>

@@ -47,7 +47,6 @@ export const ComicGenerator = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const resumeComicId = location.state?.comicId;
-  const resumeSeriesId = location.state?.seriesId;
 
   // flow state
   const [step, setStep] = useState(0);
@@ -84,11 +83,10 @@ export const ComicGenerator = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [existingComic, setExistingComic] = useState(null);
   const [successMsg, setSuccessMsg] = useState("");
+  const [redirecting, setRedirecting] = useState(false);
 
   // Style Images Modal
   const [showStyleImgModal, setShowStyleImgModal] = useState(false);
-  const closeStyleImgModal = () => setShowStyleImgModal(false);
-
   const openStyleImgModal = () => {
     if (styleType) {
       setShowStyleImgModal(true);
@@ -96,6 +94,7 @@ export const ComicGenerator = () => {
       alert("Please select a style first!");
     }
   };
+  const closeStyleImgModal = () => setShowStyleImgModal(false);
 
   // Theme Description Modal
   const [showThemeModal, setShowThemeModal] = useState(false);
@@ -152,40 +151,40 @@ export const ComicGenerator = () => {
       });
   }, []);
 
-  // Resume comic logic
-   useEffect(() => {
+  // ✅ IMPROVED RESUME LOGIC - Skip breakdown for resume comics
+  useEffect(() => {
     const loadResumeComic = async () => {
       if (resumeComicId) {
         try {
           setLoadingPrompt(true);
           const { data } = await API.get(`/user/comics/${resumeComicId}`);
           const comic = data.comic;
-          
+
           // Set current part data
           setCurrentPart({
             comicId: resumeComicId,
             part: comic?.partNumber || 1,
             title: comic?.title || "Untitled"
           });
-          
+
           setComicId(resumeComicId);
           setComicTitle(comic?.title || "");
           setSubject(comic?.subject || "");
           setConcept(comic?.concept || "");
           setStory(comic?.story || "");
-          
+
           // Check comic status and go to appropriate step
           if (comic?.comicStatus === 'published') {
-            // Already published - go to step 3 (PDF view)
+            // Already published - go to step 4 (PDF view)
             if (comic?.prompt) {
               setPrompt(JSON.stringify(JSON.parse(comic.prompt), null, 2));
             }
-            setStep(3);
+            setStep(4);
           } else if (comic?.images && comic.images.length > 0) {
-            // Images already generated - go to step 2 (preview)
+            // Images already generated - go to step 3 (preview)
             setComicImages(comic.images.map(img => img.imageUrl));
             setSelectedImage(comic.images[0]?.imageUrl);
-            setStep(2);
+            setStep(3);
           } else if (comic?.prompt) {
             // Prompt generated but no images - go to step 2 (prompt editor)
             setPrompt(JSON.stringify(JSON.parse(comic.prompt), null, 2));
@@ -194,7 +193,7 @@ export const ComicGenerator = () => {
             // No prompt yet - stay at step 0
             setStep(0);
           }
-          
+
         } catch (err) {
           console.error("Failed to resume comic:", err);
           setErrorMsg("Failed to load comic data");
@@ -210,7 +209,7 @@ export const ComicGenerator = () => {
 
   // LocalStorage management
   useEffect(() => {
-    if (!resumeComicId && !resumeSeriesId) {
+    if (!resumeComicId) {
       const saved = localStorage.getItem("currentSeries");
       if (saved) {
         try {
@@ -219,48 +218,27 @@ export const ComicGenerator = () => {
           setParts(parsed.parts);
           setCompletedParts(parsed.completedParts || []);
           setCurrentPart(parsed.currentPart);
-          
-          // If there's a current part, set the step accordingly
-          if (parsed.currentPart) {
-            setStep(2);
-            setComicId(parsed.currentPart.comicId);
-          }
         } catch (err) {
           console.error("Error parsing saved series data:", err);
         }
       }
     }
-  }, [resumeComicId, resumeSeriesId]);
+  }, [resumeComicId]);
 
   // Save to localStorage
   useEffect(() => {
-    if (series || parts.length > 0) {
+    if (parts.length > 0) {
       localStorage.setItem(
         "currentSeries",
-        JSON.stringify({ 
-          series, 
-          parts, 
+        JSON.stringify({
+          series,
+          parts,
           completedParts,
-          currentPart 
+          currentPart
         })
       );
     }
   }, [series, parts, completedParts, currentPart]);
-
-  // Check if all parts are completed
-  const allPartsCompleted = parts.length > 0 && completedParts.length === parts.length;
-
-  useEffect(() => {
-    if (allPartsCompleted) {
-      localStorage.removeItem("currentSeries");
-      setSuccessMsg("Congratulations! You've completed all parts of this series!");
-      
-      setTimeout(() => {
-        setSuccessMsg("");
-        navigate("/my-comics");
-      }, 3000);
-    }
-  }, [allPartsCompleted, navigate]);
 
   // STEP 1: Story → Prompt
   const handleConvertToPrompt = async (e) => {
@@ -295,12 +273,7 @@ export const ComicGenerator = () => {
       setParts(data.parts);
       setCompletedParts([]);
       setCurrentPart(null);
-
-       if (data.parts.length > 0) {
-        await loadPartData(data.parts[0]); // Directly load first part
-      } else {
-        setStep(1);
-      }
+      setStep(1); // Go to breakdown step (aapka purana flow)
     } catch (err) {
       console.error(err);
       setErrorMsg(err?.response?.data?.error || "Prompt refinement failed.");
@@ -309,41 +282,35 @@ export const ComicGenerator = () => {
     }
   };
 
-  // Load part data for editing/generation
- const loadPartData = async (part) => {
+  // Load part data - AAPKE PURANE CODE JAISA
+  const loadPartData = async (part) => {
     try {
-      setLoadingPrompt(true);
       const { data } = await API.get(`/user/comics/${part.comicId}`);
-      const comic = data.comic;
 
-      setCurrentPart({
-        comicId: part.comicId,
-        part: part.part,
-        title: part.title
-      });
-      
+      // ✅ reset states for new part
       setComicId(part.comicId);
-      setComicTitle(part.title);
-      
-      if (comic?.prompt) {
-        setPrompt(JSON.stringify(JSON.parse(comic.prompt), null, 2));
-      } else {
-        setPrompt("");
-      }
-
       setComicImages([]);
       setSelectedImage(null);
       setPdfUrl("");
       setPages([]);
 
-      // ✅ SKIP BREAKDOWN - go directly to PROMPT EDITOR (Step 2)
-      setStep(2);
-      
+      if (data.comic?.prompt) {
+        setPrompt(JSON.stringify(JSON.parse(data.comic.prompt), null, 2));
+      } else {
+        setPrompt("");
+      }
+
+      // Set current part
+      setCurrentPart({
+        comicId: part.comicId,
+        part: part.part,
+        title: part.title
+      });
+
+      setStep(2); // move to Prompt editor
     } catch (err) {
       console.error("Failed to fetch comic:", err);
       setErrorMsg("Could not load comic script. Please try again.");
-    } finally {
-      setLoadingPrompt(false);
     }
   };
 
@@ -377,7 +344,7 @@ export const ComicGenerator = () => {
 
       setComicImages(imgs);
       setSelectedImage(imgs[0]);
-      nextStep();
+      setStep(2); // Go to preview step
     } catch (err) {
       console.error(err);
       setErrorMsg(err?.response?.data?.error || err.message || "Error generating comic images.");
@@ -394,7 +361,7 @@ export const ComicGenerator = () => {
       const { data } = await API.post("/user/generateComicPDF", { comicId });
       if (!data?.pdfUrl) throw new Error("PDF URL not returned");
       setPdfUrl(data.pdfUrl);
-      nextStep();
+      setStep(4); // Go to publish step
     } catch (err) {
       console.error(err);
       setErrorMsg(err?.response?.data?.error || "Failed to generate PDF.");
@@ -403,33 +370,15 @@ export const ComicGenerator = () => {
     }
   };
 
-  // STEP 4: Final Publish
-  const handlePublish = async () => {
-    try {
-      await dispatch(setComicStatus(comicId, "published"));
-      
-      // Mark current part as completed
-      setCompletedParts((prev) => [...new Set([...prev, comicId])]);
-      
-      // Clear current part
-      setCurrentPart(null);
-      
-      // Reset states
-      setComicImages([]);
-      setPdfUrl("");
-      setPrompt("");
-      
-      setSuccessMsg(`Part ${currentPart?.part} published successfully!`);
-      
-      setTimeout(() => {
-        setSuccessMsg("");
-        setStep(1); // Back to breakdown
-      }, 2000);
-      
-    } catch (err) {
-      console.error("Publish failed:", err);
-      setErrorMsg("Failed to publish comic");
-    }
+  // ✅ UPDATED: STEP 4: Final Publish with AUTO-REDIRECT to MyComics
+  const handlePublish = () => {
+    dispatch(setComicStatus(comicId, "published"));
+
+    // mark current part as completed
+    setCompletedParts((prev) => [...new Set([...prev, comicId])]);
+
+    // ✅ redirect back to Concept Breakdown (Step 1)
+    setStep(1);
   };
 
   // Helper functions
@@ -501,17 +450,19 @@ export const ComicGenerator = () => {
             <Stepper currentStep={step} />
           </div>
 
-            {/* Debug Step Control (optional for development) */}
+          {/* Debug Step Control (optional for development) */}
           <div className="d-flex gap-2 mb-3">
             <Button variant="outline-primary" onClick={() => setStep(0)}>Step 0: Story</Button>
-            <Button variant="outline-primary" onClick={() => setStep(1)}>Step 1: Prompt</Button>
-            <Button variant="outline-primary" onClick={() => setStep(2)}>Step 2: Preview</Button>
-            <Button variant="outline-primary" onClick={() => setStep(3)}>Step 3: Publish</Button>
+            <Button variant="outline-primary" onClick={() => setStep(1)}>Step 1: Breakdown</Button>
+            <Button variant="outline-primary" onClick={() => setStep(2)}>Step 2: Prompt</Button>
+            <Button variant="outline-primary" onClick={() => setStep(3)}>Step 3: Preview</Button>
+            <Button variant="outline-primary" onClick={() => setStep(4)}>Step 4: Publish</Button>
           </div>
 
           {successMsg && (
             <Alert variant="success" className="mb-4">
               {successMsg}
+              {redirecting && <Spinner size="sm" className="ms-2" />}
             </Alert>
           )}
 
@@ -527,13 +478,15 @@ export const ComicGenerator = () => {
               <Form onSubmit={handleConvertToPrompt}>
                 <div className="heading-wrapper text-dark mb-4">
                   <div className="fs-3 fw-bold">Write your story</div>
+                  {resumeComicId && (
+                    <div className="text-muted fs-6">Resuming comic creation...</div>
+                  )}
                 </div>
                 <Row className="g-3">
                   <Col sm={6} md={4}>
                     <Form.Group>
                       <Form.Label>Country</Form.Label>
-                      <Select 
-                        className="custom-select"
+                      <Select className="custom-select"
                         options={countries}
                         value={selectedCountry}
                         onChange={(selectedOption) => setSelectedCountry(selectedOption)}
@@ -550,11 +503,18 @@ export const ComicGenerator = () => {
                         onChange={(e) => setClassGrade(e.target.value)}
                       >
                         <option value="" disabled>Select Class/Grade</option>
-                        {[...Array(12)].map((_, i) => (
-                          <option key={i} value={`${i+1}st Standard`}>
-                            {i+1}st Grade
-                          </option>
-                        ))}
+                        <option value="1st Standard">1st Grade</option>
+                        <option value="2nd Standard">2nd Grade</option>
+                        <option value="3rd Standard">3rd Grade</option>
+                        <option value="4th Standard">4th Grade</option>
+                        <option value="5th Standard">5th Grade</option>
+                        <option value="6th Standard">6th Grade</option>
+                        <option value="7th Standard">7th Grade</option>
+                        <option value="8th Standard">8th Grade</option>
+                        <option value="9th Standard">9th Grade</option>
+                        <option value="10th Standard">10th Grade</option>
+                        <option value="11th Standard">11th Grade</option>
+                        <option value="12th Standard">12th Grade</option>
                         <option value="UG">UG</option>
                         <option value="PG">PG</option>
                       </Form.Select>
@@ -578,7 +538,7 @@ export const ComicGenerator = () => {
                     <Form.Group>
                       <Form.Label className="d-flex align-items-center gap-2">
                         Theme
-                        <OverlayTrigger placement="top" overlay={<Tooltip>Select a theme and then click to view</Tooltip>}>
+                        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-theme">Select a theme and then click to view</Tooltip>}>
                           <i className="bi bi-info-circle text-primary" role="button" onClick={openThemeModal}></i>
                         </OverlayTrigger>
                       </Form.Label>
@@ -597,7 +557,7 @@ export const ComicGenerator = () => {
                     <Form.Group>
                       <Form.Label className="d-flex align-items-center gap-2">
                         Choose Style
-                        <OverlayTrigger placement="top" overlay={<Tooltip>Select a style and then click to view style</Tooltip>}>
+                        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-info">Select a style and then click to view style</Tooltip>}>
                           <i className="bi bi-info-circle text-primary" role="button" onClick={openStyleImgModal}></i>
                         </OverlayTrigger>
                       </Form.Label>
@@ -619,7 +579,7 @@ export const ComicGenerator = () => {
                         type="text"
                         value={comicTitle}
                         onChange={(e) => setComicTitle(e.target.value)}
-                        placeholder="e.g. The Science Adventure"
+                        placeholder="e.g. The Science"
                       />
                     </Form.Group>
                   </Col>
@@ -654,7 +614,7 @@ export const ComicGenerator = () => {
                 </div>
 
                 {existingComic && (
-                  <div className="mt-4">
+                  <div>
                     <Alert variant="info">
                       A comic for this concept already exists. Here are the details:
                     </Alert>
@@ -698,17 +658,11 @@ export const ComicGenerator = () => {
               </Form>
             )}
 
-            {/* STEP 1: Concept Breakdown */}
+            {/* STEP 1: Concept Breakdown - AAPKE PURANE CODE JAISA */}
             {step === 1 && (
               <div>
                 <div className="fs-3 fw-bold mb-3">Concept Breakdown</div>
                 <p className="text-muted">Your concept has been divided into the following parts:</p>
-
-                {allPartsCompleted && (
-                  <Alert variant="success" className="mb-4">
-                    🎉 All parts completed! Redirecting to My Comics...
-                  </Alert>
-                )}
 
                 {parts.length === 0 ? (
                   <Alert variant="warning">No parts returned from backend.</Alert>
@@ -716,39 +670,30 @@ export const ComicGenerator = () => {
                   <div className="d-flex flex-column gap-3">
                     {parts.map((p) => {
                       const isDone = completedParts.includes(p.comicId);
-                      const isCurrent = currentPart?.comicId === p.comicId;
 
                       return (
-                        <div key={p.part} className={`p-3 border rounded ${isCurrent ? 'bg-primary text-white' : 'bg-light'}`}>
+                        <div key={p.part} className="p-3 border rounded bg-light">
                           <h5>
-                            Part {p.part}: {p.title}
-                            {isDone && <Badge bg="success" className="ms-2">Completed</Badge>}
-                            {isCurrent && <Badge bg="warning" className="ms-2">In Progress</Badge>}
+                            Part {p.part}: {p.title}{" "}
+                            {isDone && <span className="badge bg-success">Done</span>}
                           </h5>
                           <p><strong>Key Terms:</strong> {p.keyTerms.join(", ")}</p>
                           <p><strong>From:</strong> {p.start} → {p.end}</p>
 
-                          <div className="d-flex gap-2">
-                            {!isDone && (
-                              <Button
-                                variant={isCurrent ? "outline-light" : "primary"}
-                                onClick={() => loadPartData(p)}
-                                disabled={loadingPrompt}
-                              >
-                                {isCurrent ? "Continue This Part" : "Work on This Part"}
-                                {loadingPrompt && <Spinner size="sm" className="ms-2" />}
-                              </Button>
-                            )}
-                            
-                            {isDone && (
-                              <Button
-                                variant="outline-success"
-                                onClick={() => navigate("/my-comics")}
-                              >
-                                View Completed
-                              </Button>
-                            )}
-                          </div>
+                          {!isDone && (
+                            <Button
+                              variant="primary"
+                              onClick={() => loadPartData(p)}
+                            >
+                              Generate Comic for Part {p.part}
+                            </Button>
+                          )}
+
+                          {isDone && (
+                            <Button variant="outline-secondary" disabled>
+                              Already Generated
+                            </Button>
+                          )}
                         </div>
                       );
                     })}
@@ -756,10 +701,7 @@ export const ComicGenerator = () => {
                 )}
 
                 <div className="btn-wrapper mt-4 d-flex gap-3">
-                  <Button variant="secondary" onClick={() => setStep(0)}>Back to Story</Button>
-                  <Button variant="outline-primary" onClick={() => navigate("/my-comics")}>
-                    Go to My Comics
-                  </Button>
+                  <Button variant="secondary" onClick={() => setStep(0)}>Back</Button>
                 </div>
               </div>
             )}
@@ -793,7 +735,7 @@ export const ComicGenerator = () => {
                           resetAfterBackToPrompt();
                         }}
                       >
-                        Back to Breakdown
+                        Back
                       </Button>
 
                       <Button type="submit" disabled={!prompt || loadingImage}>
@@ -883,14 +825,17 @@ export const ComicGenerator = () => {
                 {pdfUrl ? (
                   <div className="mt-4">
                     <p>Your comic PDF has been successfully generated!</p>
-                    <Button 
-                      variant="primary" 
+                    <Button
+                      variant="primary"
                       onClick={() => window.open(pdfUrl, "_blank")}
                       className="me-3"
                     >
                       View PDF
                     </Button>
-                    <Button variant="success" onClick={handlePublish}>
+                    <Button
+                      variant="success"
+                      onClick={() => setStep(4)}
+                    >
                       Publish Comic
                     </Button>
                   </div>
@@ -899,14 +844,28 @@ export const ComicGenerator = () => {
                     PDF URL not found. Try generating again.
                   </Alert>
                 )}
+              </div>
+            )}
 
-                {/* Additional Content Generation */}
+            {/* STEP 4: Publish */}
+            {step === 4 && (
+              <div className="text-center">
+                <h3>Comic Published 🎉</h3>
+                {pdfUrl ? (
+                  <p className="mt-3">
+                    <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                      Open PDF from S3
+                    </a>
+                  </p>
+                ) : (
+                  <Alert variant="warning">PDF URL not found. Try publishing again.</Alert>
+                )}
+
+                {/* Additional Content Sections */}
                 <div className="mt-5 text-start">
-                  <h4>Generate Additional Content</h4>
-                  
                   {/* Quiz Section */}
                   <div className="quiz-wrapper mt-4">
-                    <h5>Quiz</h5>
+                    <h4>Generate Quiz for this Comic</h4>
                     <Button
                       variant="info"
                       className="mb-3"
@@ -917,9 +876,9 @@ export const ComicGenerator = () => {
                     </Button>
                     {quizError && <Alert variant="danger">{quizError}</Alert>}
                     {quizData[comicId]?.length > 0 && (
-                      <div className="quiz-questions mt-3">
+                      <div className="quiz-questions mt-4">
                         {quizData[comicId].map((q, idx) => (
-                          <div key={idx} className="mb-3 p-3 border rounded">
+                          <div key={idx} className="mb-4 p-3 border rounded">
                             <strong>Q{idx + 1}. {q.question}</strong>
                             <ul className="mt-2">
                               {q.options.map((opt, i) => (
@@ -935,8 +894,8 @@ export const ComicGenerator = () => {
                   </div>
 
                   {/* FAQ Section */}
-                  <div className="faq-wrapper mt-4">
-                    <h5>FAQs</h5>
+                  <div className="faq-wrapper mt-5">
+                    <h4>Generate FAQs for this Comic</h4>
                     <Button
                       variant="secondary"
                       className="mb-3"
@@ -947,9 +906,9 @@ export const ComicGenerator = () => {
                     </Button>
                     {faqError && <Alert variant="danger">{faqError}</Alert>}
                     {faqData[comicId]?.length > 0 && (
-                      <div className="faq-list mt-3">
+                      <div className="faq-list mt-4">
                         {faqData[comicId].map((f, idx) => (
-                          <div key={idx} className="mb-3 p-3 border rounded bg-light">
+                          <div key={idx} className="mb-4 p-3 border rounded bg-light">
                             <div className="d-flex flex-column flex-md-row gap-3 align-items-start">
                               {f.imageUrl && (
                                 <img
@@ -971,8 +930,8 @@ export const ComicGenerator = () => {
                   </div>
 
                   {/* Facts Section */}
-                  <div className="fact-wrapper mt-4">
-                    <h5>Did You Know Facts</h5>
+                  <div className="fact-wrapper mt-5">
+                    <h4>Generate Did You Know Facts</h4>
                     <Button
                       variant="warning"
                       className="mb-3"
@@ -983,9 +942,9 @@ export const ComicGenerator = () => {
                     </Button>
                     {factError && <Alert variant="danger">{factError}</Alert>}
                     {factData[comicId]?.length > 0 && (
-                      <div className="fact-list mt-3">
+                      <div className="fact-list mt-4">
                         {factData[comicId].map((f, idx) => (
-                          <div key={idx} className="mb-3 p-3 border rounded bg-light">
+                          <div key={idx} className="mb-4 p-3 border rounded bg-light">
                             <div className="d-flex flex-column flex-md-row gap-3 align-items-start">
                               {f.imageUrl && (
                                 <img
@@ -1008,9 +967,10 @@ export const ComicGenerator = () => {
                 </div>
 
                 <div className="d-flex gap-3 justify-content-center mt-4">
-                  <Button variant="primary" onClick={handlePublish}>
-                    Final Publish
+                 <Button onClick={handlePublish}>
+                    Final Submit
                   </Button>
+
                   <Button variant="outline-primary" onClick={() => navigate("/my-comics")}>
                     Go to My Comics
                   </Button>
@@ -1021,7 +981,7 @@ export const ComicGenerator = () => {
         </div>
       </div>
 
-      {/* Style Images Modal */}
+      {/* Modals */}
       <Modal show={showStyleImgModal} onHide={closeStyleImgModal} centered>
         <Modal.Header closeButton className="fs-16 fw-bold">Preview Image</Modal.Header>
         <Modal.Body className="p-3 text-center">
@@ -1040,7 +1000,6 @@ export const ComicGenerator = () => {
         </Modal.Body>
       </Modal>
 
-      {/* Theme Description Modal */}
       <Modal show={showThemeModal} onHide={closeThemeModal} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>{themeType} Theme</Modal.Title>
