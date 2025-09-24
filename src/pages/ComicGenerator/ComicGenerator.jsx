@@ -210,35 +210,53 @@ export const ComicGenerator = () => {
   // LocalStorage management
   useEffect(() => {
     if (!resumeComicId) {
-      const saved = localStorage.getItem("currentSeries");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setSeries(parsed.series);
-          setParts(parsed.parts);
-          setCompletedParts(parsed.completedParts || []);
-          setCurrentPart(parsed.currentPart);
-        } catch (err) {
-          console.error("Error parsing saved series data:", err);
+      const userInfo = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user"))
+        : null;
+
+      const userId = userInfo?._id;   // ✅ direct from userInfo
+
+      if (userId) {
+        const saved = localStorage.getItem(`currentSeries_${userId}`);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            setSeries(parsed.series);
+            setParts(parsed.parts);
+            setCompletedParts(parsed.completedParts || []);
+            setCurrentPart(parsed.currentPart);
+          } catch (err) {
+            console.error("Error parsing saved series data:", err);
+          }
         }
       }
     }
   }, [resumeComicId]);
 
+
   // Save to localStorage
   useEffect(() => {
     if (parts.length > 0) {
-      localStorage.setItem(
-        "currentSeries",
-        JSON.stringify({
-          series,
-          parts,
-          completedParts,
-          currentPart
-        })
-      );
+      const userInfo = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user"))
+        : null;
+
+      const userId = userInfo?._id;   // ✅ direct from userInfo
+
+      if (userId) {
+        localStorage.setItem(
+          `currentSeries_${userId}`,
+          JSON.stringify({
+            series,
+            parts,
+            completedParts,
+            currentPart
+          })
+        );
+      }
     }
   }, [series, parts, completedParts, currentPart]);
+
 
   // STEP 1: Story → Prompt
   const handleConvertToPrompt = async (e) => {
@@ -275,7 +293,7 @@ export const ComicGenerator = () => {
       setCurrentPart(null);
       setStep(1); // Go to breakdown step (aapka purana flow)
     } catch (err) {
-      console.error(err);
+      console.error("Prompt refinement failed.", err);
       setErrorMsg(err?.response?.data?.error || "Prompt refinement failed.");
     } finally {
       setLoadingPrompt(false);
@@ -967,7 +985,7 @@ export const ComicGenerator = () => {
                 </div>
 
                 <div className="d-flex gap-3 justify-content-center mt-4">
-                 <Button onClick={handlePublish}>
+                  <Button onClick={handlePublish}>
                     Final Submit
                   </Button>
 

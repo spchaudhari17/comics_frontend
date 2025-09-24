@@ -18,6 +18,14 @@ export const Header = () => {
 
   const handleLogout = () => {
     dispatch(logoutUser());
+
+
+    // LocalStorage clear
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("currentSeries");
+    localStorage.removeItem("persist:root");
+
     navigate("/login");
   };
 
@@ -144,8 +152,12 @@ export const Header = () => {
                     <Dropdown.Menu className="text-theme3 shadow-sm rounded-3">
                       <div className="user-info text-theme3 pb-1 px-3">
                         <div className="user-info text-start text-truncate">
-                          <div className="username fs-14 fw-semibold text-black text-opacity-75 text-capitalize">Test User</div>
-                          <div className="user-email fs-12 text-muted text-lowercase text-truncate">testuser@virtualemployee.com</div>
+                          <div className="username fs-14 fw-semibold text-black text-opacity-75 text-capitalize">
+                            {userInfo?.firstname || userInfo?.username || "User"}
+                          </div>
+                          <div className="user-email fs-12 text-muted text-lowercase text-truncate">
+                            {userInfo?.email || "unknown@example.com"}
+                          </div>
                         </div>
                       </div>
                       <Dropdown.Divider className="my-1" />
