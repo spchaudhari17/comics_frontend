@@ -36,6 +36,7 @@ import StudentLanding from './pages/Homepage/Student/StudentLanding';
 import TeacherLanding from './pages/Homepage/Teacher/TeacherLanding';
 import FAQLanding from './pages/Homepage/Faq/FAQLanding';
 import AllUsers from './pages/admin/AllUsers';
+import ContactList from './pages/admin/ContactList';
 
 function App() {
   // AOS Animations
@@ -78,6 +79,7 @@ function App() {
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="terms-and-condition" element={<TermsAndCondition />} />
             <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
+            <Route path="contactList" element={<ContactList />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
         </Routes>
