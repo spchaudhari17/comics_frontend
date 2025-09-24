@@ -65,7 +65,7 @@ export const AboutUs = () => {
                     <div className="page-header text-white text-uppercase text-center">
                         <div className="section-heading text-white mb-2">About Us</div>
                         <ul className="list-unstyled d-flex justify-content-center gap-2 mb-0">
-                            <li><Link to="index.html" className="text-white">Home</Link></li>
+                            <li className="text-white">Home</li>
                             <li><span>/</span></li>
                             <li className="text-warning">About</li>
                         </ul>
@@ -78,14 +78,14 @@ export const AboutUs = () => {
                 <div className="container-xl my-md-4">
                     <Row className="align-items-center gx-md-5 gy-4">
                         <Col lg={6}>
-                            <div className="img-wrapper position-relative">
+                            <div data-aos="slide-right" className="img-wrapper position-relative">
                                 <img src={require('../assets/images/about-image-3.jpg')} className="img-fluid w-100" alt="About Company" />
                                 <div className="img-frame position-absolute top-50 start-50 translate-middle z-1"></div>
                             </div>
                         </Col>
 
                         <Col lg={6}>
-                            <div className="content-wrapper">
+                            <div data-aos="slide-left" className="content-wrapper">
                                 <div className="label-heading mb-2">About Us</div>
                                 <div className="section-heading mb-3 mb-xl-4">Knowledge is power, Information is liberating.</div>
                                 <div className="our-mission-wrapper mb-4">
@@ -133,7 +133,7 @@ export const AboutUs = () => {
             </section>
 
             {/* Counter Section */}
-            <section className="counters-section bg-black position-relative py-5">
+            {/* <section className="counters-section bg-black position-relative py-5">
                 <div className="container-xl position-relative my-md-4">
                     <Row className="g-4">
                         <Col xs={6} md={3} className="counter-item">
@@ -166,7 +166,7 @@ export const AboutUs = () => {
                         </Col>
                     </Row>
                 </div>
-            </section>
+            </section> */}
 
             {/* Testimonials Section */}
             {/* <section className="testimonials-section bg-theme2 py-5">
@@ -221,11 +221,37 @@ export const AboutUs = () => {
                 <div className="container-xl my-md-4">
                     <div className="heading-wrapper text-center mx-auto mb-4 pb-2 pb-md-4" style={{ maxWidth: '600px' }}>
                         <h1 className="section-heading mb-2">Meet The Expert Team</h1>
-                        <div className="sub-title text-muted">Lorem Ipsum is simply dummy text of the printing and
-                            typesetting industry. Lorem Ipsum has been the industry's</div>
+                        <div className="sub-title text-muted">Leaders, innovators, and professionals dedicated to shaping the future.</div>
                     </div>
 
-                    <Row className="gx-md-5 gy-5">
+                    <div className="team-wrapper mx-auto" style={{ maxWidth: '900px' }}>
+                        <Row className="align-items-center g-4 gx-md-5">
+                            <Col md={5}>
+                                <div data-aos="zoom-in" className="img-cover border border-primary mx-auto p-3" style={{ maxWidth: '350px' }}>
+                                    <img src={require('../assets/images/team1.jpeg')} className="img-fluid" alt="Team Member" />
+                                </div>
+                            </Col>
+                            <Col md={7}>
+                                <div className="team-info">
+                                    <div className="name fs-4 fw-bold text-black text-capitalize mb-2">Ajinkya Sham Vidhate</div>
+                                    <div className="designation fs-14 text-primary fw-medium mb-4">PMP® | MBA in Logistics & Supply Chain Management | M.S. in Supply Chain Analytics</div>
+                                    <div className="description mb-2">
+                                        <p>Founder of Kridemy and a certified project management professional, with dual master’s degrees in <span className="text-theme4 fw-semibold">Supply Chain Analytics (Rutgers Business School, USA)</span> and <span className="text-theme4 fw-semibold">Logistics & Supply Chain Management (XLRI Jamshedpur, India).</span></p>
+                                        <p>Previously led the end-to-end development and operations of <span className="text-theme4 fw-semibold">Shree Gurudatta Lawns</span>, a large-scale event venue in India, and managed multiple supply chain analytics projects across education and industry domains.</p>
+                                        <p>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</p>
+                                    </div>
+                                    {/* <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
+                                            <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
+                                            <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
+                                            <Link to="https://www.instagram.com/" className="fs-16"><i className="bi bi-instagram"></i></Link>
+                                            <Link to="https://in.linkedin.com/" className="fs-16"><i className="bi bi-linkedin"></i></Link>
+                                        </div> */}
+                                </div>
+                            </Col>
+                        </Row>
+                    </div>
+
+                    {/* <Row className="gx-md-5 gy-5">
                         <Col lg={3} md={6}>
                             <div className="team-wrapper text-center">
                                 <div className="img-wrapper position-relative p-3 p-md-4">
@@ -294,7 +320,7 @@ export const AboutUs = () => {
                                 </div>
                             </div>
                         </Col>
-                    </Row>
+                    </Row> */}
                 </div>
             </section>
         </div>

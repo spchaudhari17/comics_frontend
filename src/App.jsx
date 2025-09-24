@@ -1,7 +1,15 @@
-import React from 'react';
+import React, { useEffect } from "react";
+
+// AOS Animation NPM
+import AOS from "aos";
+import "aos/dist/aos.css";
 import './App.scss';
+
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import ToastContainers from './lib/ToastContainer';
+
+// Scroll To Top 
+import ScrollToTop from "./components/ScrollToTop";
 
 // Auth Pages
 import { LogIn } from './pages/authentication/LogIn';
@@ -21,6 +29,7 @@ import MyComics from './pages/mycomics/MyComics';
 import ComicGenerator from './pages/ComicGenerator/ComicGenerator';
 import Parent from './pages/parentsPages/Parent';
 import Privacy from './pages/PrivacyPolicy/Privacy';
+import TermsAndCondition from './pages/TermsCondition/TermsAndCondition';
 import ComicsList from './pages/ComicsList/ComicsList';
 import ParentsLanding from './pages/Homepage/Parent/ParentsLanding';
 import StudentLanding from './pages/Homepage/Student/StudentLanding';
@@ -30,9 +39,17 @@ import AllUsers from './pages/admin/AllUsers';
 import ContactList from './pages/admin/ContactList';
 
 function App() {
+  // AOS Animations
+  useEffect(() => {
+    AOS.init({ duration: 900, once: true }); // set options as needed
+  }, []);
+
   return (
     <>
       <BrowserRouter>
+        {/* When redirect to any page, page should load from top */}
+        <ScrollToTop />
+
         <Routes>
           {/* Auth Routes */}
           {/* Redirect root to /login */}
@@ -54,12 +71,13 @@ function App() {
             <Route path="for-parent" element={<ParentsLanding />} />
             <Route path="faq" element={<FAQLanding />} />
             <Route path="our-library" element={<ComicsList />} />
-            
+
             <Route path="super-admin" element={<SuperAdmin />} />
             <Route path="allUsers" element={<AllUsers />} />
             <Route path="my-comics" element={<MyComics />} />
             <Route path="create-comic" element={<ComicGenerator />} />
             <Route path="privacy-policy" element={<Privacy />} />
+            <Route path="terms-and-condition" element={<TermsAndCondition />} />
             <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
             <Route path="contactList" element={<ContactList />} />
             <Route path="*" element={<PageNotFound />} />
