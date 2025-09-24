@@ -37,7 +37,7 @@ export const Home = () => {
               </div>
             </Col>
             <Col md={6} className="text-center">
-              <div className="img-wrapper text-center">
+              <div data-aos="slide-left" className="img-wrapper text-center">
                 <img src={require('../../assets/images/comic-process.png')} alt="Comic Transformation" className="img-fluid animate-bounce-effect w-100" />
               </div>
             </Col>
@@ -66,7 +66,7 @@ export const Home = () => {
               </div>
             </Col>
             <Col md={6} className="right-section">
-              <div className="img-wrapper position-relative text-center">
+              <div data-aos="zoom-in" className="img-wrapper position-relative text-center">
                 <img src={require('../../assets/images/about-image-2.png')} className="img-fluid animate-bounce-effect border border-primary rounded-circle mx-auto" alt="" style={{ width: '370px' }} />
                 {/* <div className="animated-img-wrapper position-absolute bottom-0 end-0">
                   <img src={require('../../assets/images/about-image-1.png')} className="img-fluid " alt="" />
@@ -87,7 +87,7 @@ export const Home = () => {
           </div>
           <Row className="g-3 g-xl-4">
             <Col sm={6} lg={3}>
-              <div className="item-wrapper bg-primary bg-opacity-25 h-100 rounded-4 text-center">
+              <div data-aos="slide-right" className="item-wrapper bg-primary bg-opacity-25 h-100 rounded-4 text-center">
                 <div className="icon text-center mb-4">
                   <img src={require('../../assets/images/ai-generator.png')} alt="AI Generator" className="img-fluid" />
                 </div>
@@ -114,7 +114,7 @@ export const Home = () => {
               </div>
             </Col>
             <Col sm={6} lg={3}>
-              <div className="item-wrapper bg-danger bg-opacity-25 h-100 rounded-4 text-center">
+              <div data-aos="slide-left" className="item-wrapper bg-danger bg-opacity-25 h-100 rounded-4 text-center">
                 <div className="icon text-center mb-4">
                   <img src={require('../../assets/images/safe-learning.png')} alt="Safe Learning" className="img-fluid" />
                 </div>
@@ -135,7 +135,7 @@ export const Home = () => {
           </div>
           <Row className="g-3 g-xl-4">
             <Col md={4} sm={6}>
-              <div className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
+              <div data-aos="flip-up" className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
                 <div className="indicator-arrow">
                   <img src={require('../../assets/images/indicator-arrow-1.png')} alt="Indicator Arrow" />
                 </div>
@@ -147,7 +147,7 @@ export const Home = () => {
               </div>
             </Col>
             <Col md={4} sm={6}>
-              <div className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
+              <div data-aos="flip-up" className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
                 <div className="indicator-arrow d-sm-none d-md-block">
                   <img src={require('../../assets/images/indicator-arrow-2.png')} alt="Indicator Arrow" />
                 </div>
@@ -159,7 +159,7 @@ export const Home = () => {
               </div>
             </Col>
             <Col md={4} sm={6}>
-              <div className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
+              <div data-aos="flip-up" className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
                 <div className="indicator-arrow d-block d-md-none">
                   <img src={require('../../assets/images/indicator-arrow-2.png')} alt="Indicator Arrow" />
                 </div>
@@ -171,7 +171,7 @@ export const Home = () => {
               </div>
             </Col>
             <Col md={4} sm={6}>
-              <div className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
+              <div data-aos="flip-up" className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
                 <div className="indicator-arrow d-sm-none d-md-block">
                   <img src={require('../../assets/images/indicator-arrow-1.png')} alt="Indicator Arrow" />
                 </div>
@@ -183,7 +183,7 @@ export const Home = () => {
               </div>
             </Col>
             <Col md={4} sm={6}>
-              <div className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
+              <div data-aos="flip-up" className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
                 <div className="indicator-arrow d-block">
                   <img src={require('../../assets/images/indicator-arrow-2.png')} alt="Indicator Arrow" />
                 </div>
@@ -195,7 +195,7 @@ export const Home = () => {
               </div>
             </Col>
             <Col md={4} sm={6}>
-              <div className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
+              <div data-aos="flip-up" className="item-wrapper h-100 border border-theme2 rounded-4 text-center">
                 <div className="icon-wrap animate-bounce-effect mb-3">
                   <i className="bi bi-share"></i>
                 </div>
@@ -221,7 +221,7 @@ export const Home = () => {
           </div>
           <Row className="g-3 g-xl-4">
             <Col md={6} lg={4}>
-              <div className="item-wrapper bg-white h-100 rounded-4">
+              <div data-aos="slide-right" className="item-wrapper bg-white h-100 rounded-4">
                 <div className="icon animate-bounce-effect mb-4">
                   <img src={require('../../assets/images/teacher.png')} alt="Teacher" className="img-fluid" />
                 </div>
@@ -242,7 +242,7 @@ export const Home = () => {
               </div>
             </Col>
             <Col md={6} lg={4}>
-              <div className="item-wrapper bg-white h-100 rounded-4">
+              <div data-aos="zoom-in" className="item-wrapper bg-white h-100 rounded-4">
                 <div className="icon animate-bounce-effect mb-4">
                   <img src={require('../../assets/images/students.png')} alt="Students" className="img-fluid" />
                 </div>
@@ -262,7 +262,7 @@ export const Home = () => {
               </div>
             </Col>
             <Col lg={4}>
-              <div className="item-wrapper bg-white h-100 rounded-4">
+              <div data-aos="slide-left" className="item-wrapper bg-white h-100 rounded-4">
                 <div className="icon animate-bounce-effect mb-4">
                   <img src={require('../../assets/images/parents.png')} alt="parents" className="img-fluid" />
                 </div>
@@ -289,7 +289,7 @@ export const Home = () => {
         <div className="container-xl position-relative my-3 my-lg-5">
           <Row className="align-items-center gx-4 gy-5">
             <Col lg={6}>
-              <div className="wrapper text-center text-lg-start">
+              <div data-aos="slide-right" className="wrapper text-center text-lg-start">
                 <div className="heading-wrapper mb-4 pb-2">
                   <div className="section-heading text-white mb-3">Download Our App</div>
                   <div className="sub-title text-white">Available for Android and iOS. Free for students and early creators.</div>

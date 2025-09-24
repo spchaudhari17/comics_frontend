@@ -8,6 +8,9 @@ import './App.scss';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import ToastContainers from './lib/ToastContainer';
 
+// Scroll To Top 
+import ScrollToTop from "./components/ScrollToTop";
+
 // Auth Pages
 import { LogIn } from './pages/authentication/LogIn';
 import { SignUp } from './pages/authentication/SignUp';
@@ -43,6 +46,9 @@ function App() {
   return (
     <>
       <BrowserRouter>
+        {/* When redirect to any page, page should load from top */}
+        <ScrollToTop />
+
         <Routes>
           {/* Auth Routes */}
           {/* Redirect root to /login */}

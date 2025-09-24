@@ -162,6 +162,7 @@ body {
 .modal-content {
   border: 0;
   border-radius: 16px;
+  overflow: hidden;
 
   .modal-body {
     padding: 26px 1rem;
