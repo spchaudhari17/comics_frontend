@@ -207,17 +207,19 @@ const MyComics = () => {
                                 Resume
                               </Button>
                             ) : (
-                              <Button
-                                size="sm"
-                                variant="outline-primary"
-                                onClick={() =>
-                                  window.open(comic.pdfUrl, "_blank")
-                                }
-                                disabled={!comic.pdfUrl}
-                              >
-                                <i className="bi bi-filetype-pdf me-1"></i>
-                                View PDF
-                              </Button>
+                              <>
+                                {/* <Button
+                                  size="sm"
+                                  variant="outline-primary"
+                                  onClick={() =>
+                                    window.open(comic.pdfUrl, "_blank")
+                                  }
+                                  disabled={!comic.pdfUrl}
+                                >
+                                  <i className="bi bi-filetype-pdf me-1"></i>
+                                  View PDF
+                                </Button> */}
+                              </>
                             )}
                           </td>
                         </tr>

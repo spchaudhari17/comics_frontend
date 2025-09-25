@@ -406,7 +406,16 @@ export const ComicGenerator = () => {
     setQuizLoading(true);
     setQuizError("");
     try {
-      const { data } = await API.post("/user/generate-quiz", { comicId, script: story });
+      const subjectName = subjectsList.find(s => s._id === subject)?.name || subject;
+
+      const { data } = await API.post("/user/generate-quiz", {
+        comicId,
+        script: prompt,
+        subject: subjectName,
+        concept,
+        grade: classGrade
+
+      });
       setQuizData(prev => ({
         ...prev,
         [comicId]: data.questions || []
@@ -843,13 +852,15 @@ export const ComicGenerator = () => {
                 {pdfUrl ? (
                   <div className="mt-4">
                     <p>Your comic PDF has been successfully generated!</p>
-                    <Button
+
+                    {/* <Button
                       variant="primary"
                       onClick={() => window.open(pdfUrl, "_blank")}
                       className="me-3"
                     >
                       View PDF
-                    </Button>
+                    </Button> */}
+
                     <Button
                       variant="success"
                       onClick={() => setStep(4)}
@@ -871,9 +882,9 @@ export const ComicGenerator = () => {
                 <h3>Comic Published 🎉</h3>
                 {pdfUrl ? (
                   <p className="mt-3">
-                    <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                    {/* <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
                       Open PDF from S3
-                    </a>
+                    </a> */}
                   </p>
                 ) : (
                   <Alert variant="warning">PDF URL not found. Try publishing again.</Alert>
