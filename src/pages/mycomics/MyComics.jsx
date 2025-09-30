@@ -35,7 +35,11 @@ const MyComics = () => {
       case "rejected":
         return <Badge bg="danger">Rejected</Badge>;
       case "pending":
-        return <Badge bg="warning" text="dark">Pending</Badge>;
+        return (
+          <Badge bg="warning" text="dark">
+            Pending
+          </Badge>
+        );
       default:
         return <Badge bg="secondary">Unknown</Badge>;
     }
@@ -55,11 +59,11 @@ const MyComics = () => {
   const handleResume = (comic) => {
     if (comic.seriesId) {
       // Resume multi-part comic
-      navigate("/create-comic", { 
-        state: { 
+      navigate("/create-comic", {
+        state: {
           comicId: comic._id,
-          seriesId: comic.seriesId 
-        } 
+          seriesId: comic.seriesId,
+        },
       });
     } else {
       // Single comic resume
@@ -67,14 +71,9 @@ const MyComics = () => {
     }
   };
 
-  const handleViewSeries = (seriesId) => {
-    // Navigate to series view or breakdown page
-    navigate("/create-comic", { state: { seriesId } });
-  };
-
   // Group comics by series
   const seriesGroups = comics.reduce((groups, comic) => {
-    const seriesId = comic.seriesId || 'single';
+    const seriesId = comic.seriesId || "single";
     if (!groups[seriesId]) {
       groups[seriesId] = [];
     }
@@ -97,6 +96,7 @@ const MyComics = () => {
               </Alert>
             )}
 
+            {/* Stats Section */}
             <Row className="g-4 mb-4">
               <Col md={3}>
                 <Card className="text-center">
@@ -138,107 +138,95 @@ const MyComics = () => {
               </Col>
             </Row>
 
+            {/* Main Table */}
             <Card>
               <Card.Header className="d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">My Comics</h5>
-                
               </Card.Header>
               <Card.Body>
-                {Object.keys(seriesGroups).map(seriesId => (
-                  <div key={seriesId} className="mb-4">
-                    {/* {seriesId !== 'single' && (
-                      <div className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
-                        <h6 className="mb-0">
-                          Series: {seriesGroups[seriesId][0]?.seriesTitle || 'Untitled Series'}
-                        </h6>
-                        <Button 
-                          size="sm" 
-                          variant="outline-info"
-                          onClick={() => handleViewSeries(seriesId)}
-                        >
-                          View Series
-                        </Button>
-                      </div>
-                    )} */}
-                    
-                    <Table responsive striped hover className="mb-0">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Thumbnail</th>
-                          <th>Title</th>
-                          {seriesId !== 'single' && <th>Part</th>}
-                          <th>Subject</th>
-                          <th>Status</th>
-                          <th>Comic Status</th>
-                          <th>Created</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {seriesGroups[seriesId].map((comic, index) => (
-                          <tr key={comic._id}>
-                            <td>{index + 1}</td>
-                            <td>
-                              <img
-                                src={comic.thumbnail}
-                                alt={comic.title}
-                                style={{ width: "60px", height: "auto", borderRadius: "4px" }}
-                              />
-                            </td>
-                            <td>
-                              <div
-                                className="text-truncate"
-                                style={{ maxWidth: "150px" }}
-                                title={comic.title}
-                              >
-                                {comic.title}
-                              </div>
-                            </td>
-                            {seriesId !== 'single' && (
-                              <td>
-                                <Badge bg="info">Part {comic.partNumber}</Badge>
-                              </td>
+                <Table responsive striped hover>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Thumbnail</th>
+                      <th>Title</th>
+                      <th>Part</th>
+                      <th>Subject</th>
+                      <th>Status</th>
+                      <th>Comic Status</th>
+                      <th>Created</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.keys(seriesGroups).map((seriesId) =>
+                      seriesGroups[seriesId].map((comic, index) => (
+                        <tr key={comic._id}>
+                          <td>{index + 1}</td>
+                          <td>
+                            <img
+                              src={comic.thumbnail}
+                              alt={comic.title}
+                              style={{
+                                width: "60px",
+                                height: "auto",
+                                borderRadius: "4px",
+                              }}
+                            />
+                          </td>
+                          <td>
+                            <div
+                              className="text-truncate"
+                              style={{ maxWidth: "150px" }}
+                              title={comic.title}
+                            >
+                              {comic.title}
+                            </div>
+                          </td>
+                          <td>
+                            {seriesId !== "single" ? (
+                              <Badge bg="info">Part {comic.partNumber}</Badge>
+                            ) : (
+                              "-"
                             )}
-                            <td>{comic.subject}</td>
-                            <td>{getStatusBadge(comic.status)}</td>
-                            <td>{getComicStatusBadge(comic.comicStatus)}</td>
-                            <td>{new Date(comic.createdAt).toLocaleDateString()}</td>
-                            <td>
-                              {comic.comicStatus === "draft" ? (
-                                <div className="d-flex gap-1">
-                                  <Button
-                                    size="sm"
-                                    variant="outline-warning"
-                                    onClick={() => handleResume(comic)}
-                                  >
-                                    <i className="bi bi-pencil-square me-1"></i>
-                                    Resume
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="d-flex gap-1">
-                                  <Button
-                                    size="sm"
-                                    variant="outline-primary"
-                                    onClick={() => window.open(comic.pdfUrl, "_blank")}
-                                    disabled={!comic.pdfUrl}
-                                  >
-                                    <i className="bi bi-filetype-pdf me-1"></i>
-                                    View PDF
-                                  </Button>
-                                  
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </div>
-                ))}
-
-                
+                          </td>
+                          <td>{comic.subject}</td>
+                          <td>{getStatusBadge(comic.status)}</td>
+                          <td>{getComicStatusBadge(comic.comicStatus)}</td>
+                          <td>
+                            {new Date(comic.createdAt).toLocaleDateString()}
+                          </td>
+                          <td>
+                            {comic.comicStatus === "draft" ? (
+                              <Button
+                                size="sm"
+                                variant="outline-warning"
+                                onClick={() => handleResume(comic)}
+                              >
+                                <i className="bi bi-pencil-square me-1"></i>
+                                Resume
+                              </Button>
+                            ) : (
+                              <>
+                                {/* <Button
+                                  size="sm"
+                                  variant="outline-primary"
+                                  onClick={() =>
+                                    window.open(comic.pdfUrl, "_blank")
+                                  }
+                                  disabled={!comic.pdfUrl}
+                                >
+                                  <i className="bi bi-filetype-pdf me-1"></i>
+                                  View PDF
+                                </Button> */}
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </Table>
               </Card.Body>
             </Card>
           </>

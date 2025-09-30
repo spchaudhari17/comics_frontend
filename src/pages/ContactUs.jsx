@@ -150,11 +150,13 @@ export const ContactUs = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={(value) => setFormData({ ...formData, phone: value })}
-                    inputClass="w-100 border bg-light h-auto pe-3 py-3"
+                    inputClass="w-100 h-auto border bg-light pe-3 py-3"
+                    inputStyle={{
+                      lineHeight: "1.5",
+                    }}
                     dropdownClass="text-start"
                     placeholder='Enter phone number'
                     required
-                    style={{minHeight:'50px'}}
                   />
                 </div>
                 {/* <div className="form-group">

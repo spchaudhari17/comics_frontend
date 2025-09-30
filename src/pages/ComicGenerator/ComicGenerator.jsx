@@ -210,35 +210,53 @@ export const ComicGenerator = () => {
   // LocalStorage management
   useEffect(() => {
     if (!resumeComicId) {
-      const saved = localStorage.getItem("currentSeries");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setSeries(parsed.series);
-          setParts(parsed.parts);
-          setCompletedParts(parsed.completedParts || []);
-          setCurrentPart(parsed.currentPart);
-        } catch (err) {
-          console.error("Error parsing saved series data:", err);
+      const userInfo = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user"))
+        : null;
+
+      const userId = userInfo?._id;   // ✅ direct from userInfo
+
+      if (userId) {
+        const saved = localStorage.getItem(`currentSeries_${userId}`);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            setSeries(parsed.series);
+            setParts(parsed.parts);
+            setCompletedParts(parsed.completedParts || []);
+            setCurrentPart(parsed.currentPart);
+          } catch (err) {
+            console.error("Error parsing saved series data:", err);
+          }
         }
       }
     }
   }, [resumeComicId]);
 
+
   // Save to localStorage
   useEffect(() => {
     if (parts.length > 0) {
-      localStorage.setItem(
-        "currentSeries",
-        JSON.stringify({
-          series,
-          parts,
-          completedParts,
-          currentPart
-        })
-      );
+      const userInfo = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user"))
+        : null;
+
+      const userId = userInfo?._id;   // ✅ direct from userInfo
+
+      if (userId) {
+        localStorage.setItem(
+          `currentSeries_${userId}`,
+          JSON.stringify({
+            series,
+            parts,
+            completedParts,
+            currentPart
+          })
+        );
+      }
     }
   }, [series, parts, completedParts, currentPart]);
+
 
   // STEP 1: Story → Prompt
   const handleConvertToPrompt = async (e) => {
@@ -275,7 +293,7 @@ export const ComicGenerator = () => {
       setCurrentPart(null);
       setStep(1); // Go to breakdown step (aapka purana flow)
     } catch (err) {
-      console.error(err);
+      console.error("Prompt refinement failed.", err);
       setErrorMsg(err?.response?.data?.error || "Prompt refinement failed.");
     } finally {
       setLoadingPrompt(false);
@@ -388,7 +406,16 @@ export const ComicGenerator = () => {
     setQuizLoading(true);
     setQuizError("");
     try {
-      const { data } = await API.post("/user/generate-quiz", { comicId, script: story });
+      const subjectName = subjectsList.find(s => s._id === subject)?.name || subject;
+
+      const { data } = await API.post("/user/generate-quiz", {
+        comicId,
+        script: prompt,
+        subject: subjectName,
+        concept,
+        grade: classGrade
+
+      });
       setQuizData(prev => ({
         ...prev,
         [comicId]: data.questions || []
@@ -825,13 +852,15 @@ export const ComicGenerator = () => {
                 {pdfUrl ? (
                   <div className="mt-4">
                     <p>Your comic PDF has been successfully generated!</p>
-                    <Button
+
+                    {/* <Button
                       variant="primary"
                       onClick={() => window.open(pdfUrl, "_blank")}
                       className="me-3"
                     >
                       View PDF
-                    </Button>
+                    </Button> */}
+
                     <Button
                       variant="success"
                       onClick={() => setStep(4)}
@@ -853,9 +882,9 @@ export const ComicGenerator = () => {
                 <h3>Comic Published 🎉</h3>
                 {pdfUrl ? (
                   <p className="mt-3">
-                    <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                    {/* <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
                       Open PDF from S3
-                    </a>
+                    </a> */}
                   </p>
                 ) : (
                   <Alert variant="warning">PDF URL not found. Try publishing again.</Alert>
@@ -967,7 +996,7 @@ export const ComicGenerator = () => {
                 </div>
 
                 <div className="d-flex gap-3 justify-content-center mt-4">
-                 <Button onClick={handlePublish}>
+                  <Button onClick={handlePublish}>
                     Final Submit
                   </Button>
 
