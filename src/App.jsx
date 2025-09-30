@@ -41,7 +41,12 @@ import ContactList from './pages/admin/ContactList';
 function App() {
   // AOS Animations
   useEffect(() => {
-    AOS.init({ duration: 900, once: true }); // set options as needed
+    AOS.init({
+      offset: 120,
+      duration: 800,
+      easing: 'ease-in-out',
+      once: true
+    }); // set options as needed
   }, []);
 
   return (

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Row, Col, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 import API from '../API';
 
 
@@ -8,7 +9,7 @@ export const ContactUs = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    phone: "+91",
     role: "",
     message: ""
   });
@@ -143,6 +144,20 @@ export const ContactUs = () => {
                   />
                 </div>
                 <div className="form-group">
+                  <PhoneInput
+                    defaultCountry="IN"
+                    countryCodeEditable={true}
+                    name="phone"
+                    value={formData.phone}
+                    onChange={(value) => setFormData({ ...formData, phone: value })}
+                    inputClass="w-100 border bg-light h-auto pe-3 py-3"
+                    dropdownClass="text-start"
+                    placeholder='Enter phone number'
+                    required
+                    style={{minHeight:'50px'}}
+                  />
+                </div>
+                {/* <div className="form-group">
                   <Form.Control
                     type="tel"
                     className="border bg-light px-3 py-3"
@@ -152,7 +167,7 @@ export const ContactUs = () => {
                     onChange={handleChange}
                     required
                   />
-                </div>
+                </div> */}
                 <div className="form-group">
                   <Form.Select
                     className="border bg-light px-3 py-3"
