@@ -30,7 +30,7 @@ export const Home = () => {
                     <i className="bi bi-folder2-open fs-18">
                     </i> Browse Our Library
                   </Button>
-                  <Button variant='success' className="btn-custom" onClick={() => window.open('https://play.google.com/store/games', '_blank')}>
+                  <Button variant='success' className="btn-custom" onClick={() => window.open('https://play.google.com/store/apps/details?id=com.av.kridemy', '_blank')}>
                     <i className="bi bi-google-play"></i> Download App
                   </Button>
                 </div>
@@ -237,7 +237,7 @@ export const Home = () => {
                     <li>Revenue-share model for approved comics</li>
                     <li>Use in-class or assign as homework</li>
                   </ul>
-                  <div className="fs-12 text-primary pointer" onClick={()=> navigate('/contact')}><i className="bi bi-stars"></i> Pilot-ready platform — contact us for school deployments.</div>
+                  <div className="fs-12 text-primary pointer" onClick={() => navigate('/contact')}><i className="bi bi-stars"></i> Pilot-ready platform — contact us for school deployments.</div>
                 </div>
               </div>
             </Col>
@@ -304,7 +304,7 @@ export const Home = () => {
                   {/* <Link to={'https://appstoreconnect.apple.com/login'} target="_blank">
                     <img src={require('../../assets/images/app-store.png')} className="img-fluid" alt='App Store' />
                   </Link> */}
-                  <Link className="text-md-end" to={'https://play.google.com/store/games'} target="_blank">
+                  <Link className="text-md-end" to={'https://play.google.com/store/apps/details?id=com.av.kridemy'} target="_blank">
                     <img src={require('../../assets/images/play-store.png')} className="img-fluid" alt='Google Play Store' />
                   </Link>
                 </div>

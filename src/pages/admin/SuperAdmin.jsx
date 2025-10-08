@@ -189,6 +189,22 @@ export const SuperAdmin = () => {
         </div>
       ),
     },
+
+    {
+  name: "Details",
+  width: "130px",
+  center: true,
+  cell: (row) => (
+    <Button
+      size="sm"
+      variant="outline-primary"
+      onClick={() => navigate(`/comic-details/${row._id}`)}
+    >
+      View
+    </Button>
+  ),
+},
+
   ];
 
   return (

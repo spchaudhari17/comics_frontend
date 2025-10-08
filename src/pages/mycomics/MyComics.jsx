@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Badge, Card, Row, Col, Alert } from "react-bootstrap";
+import { Button, Badge, Card, Row, Col } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import DataTable from "react-data-table-component";
 import { Loader } from "../../lib/loader";
 import API from "../../API";
-import { useNavigate } from "react-router-dom";
+import dataTableCustomStyles from "../../assets/styles/dataTableCustomStyles";
+import { NoDataComponent } from "../../components/NoDataComponent";
 
 const MyComics = () => {
   const navigate = useNavigate();
   const [comics, setComics] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
 
-  // Fetch comics
   useEffect(() => {
     const fetchComics = async () => {
       try {
         setLoading(true);
-        setError("");
         const { data } = await API.get("/user/my-comics");
         setComics(data.comics || []);
       } catch (err) {
@@ -28,6 +28,16 @@ const MyComics = () => {
     fetchComics();
   }, []);
 
+  const handleResume = (comic) => {
+    if (comic.seriesId) {
+      navigate("/create-comic", {
+        state: { comicId: comic._id, seriesId: comic.seriesId },
+      });
+    } else {
+      navigate("/create-comic", { state: { comicId: comic._id } });
+    }
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case "approved":
@@ -35,11 +45,7 @@ const MyComics = () => {
       case "rejected":
         return <Badge bg="danger">Rejected</Badge>;
       case "pending":
-        return (
-          <Badge bg="warning" text="dark">
-            Pending
-          </Badge>
-        );
+        return <Badge bg="warning" text="dark">Pending</Badge>;
       default:
         return <Badge bg="secondary">Unknown</Badge>;
     }
@@ -56,177 +62,150 @@ const MyComics = () => {
     }
   };
 
-  const handleResume = (comic) => {
-    if (comic.seriesId) {
-      // Resume multi-part comic
-      navigate("/create-comic", {
-        state: {
-          comicId: comic._id,
-          seriesId: comic.seriesId,
-        },
-      });
-    } else {
-      // Single comic resume
-      navigate("/create-comic", { state: { comicId: comic._id } });
-    }
-  };
+  const columns = [
+    {
+      name: "Title",
+      selector: row => row.title,
+      sortable: true,
+      minWidth: "200px",
+      cell: row => (
+        <div className="fw-semibold text-capitalize">{row.title}</div>
+      ),
+    },
+    {
+      name: "Subject",
+      selector: row => row.subject,
+      sortable: true,
+      minWidth: "150px",
+    },
+    {
+      name: "Part",
+      selector: row => (row.seriesId ? `Part ${row.partNumber}` : "-"),
+      sortable: true,
+      width: "110px",
+      center: true,
+    },
+    {
+      name: "Status",
+      cell: row => getStatusBadge(row.status),
+      sortable: true,
+      width: "140px",
+      center: true,
+    },
+    {
+      name: "Comic Status",
+      cell: row => getComicStatusBadge(row.comicStatus),
+      sortable: true,
+      width: "150px",
+      center: true,
+    },
+    {
+      name: "Created",
+      selector: row => new Date(row.createdAt).toLocaleDateString(),
+      sortable: true,
+      width: "150px",
+      center: true,
+    },
+    {
+      name: "Deatils",
+      width: "150px",
+      center: true,
+    },
+    {
+      name: "Actions",
+      minWidth: "180px",
+      cell: row => (
+        <div className="d-flex gap-2">
+          {row.comicStatus === "draft" ? (
+            <Button
+              size="sm"
+              variant="outline-warning"
+              onClick={() => handleResume(row)}
+            >
+              <i className="bi bi-pencil-square me-1"></i> Resume
+            </Button>
+          ) : (
+            <>
+              {/* <Button
+                size="sm"
+                variant="outline-primary"
+                onClick={() => window.open(row.pdfUrl, "_blank")}
+                disabled={!row.pdfUrl}
+              >
+                <i className="bi bi-filetype-pdf me-1"></i> View
+              </Button> */}
+            </>
+          )}
 
-  // Group comics by series
-  const seriesGroups = comics.reduce((groups, comic) => {
-    const seriesId = comic.seriesId || "single";
-    if (!groups[seriesId]) {
-      groups[seriesId] = [];
-    }
-    groups[seriesId].push(comic);
-    return groups;
-  }, {});
+          <Button
+            size="sm"
+            variant="outline-info"
+            onClick={() => navigate(`/my-comics-details/${row._id}`)}
+          >
+            <i className="bi bi-eye me-1"></i> Details
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="my-comics-page pt-4 pb-3">
-      <div className="container-xxl">
+      <div className="container-xl">
         {loading ? (
           <Loader />
         ) : error ? (
           <p className="text-danger">{error}</p>
         ) : (
           <>
-            {successMsg && (
-              <Alert variant="success" className="mb-4">
-                {successMsg}
-              </Alert>
-            )}
-
-            {/* Stats Section */}
-            <Row className="g-4 mb-4">
+            {/* Stats Cards */}
+            <Row className="g-3 mb-4">
               <Col md={3}>
-                <Card className="text-center">
-                  <Card.Body>
-                    <h3 className="text-primary mb-1">
-                      {comics.filter((c) => c.status === "pending").length}
-                    </h3>
-                    <p className="text-muted mb-0">Pending</p>
-                  </Card.Body>
-                </Card>
+                <div className="bg-warning bg-opacity-25 rounded-4 border-bottom border-4 border-warning p-3 text-center">
+                  <div className="fs-3 fw-bold text-warning">
+                    {comics.filter((c) => c.status === "pending").length}
+                  </div>
+                  <div className="fw-semibold text-muted">Pending</div>
+                </div>
               </Col>
               <Col md={3}>
-                <Card className="text-center">
-                  <Card.Body>
-                    <h3 className="text-success mb-1">
-                      {comics.filter((c) => c.status === "approved").length}
-                    </h3>
-                    <p className="text-muted mb-0">Approved</p>
-                  </Card.Body>
-                </Card>
+                <div className="bg-success bg-opacity-25 rounded-4 border-bottom border-4 border-success p-3 text-center">
+                  <div className="fs-3 fw-bold text-success">
+                    {comics.filter((c) => c.status === "approved").length}
+                  </div>
+                  <div className="fw-semibold text-muted">Approved</div>
+                </div>
               </Col>
               <Col md={3}>
-                <Card className="text-center">
-                  <Card.Body>
-                    <h3 className="text-danger mb-1">
-                      {comics.filter((c) => c.status === "rejected").length}
-                    </h3>
-                    <p className="text-muted mb-0">Rejected</p>
-                  </Card.Body>
-                </Card>
+                <div className="bg-danger bg-opacity-25 rounded-4 border-bottom border-4 border-danger p-3 text-center">
+                  <div className="fs-3 fw-bold text-danger">
+                    {comics.filter((c) => c.status === "rejected").length}
+                  </div>
+                  <div className="fw-semibold text-muted">Rejected</div>
+                </div>
               </Col>
               <Col md={3}>
-                <Card className="text-center">
-                  <Card.Body>
-                    <h3 className="text-info mb-1">{comics.length}</h3>
-                    <p className="text-muted mb-0">Total</p>
-                  </Card.Body>
-                </Card>
+                <div className="bg-info bg-opacity-25 rounded-4 border-bottom border-4 border-info p-3 text-center">
+                  <div className="fs-3 fw-bold text-info">{comics.length}</div>
+                  <div className="fw-semibold text-muted">Total</div>
+                </div>
               </Col>
             </Row>
 
-            {/* Main Table */}
-            <Card>
-              <Card.Header className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">My Comics</h5>
-              </Card.Header>
+            {/* Table */}
+            <Card className="border-0 shadow-sm rounded-4">
               <Card.Body>
-                <Table responsive striped hover>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Thumbnail</th>
-                      <th>Title</th>
-                      <th>Part</th>
-                      <th>Subject</th>
-                      <th>Status</th>
-                      <th>Comic Status</th>
-                      <th>Created</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.keys(seriesGroups).map((seriesId) =>
-                      seriesGroups[seriesId].map((comic, index) => (
-                        <tr key={comic._id}>
-                          <td>{index + 1}</td>
-                          <td>
-                            <img
-                              src={comic.thumbnail}
-                              alt={comic.title}
-                              style={{
-                                width: "60px",
-                                height: "auto",
-                                borderRadius: "4px",
-                              }}
-                            />
-                          </td>
-                          <td>
-                            <div
-                              className="text-truncate"
-                              style={{ maxWidth: "150px" }}
-                              title={comic.title}
-                            >
-                              {comic.title}
-                            </div>
-                          </td>
-                          <td>
-                            {seriesId !== "single" ? (
-                              <Badge bg="info">Part {comic.partNumber}</Badge>
-                            ) : (
-                              "-"
-                            )}
-                          </td>
-                          <td>{comic.subject}</td>
-                          <td>{getStatusBadge(comic.status)}</td>
-                          <td>{getComicStatusBadge(comic.comicStatus)}</td>
-                          <td>
-                            {new Date(comic.createdAt).toLocaleDateString()}
-                          </td>
-                          <td>
-                            {comic.comicStatus === "draft" ? (
-                              <Button
-                                size="sm"
-                                variant="outline-warning"
-                                onClick={() => handleResume(comic)}
-                              >
-                                <i className="bi bi-pencil-square me-1"></i>
-                                Resume
-                              </Button>
-                            ) : (
-                              <>
-                                {/* <Button
-                                  size="sm"
-                                  variant="outline-primary"
-                                  onClick={() =>
-                                    window.open(comic.pdfUrl, "_blank")
-                                  }
-                                  disabled={!comic.pdfUrl}
-                                >
-                                  <i className="bi bi-filetype-pdf me-1"></i>
-                                  View PDF
-                                </Button> */}
-                              </>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </Table>
+                <div className="main-heading mb-3 fw-semibold fs-5">My Comics</div>
+                <DataTable
+                  columns={columns}
+                  data={comics}
+                  highlightOnHover
+                  pagination
+                  responsive
+                  striped
+                  customStyles={dataTableCustomStyles}
+                  noDataComponent={<NoDataComponent />}
+                />
               </Card.Body>
             </Card>
           </>
