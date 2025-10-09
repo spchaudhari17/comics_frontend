@@ -70,6 +70,12 @@ export const ComicGenerator = () => {
   const [pdfUrl, setPdfUrl] = useState("");
   const [concept, setConcept] = useState("");
 
+  // Hardcore Quiz states
+  const [hardcoreQuizData, setHardcoreQuizData] = useState({});
+  const [hardcoreQuizLoading, setHardcoreQuizLoading] = useState(false);
+  const [hardcoreQuizError, setHardcoreQuizError] = useState("");
+
+
   // multi-part series state
   const [series, setSeries] = useState(null);
   const [parts, setParts] = useState([]);
@@ -462,6 +468,32 @@ export const ComicGenerator = () => {
       setFactLoading(false);
     }
   };
+
+  const handleGenerateHardcoreQuiz = async () => {
+    setHardcoreQuizLoading(true);
+    setHardcoreQuizError("");
+    try {
+      const subjectName = subjectsList.find(s => s._id === subject)?.name || subject;
+
+      const { data } = await API.post("/user/generate-hardcore-quiz", {
+        comicId,
+        script: prompt,
+        subject: subjectName,
+        concept,
+        grade: classGrade,
+      });
+
+      setHardcoreQuizData(prev => ({
+        ...prev,
+        [comicId]: data.questions || [],
+      }));
+    } catch (err) {
+      setHardcoreQuizError(err?.response?.data?.error || "Failed to generate hardcore quiz");
+    } finally {
+      setHardcoreQuizLoading(false);
+    }
+  };
+
 
   const resetAfterBackToPrompt = () => {
     setComicImages([]);
@@ -921,6 +953,40 @@ export const ComicGenerator = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Hardcore Quiz Section */}
+                  <div className="hardcore-quiz-wrapper mt-5">
+                    <h4>🔥 Generate Hardcore Quiz (Challenge Mode)</h4>
+                    <Button
+                      variant="danger"
+                      className="mb-3"
+                      onClick={handleGenerateHardcoreQuiz}
+                      disabled={hardcoreQuizLoading || hardcoreQuizData[comicId]?.length > 0}
+                    >
+                      {hardcoreQuizLoading ? "Generating Hardcore Quiz..." : "Generate Hardcore Quiz"}
+                    </Button>
+
+                    {hardcoreQuizError && <Alert variant="danger">{hardcoreQuizError}</Alert>}
+
+                    {hardcoreQuizData[comicId]?.length > 0 && (
+                      <div className="hardcore-quiz-questions mt-4">
+                        {hardcoreQuizData[comicId].map((q, idx) => (
+                          <div key={idx} className="mb-4 p-3 border rounded bg-light">
+                            <strong>Q{idx + 1}. {q.question}</strong>
+                            <ul className="mt-2">
+                              {q.options.map((opt, i) => (
+                                <li key={i}>{opt}</li>
+                              ))}
+                            </ul>
+                            <p className="text-success mb-1">✔ Correct: {q.correctAnswer}</p>
+                            <p className="text-warning mb-1">💪 Difficulty: {q.difficulty}</p>
+                            <p className="text-muted">🧠 Explanation: {q.explanation}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
 
                   {/* FAQ Section */}
                   <div className="faq-wrapper mt-5">

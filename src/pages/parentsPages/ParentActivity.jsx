@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Parent = () => {
+const ParentActivity = () => {
     return (
         <>
             <div>
@@ -10,4 +10,4 @@ const Parent = () => {
     );
 }
 
-export default Parent;
+export default ParentActivity;
