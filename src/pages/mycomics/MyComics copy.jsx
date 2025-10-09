@@ -4,11 +4,6 @@ import { Loader } from "../../lib/loader";
 import API from "../../API";
 import { useNavigate } from "react-router-dom";
 
-// react-data-table-component
-import DataTable from 'react-data-table-component';
-import dataTableCustomStyles from '../../assets/styles/dataTableCustomStyles';
-import { NoDataComponent } from '../../components/NoDataComponent';
-
 const MyComics = () => {
   const navigate = useNavigate();
   const [comics, setComics] = useState([]);
@@ -41,7 +36,7 @@ const MyComics = () => {
         return <Badge bg="danger">Rejected</Badge>;
       case "pending":
         return (
-          <Badge bg="warning">
+          <Badge bg="warning" text="dark">
             Pending
           </Badge>
         );
@@ -86,71 +81,9 @@ const MyComics = () => {
     return groups;
   }, {});
 
-  // fdgfdhf
-  // Flatten comics data
-  const data = comics.map((comic, index) => ({
-    ...comic,
-    index: index + 1,
-  }));
-
-  // DataTable columns
-  const columns = [
-    { name: "#", 
-      cell: row => <div className="text-theme4 fs-14 fw-semibold">{row.index}</div>,
-      sortable: true, 
-      width: "50px" 
-    },
-    {
-      name: "Thumbnail",
-      cell: row => <img src={row.thumbnail} alt={row.title} className="border object-fit-contain rounded-1" style={{ width: "55px", height:'55px' }} />,
-      width: "100px",
-    },
-    {
-      name: "Title",
-      cell: row => <div title={row.title} className="text-capitalize text-truncatee" style={{ maxWidth: "150px" }}>{row.title}</div>,
-      sortable: true,
-      minWidth: '180px',
-    },
-    {
-      name: "Part",
-      cell: row => row.seriesId ? <Badge bg="info">Part {row.partNumber}</Badge> : "-",
-      sortable: true,
-    },
-    {
-      name: "Subject",
-      selector: row => row.subject,
-      sortable: true
-    },
-    {
-      name: "Status",
-      cell: row => getStatusBadge(row.status),
-      sortable: true
-    },
-    {
-      name: "Comic Status",
-      cell: row => getComicStatusBadge(row.comicStatus),
-      sortable: true
-    },
-    {
-      name: "Created",
-      selector: row => new Date(row.createdAt).toLocaleDateString(),
-      sortable: true,
-      minWidth: '120px',
-    },
-    {
-      name: "Actions",
-      minWidth: '180px',
-      cell: row => row.comicStatus === "draft" && (
-        <Button size="sm" variant="outline-warning" onClick={() => handleResume(row)}>
-          <i className="bi bi-pencil-square me-1"></i> Resume
-        </Button>
-      ),
-    },
-  ];
-
   return (
     <div className="my-comics-page pt-4 pb-3">
-      <div className="container-xl">
+      <div className="container-xxl">
         {loading ? (
           <Loader />
         ) : error ? (
@@ -164,50 +97,48 @@ const MyComics = () => {
             )}
 
             {/* Stats Section */}
-            <Row className="g-3 mb-4">
+            <Row className="g-4 mb-4">
               <Col md={3}>
-                <div className="bg-primary bg-opacity-25 rounded-4 border-bottom border-4 border-primary p-3">
-                  <div className="fs-3 fw-bold text-primary lh-sm mb-1">{comics.filter((c) => c.status === "pending").length}</div>
-                  <div className="title-name text-body">Pending</div>
-                </div>
+                <Card className="text-center">
+                  <Card.Body>
+                    <h3 className="text-primary mb-1">
+                      {comics.filter((c) => c.status === "pending").length}
+                    </h3>
+                    <p className="text-muted mb-0">Pending</p>
+                  </Card.Body>
+                </Card>
               </Col>
               <Col md={3}>
-                <div className="bg-success bg-opacity-25 rounded-4 border-bottom border-4 border-success p-3">
-                  <div className="fs-3 fw-bold text-success lh-sm mb-1">{comics.filter((c) => c.status === "approved").length}</div>
-                  <div className="title-name text-body">Approved</div>
-                </div>
+                <Card className="text-center">
+                  <Card.Body>
+                    <h3 className="text-success mb-1">
+                      {comics.filter((c) => c.status === "approved").length}
+                    </h3>
+                    <p className="text-muted mb-0">Approved</p>
+                  </Card.Body>
+                </Card>
               </Col>
               <Col md={3}>
-                <div className="bg-danger bg-opacity-25 rounded-4 border-bottom border-4 border-danger p-3">
-                  <div className="fs-3 fw-bold text-danger lh-sm mb-1">{comics.filter((c) => c.status === "rejected").length}</div>
-                  <div className="title-name text-body">Rejected</div>
-                </div>
+                <Card className="text-center">
+                  <Card.Body>
+                    <h3 className="text-danger mb-1">
+                      {comics.filter((c) => c.status === "rejected").length}
+                    </h3>
+                    <p className="text-muted mb-0">Rejected</p>
+                  </Card.Body>
+                </Card>
               </Col>
               <Col md={3}>
-                <div className="bg-info bg-opacity-25 rounded-4 border-bottom border-4 border-info p-3">
-                  <div className="fs-3 fw-bold text-info lh-sm mb-1">{comics.length}</div>
-                  <div className="title-name text-body">Total</div>
-                </div>
+                <Card className="text-center">
+                  <Card.Body>
+                    <h3 className="text-info mb-1">{comics.length}</h3>
+                    <p className="text-muted mb-0">Total</p>
+                  </Card.Body>
+                </Card>
               </Col>
             </Row>
 
             {/* Main Table */}
-            <div className="info-wrapper">
-              <div className="main-heading mb-3">My Comics -</div>
-              <div className="table-responsive table-custom-wrapper">
-                <DataTable
-                  columns={columns}
-                  data={data}
-                  highlightOnHover
-                  responsive
-                  pagination
-                  customStyles={dataTableCustomStyles}
-                  noDataComponent={<NoDataComponent />}
-                  striped
-                />
-              </div>
-            </div>
-
             <Card>
               <Card.Header className="d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">My Comics</h5>

@@ -229,9 +229,9 @@ export const SuperAdmin = () => {
             </Row>
 
             {/* Comics Table */}
-            <div className="info-wrapper bg-white rounded-4 p-3">
+            <div className="info-wrapper">
               <div className="main-heading mb-3">Creator Submissions -</div>
-              <div className='table-responsive table-custom-wrapper'>
+              <div className="table-responsive table-custom-wrapper">
                 <DataTable
                   columns={columns}
                   data={comics}
