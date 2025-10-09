@@ -39,6 +39,7 @@ import AllUsers from './pages/admin/AllUsers';
 import ContactList from './pages/admin/ContactList';
 import AdminComicDetails from "./pages/admin/AdminComicDetails";
 import MyComicsDetails from "./pages/mycomics/MyComicsDetails";
+import SubjectList from "./pages/admin/SubjectList";
 
 
 function App() {
@@ -83,8 +84,7 @@ function App() {
             <Route path="super-admin" element={<SuperAdmin />} />
             <Route path="allUsers" element={<AllUsers />} />
             <Route path="comic-details/:id" element={<AdminComicDetails />} />
-
-
+            <Route path="subjectlist" element={<SubjectList />} />
 
             <Route path="my-comics" element={<MyComics />} />
             <Route path="create-comic" element={<ComicGenerator />} />

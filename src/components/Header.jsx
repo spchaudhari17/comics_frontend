@@ -130,6 +130,14 @@ export const Header = () => {
                   </li>
                 )}
 
+                {userInfo && userInfo.userType === "admin" && (
+                  <li className="nav-item">
+                    <Link to={'/subjectlist'} className="nav-link p-0">
+                      <i className="bi bi-list-ul"></i>
+                    </Link>
+                  </li>
+                )}
+
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                   <li className="nav-item">
                     <Link to={'/my-comics'} className="nav-link p-0">

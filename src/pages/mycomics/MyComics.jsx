@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Badge, Card, Row, Col } from "react-bootstrap";
+import { Button, Badge, Card, Row, Col, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import { Loader } from "../../lib/loader";
@@ -12,6 +12,7 @@ const MyComics = () => {
   const [comics, setComics] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchComics = async () => {
@@ -61,6 +62,19 @@ const MyComics = () => {
         return <Badge bg="dark">N/A</Badge>;
     }
   };
+
+  // Filter comics based on search input
+  const filteredComics = comics.filter((comic) => {
+    const searchTerm = search.toLowerCase();
+    return (
+      comic.title?.toLowerCase().includes(searchTerm) ||
+      comic.subject?.toLowerCase().includes(searchTerm) ||
+      comic.status?.toLowerCase().includes(searchTerm) ||
+      comic.comicStatus?.toLowerCase().includes(searchTerm) ||
+      (comic.seriesId && `part ${comic.partNumber}`.includes(searchTerm))
+    );
+  });
+
 
   const columns = [
     {
@@ -195,10 +209,25 @@ const MyComics = () => {
             {/* Table */}
             <Card className="border-0 shadow-sm rounded-4">
               <Card.Body>
-                <div className="main-heading mb-3 fw-semibold fs-5">My Comics</div>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+
+                  <div className="main-heading fw-semibold fs-5">My Comics - </div>
+
+           
+                    <Form.Control
+                      type="text"
+                      placeholder="Search by title, subject, status..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      style={{ width: "300px" }}
+                    />
+           
+                </div>
+
                 <DataTable
                   columns={columns}
-                  data={comics}
+                  // data={comics}
+                  data={filteredComics}
                   highlightOnHover
                   pagination
                   responsive

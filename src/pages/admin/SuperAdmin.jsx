@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Badge, Card, Row, Col, Modal } from "react-bootstrap";
+import { Table, Button, Badge, Card, Row, Col, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { listAllComicsAdmin, updateComicStatus } from "../../redux/actions/adminComicsActions";
@@ -17,6 +17,7 @@ export const SuperAdmin = () => {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedComicId, setSelectedComicId] = useState(null);
+  const [search, setSearch] = useState("");
 
   // Redux state
   const { loading, error, comics } = useSelector((state) => state.adminComicList);
@@ -79,6 +80,19 @@ export const SuperAdmin = () => {
     setShowDeleteModal(false);
     setSelectedComicId(null);
   };
+
+
+  //  Filtered comics based on search term
+  const filteredComics = comics.filter((comic) => {
+    const searchTerm = search.toLowerCase();
+    return (
+      comic?.user_id?.firstname?.toLowerCase().includes(searchTerm) ||
+      comic?.user_id?.email?.toLowerCase().includes(searchTerm) ||
+      comic?.subject?.toLowerCase().includes(searchTerm) ||
+      comic?.title?.toLowerCase().includes(searchTerm) ||
+      comic?.user_id?.userType?.toLowerCase().includes(searchTerm)
+    );
+  });
 
   const columns = [
     // {
@@ -191,19 +205,19 @@ export const SuperAdmin = () => {
     },
 
     {
-  name: "Details",
-  width: "130px",
-  center: true,
-  cell: (row) => (
-    <Button
-      size="sm"
-      variant="outline-primary"
-      onClick={() => navigate(`/comic-details/${row._id}`)}
-    >
-      View
-    </Button>
-  ),
-},
+      name: "Details",
+      width: "130px",
+      center: true,
+      cell: (row) => (
+        <Button
+          size="sm"
+          variant="outline-primary"
+          onClick={() => navigate(`/comic-details/${row._id}`)}
+        >
+          View
+        </Button>
+      ),
+    },
 
   ];
 
@@ -247,10 +261,24 @@ export const SuperAdmin = () => {
             {/* Comics Table */}
             <div className="info-wrapper bg-white rounded-4 p-3">
               <div className="main-heading mb-3">Creator Submissions -</div>
+
+
+              {/* 🔍 Search Box */}
+              <div className="mb-3">
+                <Form.Control
+                  type="text"
+                  placeholder="Search by name, email, title, or subject..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+
+
               <div className='table-responsive table-custom-wrapper'>
                 <DataTable
                   columns={columns}
-                  data={comics}
+                  // data={comics}
+                  data={filteredComics}
                   highlightOnHover
                   responsive
                   pagination
