@@ -146,6 +146,15 @@ export const Header = () => {
                   </li>
                 )}
 
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
+                  <li className="nav-item">
+                    <Link to={'/institute-dashboard'} className="nav-link p-0">
+                      {/* <i className="bi bi-book-half"></i> */}
+                      <i className="bi bi-speedometer2"></i>
+                    </Link>
+                  </li>
+                )}
+
                 {/* <div className="divider vr d-none d-md-block me-2"></div> */}
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") ? (
                   <Dropdown align="end" className="account-menu">

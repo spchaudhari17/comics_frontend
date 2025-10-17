@@ -31,7 +31,8 @@
     "redux-thunk": "^3.1.0",
     "sass": "^1.90.0",
     "swiper": "^11.2.10",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",

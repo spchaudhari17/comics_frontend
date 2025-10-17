@@ -135,7 +135,7 @@ export const ComicGenerator = () => {
         const [themesRes, stylesRes, subjectsRes] = await Promise.all([
           API.get("/user/getAllThemes"),
           API.get("/user/getAllStyles"),
-          API.get("/user/getallSubject"),
+          API.get("/user/getAllSubjectsForWeb"),
         ]);
 
         setThemes(themesRes.data || []);

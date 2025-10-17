@@ -35,7 +35,7 @@ const SubjectList = () => {
   const fetchSubjects = async () => {
     try {
       setLoading(true);
-      const { data } = await API.get("/user/getallSubject");
+      const { data } = await API.get("/user/getAllSubjectsForWeb");
       setSubjects(data);
     } catch (err) {
       console.error(err);

@@ -40,6 +40,7 @@ import ContactList from './pages/admin/ContactList';
 import AdminComicDetails from "./pages/admin/AdminComicDetails";
 import MyComicsDetails from "./pages/mycomics/MyComicsDetails";
 import SubjectList from "./pages/admin/SubjectList";
+import InstituteDashboard from "./pages/InstituteDashboard/InstituteDashboard";
 
 
 function App() {
@@ -87,6 +88,7 @@ function App() {
             <Route path="subjectlist" element={<SubjectList />} />
 
             <Route path="my-comics" element={<MyComics />} />
+            <Route path="institute-dashboard" element={<InstituteDashboard />} />
             <Route path="create-comic" element={<ComicGenerator />} />
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="terms-and-condition" element={<TermsAndCondition />} />
