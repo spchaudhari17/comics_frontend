@@ -5,7 +5,7 @@ const API = axios.create({
   // baseURL: "http://localhost:5000/api", // local server
   // baseURL: "http://13.60.35.222:5000/api", // IP server
   baseURL: "https://api.kridemy.com/api", // production server
-});
+});   
 
 
 API.interceptors.request.use((config) => {

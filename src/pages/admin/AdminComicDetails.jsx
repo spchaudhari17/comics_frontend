@@ -1,8 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, Row, Col, Badge, Button, Image, Alert } from "react-bootstrap";
+import {
+    Card,
+    Row,
+    Col,
+    Badge,
+    Button,
+    Image,
+    Alert,
+    Accordion,
+    ListGroup,
+} from "react-bootstrap";
 import API from "../../API";
 import { Loader } from "../../lib/loader";
+
+
 
 const AdminComicDetails = () => {
     const { id } = useParams();
@@ -11,12 +23,14 @@ const AdminComicDetails = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+
+
     useEffect(() => {
         const fetchComic = async () => {
             try {
                 setLoading(true);
                 const { data } = await API.get(`/admin/comics/${id}`);
-                setData(data);
+                setData(data.data); // ✅ Adjusted (data.data)
             } catch (err) {
                 setError(err.response?.data?.error || "Failed to load comic details");
             } finally {
@@ -30,9 +44,8 @@ const AdminComicDetails = () => {
     if (error) return <Alert variant="danger">{error}</Alert>;
     if (!data) return null;
 
-    const { comic, pages } = data;
+    const { comic, pages, quiz, didYouKnow, faqs, hardcoreQuiz } = data;
 
-    // 🎨 Badge color by status
     const getStatusBadge = (status) => {
         switch (status) {
             case "approved":
@@ -45,6 +58,8 @@ const AdminComicDetails = () => {
                 return <Badge bg="secondary">Unknown</Badge>;
         }
     };
+
+
 
     return (
         <div className="admin-comic-details-page pt-4 pb-5">
@@ -72,17 +87,21 @@ const AdminComicDetails = () => {
                             <Col md={6}>
                                 <div><strong>Creator:</strong> {comic.user_id?.firstname}</div>
                                 <div><strong>Email:</strong> {comic.user_id?.email}</div>
-                                {/* <div><strong>User Type:</strong> {comic.user_id?.userType}</div> */}
                                 <div><strong>Country:</strong> {comic.country}</div>
                                 <div><strong>Grade:</strong> {comic.grade}</div>
-                            </Col>
 
+                                <div><strong>Has Quiz:</strong> {comic.hasQuiz ? "✅ Yes" : "❌ No"}</div>
+                                <div><strong>Has Did You Know:</strong> {data.hasDidYouKnow ? "✅ Yes" : "❌ No"}</div>
+                            </Col>
                             <Col md={6}>
                                 <div><strong>Subject:</strong> {comic.subjectId?.name}</div>
                                 <div><strong>Theme:</strong> {comic.themeId?.name}</div>
                                 <div><strong>Style:</strong> {comic.styleId?.name}</div>
                                 <div><strong>Concept:</strong> {comic.concept}</div>
-                                <div><strong>Has Quiz:</strong> {comic.hasQuiz ? "✅ Yes" : "❌ No"}</div>
+
+                                <div><strong>Has FAQ:</strong> {data.hasFaq ? "✅ Yes" : "❌ No"}</div>
+                                <div><strong>Has Hardcore Quiz:</strong> {data.hasHardcoreQuiz ? "✅ Yes" : "❌ No"}</div>
+
                             </Col>
                         </Row>
                     </Card.Body>
@@ -121,7 +140,6 @@ const AdminComicDetails = () => {
                                             style={{ maxHeight: "350px", objectFit: "cover" }}
                                         />
                                         <div className="fw-semibold mb-1">Page {page.pageNumber}</div>
-
                                         {page.panels?.length > 0 && (
                                             <>
                                                 <div className="small text-muted">
@@ -139,11 +157,129 @@ const AdminComicDetails = () => {
                     </Card.Body>
                 </Card>
 
+                {/* 🔹 Quiz / DidYouKnow / FAQ / Hardcore */}
+                <Accordion defaultActiveKey="0" alwaysOpen>
+                    {/* 📘 Quiz Section */}
+                    {quiz && (
+                        <Accordion.Item eventKey="0">
+                            <Accordion.Header>📘 Quiz Questions</Accordion.Header>
+                            <Accordion.Body>
+                                <ListGroup variant="flush">
+                                    {quiz.questions.map((q, idx) => (
+                                        <ListGroup.Item key={q._id}>
+                                            <strong>Q{idx + 1}:</strong> {q.question}
+                                            <ul className="mt-2">
+                                                {q.options.map((opt, i) => (
+                                                    <li key={i}>
+                                                        {opt === q.correctAnswer ? (
+                                                            <span className="text-success fw-semibold">{opt} ✅</span>
+                                                        ) : (
+                                                            <span>{opt}</span>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <small className="text-muted">Difficulty: {q.difficulty}</small>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    )}
+
+                    {/* 💡 Did You Know */}
+                    {didYouKnow && didYouKnow.length > 0 && (
+                        <Accordion.Item eventKey="1">
+                            <Accordion.Header>💡 Did You Know Facts</Accordion.Header>
+                            <Accordion.Body>
+                                <Row className="gy-3">
+                                    {didYouKnow.map((fact) => (
+                                        <Col md={6} key={fact._id}>
+                                            <Card className="border-0 shadow-sm rounded-4">
+                                                <Image
+                                                    src={fact.imageUrl}
+                                                    alt="DidYouKnow"
+                                                    fluid
+                                                    className="rounded-top-4"
+                                                />
+                                                <Card.Body>
+                                                    <p>{fact.fact}</p>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    ))}
+                                </Row>
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    )}
+
+                    {/* ❓ FAQs */}
+                    {faqs && faqs.length > 0 && (
+                        <Accordion.Item eventKey="2">
+                            <Accordion.Header>❓ FAQs</Accordion.Header>
+                            <Accordion.Body>
+                                <ListGroup variant="flush">
+                                    {faqs.map((faq) => (
+                                        <ListGroup.Item key={faq._id}>
+                                            <strong>Q:</strong> {faq.question}
+                                            <div className="mt-2 text-muted">A: {faq.answer}</div>
+                                            {faq.imageUrl && (
+                                                <div className="mt-2">
+                                                    <Image
+                                                        src={faq.imageUrl}
+                                                        alt="FAQ"
+                                                        style={{ maxWidth: "200px", borderRadius: "8px" }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    )}
+
+                    {/* 🔥 Hardcore Quiz */}
+                    {hardcoreQuiz && (
+                        <Accordion.Item eventKey="3">
+                            <Accordion.Header>🔥 Hardcore Quiz</Accordion.Header>
+                            <Accordion.Body>
+                                <ListGroup variant="flush">
+                                    {hardcoreQuiz.questions.map((q, idx) => (
+                                        <ListGroup.Item key={q._id}>
+                                            <strong>Q{idx + 1}:</strong> {q.question}
+                                            <ul className="mt-2">
+                                                {q.options.map((opt, i) => (
+                                                    <li key={i}>
+                                                        {opt === q.correctAnswer ? (
+                                                            <span className="text-success fw-semibold">{opt} ✅</span>
+                                                        ) : (
+                                                            <span>{opt}</span>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <small className="text-muted">
+                                                Difficulty: {q.difficulty} <br />
+                                                Explanation: {q.explanation}
+                                            </small>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    )}
+                </Accordion>
+
                 {/* 🔹 Footer */}
                 <div className="d-flex justify-content-between align-items-center mt-4">
                     <Button variant="secondary" onClick={() => navigate(-1)}>
                         ← Back
                     </Button>
+
+                    {/* <Button variant="success" onClick={handleDownloadAsPDF}>
+                        <i className="bi bi-file-earmark-arrow-down me-1"></i> Download Full Quiz Data (PDF)
+                    </Button> */}
 
                     {comic.pdfUrl && (
                         <Button
@@ -153,6 +289,8 @@ const AdminComicDetails = () => {
                             <i className="bi bi-filetype-pdf me-1"></i> View PDF
                         </Button>
                     )}
+
+
                 </div>
             </div>
         </div>
