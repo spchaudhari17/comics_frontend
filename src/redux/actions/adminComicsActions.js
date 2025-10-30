@@ -8,16 +8,19 @@ import {
     ADMIN_COMIC_UPDATE_STATUS_REQUEST,
     ADMIN_COMIC_UPDATE_STATUS_SUCCESS,
     ADMIN_COMIC_UPDATE_STATUS_FAIL,
-    
+
 } from "../constants/adminComicsConstants";
 
 
 //  Fetch All Comics (Admin)
-export const listAllComicsAdmin = () => async (dispatch, getState) => {
+export const listAllComicsAdmin = (country = "") => async (dispatch, getState) => {
     try {
         dispatch({ type: ADMIN_COMIC_LIST_REQUEST });
 
-        const { data } = await API.get("/admin/comics");
+        // const { data } = await API.get("/admin/comics");
+
+        const query = country ? `?country=${encodeURIComponent(country)}` : "";
+        const { data } = await API.get(`/admin/comics${query}`);
 
 
         dispatch({ type: ADMIN_COMIC_LIST_SUCCESS, payload: data });

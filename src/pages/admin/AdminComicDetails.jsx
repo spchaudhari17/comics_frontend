@@ -13,6 +13,8 @@ import {
 } from "react-bootstrap";
 import API from "../../API";
 import { Loader } from "../../lib/loader";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 
 
@@ -22,7 +24,7 @@ const AdminComicDetails = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
+    const [generatingPdf, setGeneratingPdf] = useState(false);
 
 
     useEffect(() => {
@@ -58,6 +60,175 @@ const AdminComicDetails = () => {
                 return <Badge bg="secondary">Unknown</Badge>;
         }
     };
+
+
+    // PDF डाउनलोड फंक्शन
+    const downloadQuizPDF = async () => {
+        try {
+            setGeneratingPdf(true);
+
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const margin = 20;
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const contentWidth = pageWidth - 2 * margin;
+            let y = 20;
+
+            // 🔹 Unicode & text cleaner
+            const sanitize = (t) =>
+                String(t || "")
+                    .replace(/[\u2018\u2019]/g, "'")
+                    .replace(/[\u201C\u201D]/g, '"')
+                    .replace(/[✓✔️]/g, "✔")
+                    .replace(/[^\x00-\x7F]/g, " ");
+
+            // 🔹 Auto-wrapping text function
+            const addText = (text, fontSize = 12, lineSpacing = 6, bold = false) => {
+                pdf.setFont('helvetica', bold ? 'bold' : 'normal');
+                pdf.setFontSize(fontSize);
+                const lines = pdf.splitTextToSize(sanitize(text), contentWidth);
+                for (const line of lines) {
+                    if (y > 270) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    pdf.text(line, margin, y);
+                    y += lineSpacing;
+                }
+            };
+
+            // 🔹 Section Heading
+            const addSectionTitle = (title) => {
+                if (y > 260) {
+                    pdf.addPage();
+                    y = 20;
+                }
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(16);
+                pdf.text(sanitize(title), margin, y);
+                y += 10;
+            };
+
+            // ==========================================================
+            // 🧾 COMIC INFO
+            // ==========================================================
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(18);
+            pdf.text(sanitize(`Comic: ${comic.title}`), pageWidth / 2, y, { align: 'center' });
+            y += 12;
+
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(11);
+            addText(`Creator: ${comic.user_id?.firstname || 'N/A'}`);
+            addText(`Grade: ${comic.grade || 'N/A'}`);
+            addText(`Subject: ${comic.subjectId?.name || 'N/A'}`);
+            addText(`Theme: ${comic.themeId?.name || 'N/A'}`);
+            y += 10;
+
+            // ==========================================================
+            // 📘 QUIZ SECTION
+            // ==========================================================
+            if (quiz && quiz.questions?.length > 0) {
+                addSectionTitle('Quiz Questions');
+
+                quiz.questions.forEach((q, i) => {
+                    addText(`Q${i + 1}: ${q.question}`, 12, 6, true);
+
+                    q.options.forEach((opt, j) => {
+                        const optionText = `${String.fromCharCode(65 + j)}. ${opt}`;
+                        if (opt === q.correctAnswer) {
+                            pdf.setTextColor(0, 128, 0);
+                            addText(`${optionText} ✔ (Correct Answer)`, 11);
+                            pdf.setTextColor(0, 0, 0);
+                        } else {
+                            addText(optionText, 11);
+                        }
+                    });
+
+                    addText(`Difficulty: ${q.difficulty || 'Not specified'}`, 10);
+                    y += 4;
+                });
+            }
+
+            // ==========================================================
+            // 💡 DID YOU KNOW SECTION
+            // ==========================================================
+            if (didYouKnow && didYouKnow.length > 0) {
+                addSectionTitle('Did You Know Facts');
+                didYouKnow.forEach((fact, i) => {
+                    addText(`• ${fact.fact}`, 11);
+                    y += 3;
+                });
+                y += 5;
+            }
+
+            // ==========================================================
+            // ❓ FAQ SECTION
+            // ==========================================================
+            if (faqs && faqs.length > 0) {
+                addSectionTitle('Frequently Asked Questions');
+                faqs.forEach((faq, i) => {
+                    addText(`Q: ${faq.question}`, 11, 6, true);
+                    addText(`A: ${faq.answer}`, 11, 6, false);
+                    y += 5;
+                });
+            }
+
+            // ==========================================================
+            // 🔥 HARDCORE QUIZ SECTION
+            // ==========================================================
+            if (hardcoreQuiz && hardcoreQuiz.questions?.length > 0) {
+                addSectionTitle('Hardcore Quiz');
+
+                hardcoreQuiz.questions.forEach((q, i) => {
+                    addText(`Q${i + 1}: ${q.question}`, 12, 6, true);
+
+                    q.options.forEach((opt, j) => {
+                        const optionText = `${String.fromCharCode(65 + j)}. ${opt}`;
+                        if (opt === q.correctAnswer) {
+                            pdf.setTextColor(0, 128, 0);
+                            addText(`${optionText} ✔ (Correct Answer)`, 11);
+                            pdf.setTextColor(0, 0, 0);
+                        } else {
+                            addText(optionText, 11);
+                        }
+                    });
+
+                    addText(`Difficulty: ${q.difficulty || 'N/A'}`, 10);
+                    if (q.explanation) addText(`Explanation: ${q.explanation}`, 10);
+                    y += 5;
+                });
+            }
+
+            // ==========================================================
+            // 📄 PAGE NUMBERS
+            // ==========================================================
+            const totalPages = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(10);
+                pdf.setTextColor(120);
+                pdf.text(
+                    `Page ${i} of ${totalPages} • Generated on ${new Date().toLocaleDateString()}`,
+                    pageWidth / 2,
+                    290,
+                    { align: 'center' }
+                );
+            }
+
+            // ==========================================================
+            // 💾 SAVE FILE
+            // ==========================================================
+            const fileName = `${comic.title.replace(/[^a-zA-Z0-9]/g, "_")}_FullData.pdf`;
+            pdf.save(fileName);
+
+        } catch (err) {
+            console.error('PDF generation failed:', err);
+            alert('PDF generation failed. Please try again.');
+        } finally {
+            setGeneratingPdf(false);
+        }
+    };
+
 
 
 
@@ -277,9 +448,14 @@ const AdminComicDetails = () => {
                         ← Back
                     </Button>
 
-                    {/* <Button variant="success" onClick={handleDownloadAsPDF}>
-                        <i className="bi bi-file-earmark-arrow-down me-1"></i> Download Full Quiz Data (PDF)
-                    </Button> */}
+                    <Button
+                        variant="success"
+                        onClick={downloadQuizPDF}
+                        disabled={generatingPdf}
+                    >
+                        <i className="bi bi-file-earmark-arrow-down me-1"></i>
+                        {generatingPdf ? 'Generating PDF...' : 'Download Full Quiz Data (PDF)'}
+                    </Button>
 
                     {comic.pdfUrl && (
                         <Button

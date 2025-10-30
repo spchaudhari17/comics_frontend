@@ -5,11 +5,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { listAllComicsAdmin, updateComicStatus } from "../../redux/actions/adminComicsActions";
 import { deleteComic } from "../../redux/actions/comicActions";
 import { Loader } from "../../lib/loader";
+import Select from "react-select";
+
 
 // react-data-table-component
 import DataTable from 'react-data-table-component';
 import dataTableCustomStyles from '../../assets/styles/dataTableCustomStyles';
 import { NoDataComponent } from '../../components/NoDataComponent';
+import API from "../../API";
 
 export const SuperAdmin = () => {
   const navigate = useNavigate();
@@ -18,6 +21,14 @@ export const SuperAdmin = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedComicId, setSelectedComicId] = useState(null);
   const [search, setSearch] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [countries, setCountries] = useState([]);
+
+  const [showCountryModal, setShowCountryModal] = useState(false);
+  const [selectedSeriesId, setSelectedSeriesId] = useState(null);
+  const [newCountry, setNewCountry] = useState("");
+  const [updatingCountry, setUpdatingCountry] = useState(false);
+
 
   // Redux state
   const { loading, error, comics } = useSelector((state) => state.adminComicList);
@@ -76,6 +87,49 @@ export const SuperAdmin = () => {
     }
   };
 
+
+  // 🌍 Open modal for selected series/comic
+  const openCountryModal = (seriesId) => {
+    setSelectedSeriesId(seriesId);
+    setShowCountryModal(true);
+  };
+
+  // ❌ Close modal
+  const handleCloseCountryModal = () => {
+    setShowCountryModal(false);
+    setSelectedSeriesId(null);
+    setNewCountry("");
+  };
+
+  // ✅ Update country
+  const handleUpdateCountry = async () => {
+    if (!selectedSeriesId || !newCountry) {
+      alert("Please select a country first!");
+      return;
+    }
+
+    try {
+      setUpdatingCountry(true);
+      const { data } = await API.put("/admin/update-country", {
+        seriesId: selectedSeriesId,
+        newCountry,
+      });
+
+      if (data.success) {
+        alert(data.message || "Country updated successfully!");
+        handleCloseCountryModal();
+        dispatch(listAllComicsAdmin());
+      } else {
+        alert("Failed to update country.");
+      }
+    } catch (err) {
+      console.error("❌ Update failed:", err);
+      alert("Error updating country: " + (err.response?.data?.error || err.message));
+    } finally {
+      setUpdatingCountry(false);
+    }
+  };
+
   const handleClose = () => {
     setShowDeleteModal(false);
     setSelectedComicId(null);
@@ -90,9 +144,33 @@ export const SuperAdmin = () => {
       comic?.user_id?.email?.toLowerCase().includes(searchTerm) ||
       comic?.subject?.toLowerCase().includes(searchTerm) ||
       comic?.title?.toLowerCase().includes(searchTerm) ||
+      comic?.country?.toLowerCase().includes(searchTerm) ||
       comic?.user_id?.userType?.toLowerCase().includes(searchTerm)
     );
   });
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const { data } = await API.get("/user/countries");
+        if (data.success) {
+          const sorted = data.countries
+            .sort((a, b) => a.label.trim().localeCompare(b.label.trim()))
+            .map((c) => ({
+              value: c.value,
+              label: c.label, // already has flag + name
+            }));
+          setCountries(sorted);
+        }
+      } catch (err) {
+        console.error("❌ Failed to load countries:", err);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+
 
   const columns = [
     // {
@@ -195,6 +273,14 @@ export const SuperAdmin = () => {
             </div>
           )}
 
+          <Button
+            size="sm"
+            variant="outline-secondary"
+            onClick={() => openCountryModal(row.seriesId || row._id)} // handle seriesId
+          >
+            🌍 Edit Country
+          </Button>
+
           {(row.status === "approved" || row.status === "rejected") && (
             <Button size="sm" variant="outline-danger" onClick={() => openDeleteModal(row._id)} >
               <i className="bi bi-trash3"></i>
@@ -263,14 +349,43 @@ export const SuperAdmin = () => {
               <div className="main-heading mb-3">Creator Submissions -</div>
 
               {/* 🔍 Search Box */}
-              <div className="mb-3">
+              {/* <div className="mb-3">
                 <Form.Control
                   type="text"
                   placeholder="Search by name, email, title, or subject..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
+              </div> */}
+
+
+              {/* 🌍 Country Filter + Search Box */}
+              <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                <div style={{ width: "300px" }}>
+                  <Select
+                    options={[{ value: "", label: "🌍 All Countries" }, ...countries]}
+                    value={countries.find((c) => c.value === selectedCountry) || { value: "", label: "🌍 All Countries" }}
+                    onChange={(selected) => {
+                      const value = selected?.value || "";
+                      setSelectedCountry(value);
+                      dispatch(listAllComicsAdmin(value));
+                    }}
+                    placeholder="Select or search country..."
+                    isSearchable
+                    className="react-select-country"
+                  />
+                </div>
+
+                <Form.Control
+                  type="text"
+                  placeholder="Search by name, email, title, or subject..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  style={{ maxWidth: "350px" }}
+                />
               </div>
+
+
 
               <div className='table-responsive table-custom-wrapper'>
                 <DataTable
@@ -311,6 +426,38 @@ export const SuperAdmin = () => {
                 </div>
               </Modal.Body>
             </Modal>
+
+            {/* 🌍 Update Country Modal */}
+            <Modal show={showCountryModal} onHide={handleCloseCountryModal} centered>
+              <Modal.Header closeButton>
+                <Modal.Title>Update Country</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div className="mb-5">
+                  <label className="form-label">Select New Country</label>
+                  <Select
+                    options={countries}
+                    value={countries.find((c) => c.value === newCountry) || null}
+                    onChange={(selected) => setNewCountry(selected?.value || "")}
+                    placeholder="Choose a country..."
+                    isSearchable
+                  />
+                </div>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseCountryModal}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleUpdateCountry}
+                  disabled={updatingCountry}
+                >
+                  {updatingCountry ? "Updating..." : "Update Country"}
+                </Button>
+              </Modal.Footer>
+            </Modal>
+
           </>
         )}
       </div>
