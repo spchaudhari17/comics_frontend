@@ -235,21 +235,51 @@ export const SuperAdmin = () => {
       sortable: true,
       minWidth: '120px',
     },
+    // {
+    //   name: "Country",
+    //   minWidth: "180px",
+    //   cell: row => (
+    //     row.country ? (
+    //       <div className="d-flex align-items-center gap-2">
+    //         <img
+    //           src={`https://flagcdn.com/24x18/${row.country.toLowerCase()}.png`}
+    //           alt={row.country}
+    //           style={{ borderRadius: "2px" }}
+    //         />
+    //         <span className="text-capitalize">{row.country}</span>
+    //       </div>
+    //     ) : "N/A"
+    //   ),
+    // },
+
     {
       name: "Country",
-      minWidth: "180px",
-      cell: row => (
-        row.country ? (
-          <div className="d-flex align-items-center gap-2">
-            <img
-              src={`https://flagcdn.com/24x18/${row.country.toLowerCase()}.png`}
-              alt={row.country}
-              style={{ borderRadius: "2px" }}
-            />
-            <span className="text-capitalize">{row.country}</span>
+      minWidth: "200px",
+      cell: (row) => {
+        // Normalize the data to always be an array
+        const countryList = Array.isArray(row.countries)
+          ? row.countries
+          : row.country
+            ? [row.country]
+            : [];
+
+        if (countryList.length === 0) return "N/A";
+
+        return (
+          <div className="d-flex flex-wrap align-items-center gap-2">
+            {countryList.map((c, i) => (
+              <div key={i} className="d-flex align-items-center gap-1">
+                <img
+                  src={`https://flagcdn.com/24x18/${String(c).toLowerCase()}.png`}
+                  alt={c}
+                  style={{ borderRadius: "2px" }}
+                />
+                <span className="text-capitalize">{c}</span>
+              </div>
+            ))}
           </div>
-        ) : "N/A"
-      ),
+        );
+      },
     },
 
 
