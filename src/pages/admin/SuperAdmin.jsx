@@ -6,6 +6,8 @@ import { listAllComicsAdmin, updateComicStatus } from "../../redux/actions/admin
 import { deleteComic } from "../../redux/actions/comicActions";
 import { Loader } from "../../lib/loader";
 import Select from "react-select";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 // react-data-table-component
@@ -50,12 +52,13 @@ export const SuperAdmin = () => {
       dispatch(listAllComicsAdmin());
     }
     if (deleteError) {
-      alert(deleteError);
+      toast.error(deleteError);
     }
   }, [deleteSuccess, deleteError, deleteMessage, dispatch]);
 
   const handleStatusChange = (comicId, newStatus) => {
     dispatch(updateComicStatus(comicId, newStatus));
+    toast.info(`Status updated to "${newStatus}"`);
   };
 
   const getStatusBadge = (status) => {
@@ -101,34 +104,42 @@ export const SuperAdmin = () => {
     setNewCountry("");
   };
 
-  // ✅ Update country
+  //  Update country
   const handleUpdateCountry = async () => {
-    if (!selectedSeriesId || !newCountry) {
-      alert("Please select a country first!");
+    if (!selectedSeriesId || !newCountry || newCountry.length === 0) {
+      toast.warning("Please select at least one country!");
       return;
     }
 
     try {
       setUpdatingCountry(true);
+
+      // If “All Countries” was selected → just send ["ALL"]
+      const countriesToSend = newCountry.includes("ALL")
+        ? ["ALL"]
+        : newCountry;
+
       const { data } = await API.put("/admin/update-country", {
         seriesId: selectedSeriesId,
-        newCountry,
+        newCountry: countriesToSend,
       });
 
       if (data.success) {
-        alert(data.message || "Country updated successfully!");
+        toast.success(data.message || "Countries updated successfully!");
         handleCloseCountryModal();
         dispatch(listAllComicsAdmin());
       } else {
-        alert("Failed to update country.");
+        toast.error("Failed to update countries.");
       }
     } catch (err) {
-      console.error("❌ Update failed:", err);
-      alert("Error updating country: " + (err.response?.data?.error || err.message));
+      console.error("Update failed:", err);
+      toast.error("Error updating countries: " + (err.response?.data?.error || err.message));
     } finally {
       setUpdatingCountry(false);
     }
   };
+
+
 
   const handleClose = () => {
     setShowDeleteModal(false);
@@ -457,21 +468,39 @@ export const SuperAdmin = () => {
               </Modal.Body>
             </Modal>
 
+
             {/* 🌍 Update Country Modal */}
             <Modal show={showCountryModal} onHide={handleCloseCountryModal} centered>
               <Modal.Header closeButton>
-                <Modal.Title>Update Country</Modal.Title>
+                <Modal.Title>Update Countries</Modal.Title>
               </Modal.Header>
               <Modal.Body>
-                <div className="mb-5">
-                  <label className="form-label">Select New Country</label>
+                <div className="mb-4">
+                  <label className="form-label">Select Country or Countries</label>
+
                   <Select
-                    options={countries}
-                    value={countries.find((c) => c.value === newCountry) || null}
-                    onChange={(selected) => setNewCountry(selected?.value || "")}
-                    placeholder="Choose a country..."
+                    options={[{ value: "ALL", label: "🌍 All Countries" }, ...countries]}
+                    isMulti
+                    value={
+                      Array.isArray(newCountry)
+                        ? newCountry.includes("ALL")
+                          ? [{ value: "ALL", label: "🌍 All Countries" }] // ✅ Show All Countries visibly
+                          : countries.filter((c) => newCountry.includes(c.value))
+                        : []
+                    }
+                    onChange={(selected) => {
+                      if (selected?.some((s) => s.value === "ALL")) {
+                        // ✅ Only store "ALL"
+                        setNewCountry(["ALL"]);
+                      } else {
+                        setNewCountry(selected?.map((s) => s.value) || []);
+                      }
+                    }}
+                    placeholder="Choose one or more countries..."
                     isSearchable
+                    className="react-select-country"
                   />
+
                 </div>
               </Modal.Body>
               <Modal.Footer>
@@ -483,14 +512,18 @@ export const SuperAdmin = () => {
                   onClick={handleUpdateCountry}
                   disabled={updatingCountry}
                 >
-                  {updatingCountry ? "Updating..." : "Update Country"}
+                  {updatingCountry ? "Updating..." : "Update Countries"}
                 </Button>
               </Modal.Footer>
             </Modal>
 
+
           </>
         )}
       </div>
+
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+
     </div>
   );
 };
