@@ -70,11 +70,23 @@ export const ComicGenerator = () => {
   const [pdfUrl, setPdfUrl] = useState("");
   const [concept, setConcept] = useState("");
 
-  // Hardcore Quiz states
+  // Content generation states
+  const [quizData, setQuizData] = useState({});
+  const [faqData, setFaqData] = useState({});
+  const [factData, setFactData] = useState({});
   const [hardcoreQuizData, setHardcoreQuizData] = useState({});
-  const [hardcoreQuizLoading, setHardcoreQuizLoading] = useState(false);
-  const [hardcoreQuizError, setHardcoreQuizError] = useState("");
 
+  // Loading states for all content
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [faqLoading, setFaqLoading] = useState(false);
+  const [factLoading, setFactLoading] = useState(false);
+  const [hardcoreQuizLoading, setHardcoreQuizLoading] = useState(false);
+
+  // Error states
+  const [quizError, setQuizError] = useState("");
+  const [faqError, setFaqError] = useState("");
+  const [factError, setFactError] = useState("");
+  const [hardcoreQuizError, setHardcoreQuizError] = useState("");
 
   // multi-part series state
   const [series, setSeries] = useState(null);
@@ -90,6 +102,11 @@ export const ComicGenerator = () => {
   const [existingComic, setExistingComic] = useState(null);
   const [successMsg, setSuccessMsg] = useState("");
   const [redirecting, setRedirecting] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [estimatedTime, setEstimatedTime] = useState("");
+  const [currentGeneratingPage, setCurrentGeneratingPage] = useState(0);
 
   // Style Images Modal
   const [showStyleImgModal, setShowStyleImgModal] = useState(false);
@@ -117,15 +134,6 @@ export const ComicGenerator = () => {
   const [subjectsList, setSubjectsList] = useState([]);
 
   // Quiz and FAQ states
-  const [quizData, setQuizData] = useState({});
-  const [faqData, setFaqData] = useState({});
-  const [factData, setFactData] = useState({});
-  const [quizLoading, setQuizLoading] = useState(false);
-  const [faqLoading, setFaqLoading] = useState(false);
-  const [factLoading, setFactLoading] = useState(false);
-  const [quizError, setQuizError] = useState("");
-  const [faqError, setFaqError] = useState("");
-  const [factError, setFactError] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
 
   // Initialize data
@@ -239,7 +247,6 @@ export const ComicGenerator = () => {
     }
   }, [resumeComicId]);
 
-
   // Save to localStorage
   useEffect(() => {
     if (parts.length > 0) {
@@ -262,7 +269,6 @@ export const ComicGenerator = () => {
       }
     }
   }, [series, parts, completedParts, currentPart]);
-
 
   // STEP 1: Story → Prompt
   const handleConvertToPrompt = async (e) => {
@@ -338,11 +344,152 @@ export const ComicGenerator = () => {
     }
   };
 
-  // STEP 2: Prompt → Images
+  // ✅ IMPROVED: Function to generate all additional content with better error handling
+  const generateAllContent = async () => {
+    const subjectName = subjectsList.find(s => s._id === subject)?.name || subject;
+
+    console.log('🔄 Starting content generation for comic:', comicId);
+    console.log('📝 Subject:', subjectName);
+    console.log('🎯 Concept:', concept);
+    console.log('📚 Grade:', classGrade);
+
+    // Start all content generation in parallel
+    const promises = [
+      // Quiz
+      (async () => {
+        setQuizLoading(true);
+        setQuizError("");
+        try {
+          console.log('📝 Starting Quiz generation...');
+          const { data } = await API.post("/user/generate-quiz", {
+            comicId,
+            script: prompt,
+            subject: subjectName,
+            concept,
+            grade: classGrade
+          });
+          console.log('✅ Quiz generated:', data.questions?.length, 'questions');
+          setQuizData(prev => ({
+            ...prev,
+            [comicId]: data.questions || []
+          }));
+        } catch (err) {
+          const errorMsg = err?.response?.data?.error || "Failed to generate quiz";
+          console.error('❌ Quiz generation failed:', errorMsg);
+          setQuizError(errorMsg);
+        } finally {
+          setQuizLoading(false);
+        }
+      })(),
+
+      // FAQ
+      (async () => {
+        setFaqLoading(true);
+        setFaqError("");
+        try {
+          console.log('❓ Starting FAQ generation...');
+          const { data } = await API.post("/user/generate-faqs", {
+            comicId,
+            story: pages.length > 0 ? pages : JSON.parse(prompt)
+          });
+          console.log('✅ FAQ generated:', data.faqs?.length, 'FAQs');
+          setFaqData(prev => ({
+            ...prev,
+            [comicId]: data.faqs || []
+          }));
+        } catch (err) {
+          const errorMsg = err?.response?.data?.error || "Failed to generate FAQs";
+          console.error('❌ FAQ generation failed:', errorMsg);
+          setFaqError(errorMsg);
+        } finally {
+          setFaqLoading(false);
+        }
+      })(),
+
+      // Facts
+      (async () => {
+        setFactLoading(true);
+        setFactError("");
+        try {
+          console.log('💡 Starting Facts generation...');
+          const { data } = await API.post("/user/generate-didyouknow", {
+            comicId,
+            subject: subjectName,
+            story: story || pages.join(' ') || JSON.parse(prompt).map(p => p.description).join(' '),
+          });
+          console.log('✅ Facts generated:', data.didYouKnow?.length, 'facts');
+          setFactData(prev => ({
+            ...prev,
+            [comicId]: data.didYouKnow || []
+          }));
+        } catch (err) {
+          const errorMsg = err?.response?.data?.error || "Failed to generate facts";
+          console.error('❌ Facts generation failed:', errorMsg);
+          setFactError(errorMsg);
+        } finally {
+          setFactLoading(false);
+        }
+      })(),
+
+      // Hardcore Quiz - FIXED VERSION
+      (async () => {
+        setHardcoreQuizLoading(true);
+        setHardcoreQuizError("");
+        try {
+          console.log('🔥 Starting Hardcore Quiz generation...');
+          console.log('📋 Parameters:', {
+            comicId,
+            script: prompt?.substring(0, 100) + '...', // Log first 100 chars
+            subject: subjectName,
+            concept,
+            grade: classGrade,
+          });
+
+          const { data } = await API.post("/user/generate-hardcore-quiz", {
+            comicId,
+            script: prompt, // Make sure this is the full prompt
+            subject: subjectName,
+            concept,
+            grade: classGrade,
+          });
+
+          console.log('🔥 Hardcore Quiz API Response:', data);
+          console.log('✅ Hardcore Quiz generated:', data.questions?.length, 'questions');
+
+          if (data.questions && data.questions.length > 0) {
+            setHardcoreQuizData(prev => ({
+              ...prev,
+              [comicId]: data.questions,
+            }));
+          } else {
+            throw new Error("No questions returned from hardcore quiz API");
+          }
+        } catch (err) {
+          const errorMsg = err?.response?.data?.error || err.message || "Failed to generate hardcore quiz";
+          console.error('❌ Hardcore Quiz generation failed:', err);
+          console.error('❌ Error details:', err.response?.data);
+          setHardcoreQuizError(errorMsg);
+        } finally {
+          setHardcoreQuizLoading(false);
+        }
+      })()
+    ];
+
+    // Wait for all content to generate (but don't block UI)
+    const results = await Promise.allSettled(promises);
+    console.log('🎉 All content generation completed:', results);
+  };
+
+  // ✅ IMPROVED: STEP 2: Prompt → Images with REALISTIC PROGRESS
   const handleGenerateComic = async (e) => {
     e.preventDefault();
     setErrorMsg("");
     setLoadingImage(true);
+    setIsGenerating(true);
+    setProgress(0);
+    setEstimatedTime("Starting comic generation...");
+    setCurrentGeneratingPage(0);
+    setComicImages([]);
 
     try {
       let finalPages = pages;
@@ -353,27 +500,85 @@ export const ComicGenerator = () => {
           setPages(maybeParsed);
         }
       } catch {
-        // keep previous pages if textarea text isn't valid JSON
+        // keep previous pages
       }
 
+      const total = finalPages.length || 1;
+      setTotalPages(total);
+
+      // 🎯 REALISTIC PROGRESS SIMULATION
+      let completedPages = 0;
+      let progressInterval;
+
+      // Start progress simulation
+      const startProgressSimulation = () => {
+        let simulatedProgress = 0;
+        let currentSimulatedPage = 0;
+
+        progressInterval = setInterval(() => {
+          if (currentSimulatedPage < total) {
+            // Simulate realistic page-by-page progress
+            const baseProgress = (currentSimulatedPage / total) * 100;
+            const pageProgress = Math.min(25, Math.random() * 30); // Each page takes 25-30% progress
+            simulatedProgress = Math.min(95, baseProgress + pageProgress);
+            
+            setProgress(Math.round(simulatedProgress));
+            setCurrentGeneratingPage(currentSimulatedPage + 1);
+            setEstimatedTime(`Generating page ${currentSimulatedPage + 1}/${total}...`);
+
+            // Randomly move to next page (simulating actual processing)
+            if (Math.random() > 0.6) {
+              currentSimulatedPage++;
+            }
+          } else {
+            clearInterval(progressInterval);
+          }
+        }, 2000); // Update every 2 seconds
+      };
+
+      // Start the progress simulation
+      startProgressSimulation();
+
+      // 🧠 REAL API CALL
+      console.log('🚀 Starting comic generation for', total, 'pages...');
+      
       const { data } = await API.post("/user/generate-comic", {
         comicId,
         pages: finalPages,
       });
 
-      const imgs = (data?.images || []).map((it) => it.imageUrl).filter(Boolean);
-      if (imgs.length === 0) {
-        throw new Error("No images generated.");
+      // Clear the simulation interval
+      if (progressInterval) {
+        clearInterval(progressInterval);
       }
 
+      // 🖼️ Process actual images
+      const imgs = (data?.images || []).map(it => it.imageUrl).filter(Boolean);
+      if (imgs.length === 0) throw new Error("No images generated.");
+
+      // ✅ FINAL PROGRESS - Show actual completion
+      setProgress(100);
+      setCurrentGeneratingPage(total);
+      setEstimatedTime("Completed! Generating additional content...");
+
+      // ✅ UPDATE UI WITH ACTUAL IMAGES
       setComicImages(imgs);
       setSelectedImage(imgs[0]);
-      setStep(2); // Go to preview step
+
+      // ✅ AUTO-GENERATE ALL CONTENT
+      console.log('🎨 Comic images generated, starting content generation...');
+      await generateAllContent();
+
+      setLoadingImage(false);
+      setIsGenerating(false);
+
     } catch (err) {
       console.error(err);
       setErrorMsg(err?.response?.data?.error || err.message || "Error generating comic images.");
-    } finally {
       setLoadingImage(false);
+      setIsGenerating(false);
+      setProgress(0);
+      setEstimatedTime("Failed");
     }
   };
 
@@ -407,93 +612,6 @@ export const ComicGenerator = () => {
 
   // Helper functions
   const isStep0Valid = story?.trim()?.length > 0 && comicTitle.trim() && subject.trim();
-
-  const handleGenerateQuiz = async () => {
-    setQuizLoading(true);
-    setQuizError("");
-    try {
-      const subjectName = subjectsList.find(s => s._id === subject)?.name || subject;
-
-      const { data } = await API.post("/user/generate-quiz", {
-        comicId,
-        script: prompt,
-        subject: subjectName,
-        concept,
-        grade: classGrade
-
-      });
-      setQuizData(prev => ({
-        ...prev,
-        [comicId]: data.questions || []
-      }));
-    } catch (err) {
-      setQuizError(err?.response?.data?.error || "Failed to generate quiz");
-    } finally {
-      setQuizLoading(false);
-    }
-  };
-
-  const handleGenerateFAQs = async () => {
-    setFaqLoading(true);
-    setFaqError("");
-    try {
-      const { data } = await API.post("/user/generate-faqs", { comicId, story: pages });
-      setFaqData(prev => ({
-        ...prev,
-        [comicId]: data.faqs || []
-      }));
-    } catch (err) {
-      setFaqError(err?.response?.data?.error || "Failed to generate FAQs");
-    } finally {
-      setFaqLoading(false);
-    }
-  };
-
-  const handleGenerateFacts = async () => {
-    setFactLoading(true);
-    setFactError("");
-    try {
-      const { data } = await API.post("/user/generate-didyouknow", {
-        comicId,
-        subject,
-        story,
-      });
-      setFactData(prev => ({
-        ...prev,
-        [comicId]: data.didYouKnow || []
-      }));
-    } catch (err) {
-      setFactError(err?.response?.data?.error || "Failed to generate facts");
-    } finally {
-      setFactLoading(false);
-    }
-  };
-
-  const handleGenerateHardcoreQuiz = async () => {
-    setHardcoreQuizLoading(true);
-    setHardcoreQuizError("");
-    try {
-      const subjectName = subjectsList.find(s => s._id === subject)?.name || subject;
-
-      const { data } = await API.post("/user/generate-hardcore-quiz", {
-        comicId,
-        script: prompt,
-        subject: subjectName,
-        concept,
-        grade: classGrade,
-      });
-
-      setHardcoreQuizData(prev => ({
-        ...prev,
-        [comicId]: data.questions || [],
-      }));
-    } catch (err) {
-      setHardcoreQuizError(err?.response?.data?.error || "Failed to generate hardcore quiz");
-    } finally {
-      setHardcoreQuizLoading(false);
-    }
-  };
-
 
   const resetAfterBackToPrompt = () => {
     setComicImages([]);
@@ -807,6 +925,89 @@ export const ComicGenerator = () => {
                         )}
                       </Button>
                     </div>
+
+                    {/* IMPROVED PROGRESS DISPLAY */}
+                    {isGenerating && (
+                      <div className="mt-4 p-4 border rounded bg-light">
+                        <div className="text-center">
+                          <h5 className="text-primary mb-3">
+                            🎨 Generating Your Comic
+                          </h5>
+                          
+                          {/* Progress Bar */}
+                          <div className="progress mb-3" style={{ height: "20px" }}>
+                            <div
+                              className="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                              role="progressbar"
+                              style={{ width: `${progress}%` }}
+                              aria-valuenow={progress}
+                              aria-valuemin="0"
+                              aria-valuemax="100"
+                            >
+                              {progress}%
+                            </div>
+                          </div>
+
+                          {/* Page Progress */}
+                          <div className="row text-center mb-3">
+                            <div className="col-md-6">
+                              <div className="card bg-primary text-white">
+                                <div className="card-body py-2">
+                                  <h6 className="mb-0">Current Page</h6>
+                                  <h4 className="mb-0">{currentGeneratingPage}/{totalPages}</h4>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-md-6">
+                              <div className="card bg-info text-white">
+                                <div className="card-body py-2">
+                                  <h6 className="mb-0">Overall Progress</h6>
+                                  <h4 className="mb-0">{progress}%</h4>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Status Message */}
+                          <div className="alert alert-info mb-0">
+                            <Spinner size="sm" className="me-2" />
+                            <strong>{estimatedTime}</strong>
+                            <div className="mt-1 small">
+                              {progress < 100 ? "Please wait while we create your comic pages..." : "Finalizing your comic..."}
+                            </div>
+                          </div>
+
+                          {/* Visual Page Indicators */}
+                          {totalPages > 0 && (
+                            <div className="mt-3">
+                              <div className="d-flex justify-content-center flex-wrap gap-2">
+                                {Array.from({ length: totalPages }, (_, i) => (
+                                  <div
+                                    key={i}
+                                    className={`page-indicator ${i < currentGeneratingPage ? 'bg-success' : i === currentGeneratingPage ? 'bg-warning' : 'bg-light border'}`}
+                                    style={{
+                                      width: '30px',
+                                      height: '30px',
+                                      borderRadius: '50%',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      fontWeight: 'bold',
+                                      color: i < currentGeneratingPage ? 'white' : 'black'
+                                    }}
+                                  >
+                                    {i + 1}
+                                  </div>
+                                ))}
+                              </div>
+                              <small className="text-muted mt-2 d-block">
+                                Page {currentGeneratingPage} of {totalPages} in progress...
+                              </small>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </Form>
                 ) : (
                   <>
@@ -885,14 +1086,6 @@ export const ComicGenerator = () => {
                   <div className="mt-4">
                     <p>Your comic PDF has been successfully generated!</p>
 
-                    {/* <Button
-                      variant="primary"
-                      onClick={() => window.open(pdfUrl, "_blank")}
-                      className="me-3"
-                    >
-                      View PDF
-                    </Button> */}
-
                     <Button
                       variant="success"
                       onClick={() => setStep(4)}
@@ -908,7 +1101,7 @@ export const ComicGenerator = () => {
               </div>
             )}
 
-            {/* STEP 4: Publish */}
+            {/* STEP 4: Publish - NOW WITH AUTO-GENERATED CONTENT */}
             {step === 4 && (
               <div className="text-center">
                 <h3>Comic Published 🎉</h3>
@@ -922,19 +1115,21 @@ export const ComicGenerator = () => {
                   <Alert variant="warning">PDF URL not found. Try publishing again.</Alert>
                 )}
 
-                {/* Additional Content Sections */}
+                {/* Additional Content Sections - NOW AUTO-GENERATED */}
                 <div className="mt-5 text-start">
+
+                  {/* Loading indicators for all content */}
+                  {(quizLoading || faqLoading || factLoading || hardcoreQuizLoading) && (
+                    <Alert variant="info" className="mb-4">
+                      <Spinner size="sm" className="me-2" />
+                      Generating additional content... This may take a few moments.
+                    </Alert>
+                  )}
+
                   {/* Quiz Section */}
                   <div className="quiz-wrapper mt-4">
-                    <h4>Generate Quiz for this Comic</h4>
-                    <Button
-                      variant="info"
-                      className="mb-3"
-                      onClick={handleGenerateQuiz}
-                      disabled={quizLoading || quizData[comicId]?.length > 0}
-                    >
-                      {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
-                    </Button>
+                    <h4>📝 Quiz for this Comic</h4>
+                    {quizLoading && <Spinner size="sm" className="me-2" />}
                     {quizError && <Alert variant="danger">{quizError}</Alert>}
                     {quizData[comicId]?.length > 0 && (
                       <div className="quiz-questions mt-4">
@@ -956,20 +1151,26 @@ export const ComicGenerator = () => {
 
                   {/* Hardcore Quiz Section */}
                   <div className="hardcore-quiz-wrapper mt-5">
-                    <h4>🔥 Generate Hardcore Quiz (Challenge Mode)</h4>
-                    <Button
-                      variant="danger"
-                      className="mb-3"
-                      onClick={handleGenerateHardcoreQuiz}
-                      disabled={hardcoreQuizLoading || hardcoreQuizData[comicId]?.length > 0}
-                    >
-                      {hardcoreQuizLoading ? "Generating Hardcore Quiz..." : "Generate Hardcore Quiz"}
-                    </Button>
+                    <h4>🔥 Hardcore Quiz (Challenge Mode)</h4>
 
-                    {hardcoreQuizError && <Alert variant="danger">{hardcoreQuizError}</Alert>}
+                    {hardcoreQuizLoading && (
+                      <div className="d-flex align-items-center gap-2 mb-3">
+                        <Spinner size="sm" variant="danger" />
+                        <span>Generating hardcore quiz questions...</span>
+                      </div>
+                    )}
 
-                    {hardcoreQuizData[comicId]?.length > 0 && (
+                    {hardcoreQuizError && (
+                      <Alert variant="danger" className="mb-3">
+                        <strong>Error generating hardcore quiz:</strong> {hardcoreQuizError}
+                      </Alert>
+                    )}
+
+                    {hardcoreQuizData[comicId]?.length > 0 ? (
                       <div className="hardcore-quiz-questions mt-4">
+                        <Alert variant="success" className="mb-3">
+                          ✅ Generated {hardcoreQuizData[comicId].length} hardcore questions!
+                        </Alert>
                         {hardcoreQuizData[comicId].map((q, idx) => (
                           <div key={idx} className="mb-4 p-3 border rounded bg-light">
                             <strong>Q{idx + 1}. {q.question}</strong>
@@ -984,21 +1185,19 @@ export const ComicGenerator = () => {
                           </div>
                         ))}
                       </div>
+                    ) : (
+                      !hardcoreQuizLoading && !hardcoreQuizError && (
+                        <Alert variant="warning" className="mb-3">
+                          No hardcore quiz questions generated yet. Check console for details.
+                        </Alert>
+                      )
                     )}
                   </div>
 
-
                   {/* FAQ Section */}
                   <div className="faq-wrapper mt-5">
-                    <h4>Generate FAQs for this Comic</h4>
-                    <Button
-                      variant="secondary"
-                      className="mb-3"
-                      onClick={handleGenerateFAQs}
-                      disabled={faqLoading || faqData[comicId]?.length > 0}
-                    >
-                      {faqLoading ? "Generating FAQs..." : "Generate FAQs"}
-                    </Button>
+                    <h4>❓ FAQs for this Comic</h4>
+                    {faqLoading && <Spinner size="sm" className="me-2" />}
                     {faqError && <Alert variant="danger">{faqError}</Alert>}
                     {faqData[comicId]?.length > 0 && (
                       <div className="faq-list mt-4">
@@ -1026,15 +1225,8 @@ export const ComicGenerator = () => {
 
                   {/* Facts Section */}
                   <div className="fact-wrapper mt-5">
-                    <h4>Generate Did You Know Facts</h4>
-                    <Button
-                      variant="warning"
-                      className="mb-3"
-                      onClick={handleGenerateFacts}
-                      disabled={factLoading || factData[comicId]?.length > 0}
-                    >
-                      {factLoading ? "Generating Facts..." : "Generate Facts"}
-                    </Button>
+                    <h4>💡 Did You Know Facts</h4>
+                    {factLoading && <Spinner size="sm" className="me-2" />}
                     {factError && <Alert variant="danger">{factError}</Alert>}
                     {factData[comicId]?.length > 0 && (
                       <div className="fact-list mt-4">
