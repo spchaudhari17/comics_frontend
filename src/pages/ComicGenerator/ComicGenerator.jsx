@@ -521,7 +521,7 @@ export const ComicGenerator = () => {
             const baseProgress = (currentSimulatedPage / total) * 100;
             const pageProgress = Math.min(25, Math.random() * 30); // Each page takes 25-30% progress
             simulatedProgress = Math.min(95, baseProgress + pageProgress);
-            
+
             setProgress(Math.round(simulatedProgress));
             setCurrentGeneratingPage(currentSimulatedPage + 1);
             setEstimatedTime(`Generating page ${currentSimulatedPage + 1}/${total}...`);
@@ -541,7 +541,7 @@ export const ComicGenerator = () => {
 
       // 🧠 REAL API CALL
       console.log('🚀 Starting comic generation for', total, 'pages...');
-      
+
       const { data } = await API.post("/user/generate-comic", {
         comicId,
         pages: finalPages,
@@ -933,7 +933,7 @@ export const ComicGenerator = () => {
                           <h5 className="text-primary mb-3">
                             🎨 Generating Your Comic
                           </h5>
-                          
+
                           {/* Progress Bar */}
                           <div className="progress mb-3" style={{ height: "20px" }}>
                             <div
@@ -1153,25 +1153,22 @@ export const ComicGenerator = () => {
                   <div className="hardcore-quiz-wrapper mt-5">
                     <h4>🔥 Hardcore Quiz (Challenge Mode)</h4>
 
-                    {hardcoreQuizLoading && (
+                    {hardcoreQuizLoading ? (
                       <div className="d-flex align-items-center gap-2 mb-3">
                         <Spinner size="sm" variant="danger" />
                         <span>Generating hardcore quiz questions...</span>
                       </div>
-                    )}
-
-                    {hardcoreQuizError && (
+                    ) : hardcoreQuizError ? (
                       <Alert variant="danger" className="mb-3">
-                        <strong>Error generating hardcore quiz:</strong> {hardcoreQuizError}
+                        <strong>Error:</strong> {hardcoreQuizError}
                       </Alert>
-                    )}
-
-                    {hardcoreQuizData[comicId]?.length > 0 ? (
+                    ) : hardcoreQuizData?.[comicId]?.length > 0 ? (
                       <div className="hardcore-quiz-questions mt-4">
                         <Alert variant="success" className="mb-3">
-                          ✅ Generated {hardcoreQuizData[comicId].length} hardcore questions!
+                          ✅ Generated {hardcoreQuizData?.[comicId]?.length} hardcore questions!
                         </Alert>
-                        {hardcoreQuizData[comicId].map((q, idx) => (
+
+                        {hardcoreQuizData?.[comicId]?.map((q, idx) => (
                           <div key={idx} className="mb-4 p-3 border rounded bg-light">
                             <strong>Q{idx + 1}. {q.question}</strong>
                             <ul className="mt-2">
@@ -1186,13 +1183,12 @@ export const ComicGenerator = () => {
                         ))}
                       </div>
                     ) : (
-                      !hardcoreQuizLoading && !hardcoreQuizError && (
-                        <Alert variant="warning" className="mb-3">
-                          No hardcore quiz questions generated yet. Check console for details.
-                        </Alert>
-                      )
+                      <Alert variant="warning" className="mb-3">
+                        No hardcore quiz generated yet.
+                      </Alert>
                     )}
                   </div>
+
 
                   {/* FAQ Section */}
                   <div className="faq-wrapper mt-5">
