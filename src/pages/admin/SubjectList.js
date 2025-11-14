@@ -24,7 +24,13 @@ const SubjectList = () => {
   const [updating, setUpdating] = useState(false);
   const [editName, setEditName] = useState("");
   const [editImage, setEditImage] = useState(null);
+
+  // Ad toggle fields
   const [editShowAds, setEditShowAds] = useState(true);
+  const [editShowAdsFaq, setEditShowAdsFaq] = useState(true);
+  const [editShowAdsDidYouKnow, setEditShowAdsDidYouKnow] = useState(true);
+  const [editShowAdsQuiz, setEditShowAdsQuiz] = useState(true);
+  const [editShowAdsHardcoreQuiz, setEditShowAdsHardcoreQuiz] = useState(true);
 
   // Delete Modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -97,12 +103,16 @@ const SubjectList = () => {
   const openEditModal = (subject) => {
     setEditSubject(subject);
     setEditName(subject.name);
-    setEditShowAds(subject.ishowads);
     setEditImage(null);
+    setEditShowAds(subject.ishowads);
+    setEditShowAdsFaq(subject.showAdsFaq ?? true);
+    setEditShowAdsDidYouKnow(subject.showAdsDidYouKnow ?? true);
+    setEditShowAdsQuiz(subject.showAdsQuiz ?? true);
+    setEditShowAdsHardcoreQuiz(subject.showAdsHardcoreQuiz ?? true);
     setShowEditModal(true);
   };
 
-  // 🧩 Update Subject
+  // 🧩 Update Subject (modal)
   const handleUpdateSubject = async (e) => {
     e.preventDefault();
     if (!editSubject) return;
@@ -113,6 +123,10 @@ const SubjectList = () => {
       formData.append("id", editSubject._id);
       formData.append("name", editName);
       formData.append("ishowads", editShowAds);
+      formData.append("showAdsFaq", editShowAdsFaq);
+      formData.append("showAdsDidYouKnow", editShowAdsDidYouKnow);
+      formData.append("showAdsQuiz", editShowAdsQuiz);
+      formData.append("showAdsHardcoreQuiz", editShowAdsHardcoreQuiz);
       if (editImage) formData.append("image", editImage);
 
       const { data } = await API.post("/user/update-subject", formData, {
@@ -133,24 +147,26 @@ const SubjectList = () => {
     }
   };
 
-  // Toggle Show Ads directly in table
-  const handleToggleAds = async (subject) => {
+  // 🔁 Generic toggle handler for inline table switches
+  const handleToggleAdField = async (subject, fieldName) => {
     try {
-      const updatedStatus = !subject.ishowads;
+      const newValue = !subject[fieldName];
       const formData = new FormData();
       formData.append("id", subject._id);
-      formData.append("ishowads", updatedStatus);
+      formData.append(fieldName, newValue);
+
       await API.post("/user/update-subject", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
       setSubjects((prev) =>
         prev.map((s) =>
-          s._id === subject._id ? { ...s, ishowads: updatedStatus } : s
+          s._id === subject._id ? { ...s, [fieldName]: newValue } : s
         )
       );
     } catch (err) {
       console.error(err);
-      alert("Failed to update Show Ads status");
+      alert("Failed to update ads flag");
     }
   };
 
@@ -159,7 +175,7 @@ const SubjectList = () => {
     s.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Columns
+  // ✅ Columns with all toggles
   const columns = [
     { name: "#", selector: (row, index) => index + 1, width: "60px" },
     {
@@ -178,6 +194,7 @@ const SubjectList = () => {
       width: "80px",
     },
     { name: "Name", selector: (row) => row.name, sortable: true },
+
     {
       name: "Show Ads",
       cell: (row) => (
@@ -185,11 +202,63 @@ const SubjectList = () => {
           type="switch"
           id={`ads-${row._id}`}
           checked={row.ishowads}
-          onChange={() => handleToggleAds(row)}
+          onChange={() => handleToggleAdField(row, "ishowads")}
           label={row.ishowads ? "On" : "Off"}
         />
       ),
-      width: "150px",
+      width: "130px",
+    },
+    {
+      name: "FAQ Ads",
+      cell: (row) => (
+        <Form.Check
+          type="switch"
+          id={`faq-${row._id}`}
+          checked={row.showAdsFaq ?? false}
+          onChange={() => handleToggleAdField(row, "showAdsFaq")}
+          label={row.showAdsFaq ? "On" : "Off"}
+        />
+      ),
+      width: "130px",
+    },
+    {
+      name: "DidYouKnow Ads",
+      cell: (row) => (
+        <Form.Check
+          type="switch"
+          id={`dyk-${row._id}`}
+          checked={row.showAdsDidYouKnow ?? false}
+          onChange={() => handleToggleAdField(row, "showAdsDidYouKnow")}
+          label={row.showAdsDidYouKnow ? "On" : "Off"}
+        />
+      ),
+      width: "160px",
+    },
+    {
+      name: "Quiz Ads",
+      cell: (row) => (
+        <Form.Check
+          type="switch"
+          id={`quiz-${row._id}`}
+          checked={row.showAdsQuiz ?? false}
+          onChange={() => handleToggleAdField(row, "showAdsQuiz")}
+          label={row.showAdsQuiz ? "On" : "Off"}
+        />
+      ),
+      width: "130px",
+    },
+    {
+      name: "Hardcore Ads",
+      cell: (row) => (
+        <Form.Check
+          type="switch"
+          id={`hc-${row._id}`}
+          checked={row.showAdsHardcoreQuiz ?? false}
+          onChange={() => handleToggleAdField(row, "showAdsHardcoreQuiz")}
+          label={row.showAdsHardcoreQuiz ? "On" : "Off"}
+        />
+      ),
+      width: "160px",
     },
     {
       name: "Created At",
@@ -296,7 +365,7 @@ const SubjectList = () => {
         </Form>
       </Modal>
 
-      {/* 🧠 Edit Modal */}
+      {/* Edit Modal */}
       <Modal show={showEditModal} centered onHide={() => setShowEditModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Edit Subject</Modal.Title>
@@ -311,6 +380,7 @@ const SubjectList = () => {
                 onChange={(e) => setEditName(e.target.value)}
               />
             </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>Update Image (optional)</Form.Label>
               <Form.Control
@@ -319,13 +389,45 @@ const SubjectList = () => {
                 onChange={(e) => setEditImage(e.target.files[0])}
               />
             </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Check
                 type="switch"
-                id="editShowAds"
-                label="Show Ads"
+                label="Show Ads (Global)"
                 checked={editShowAds}
                 onChange={(e) => setEditShowAds(e.target.checked)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="switch"
+                label="Show Ads in FAQ"
+                checked={editShowAdsFaq}
+                onChange={(e) => setEditShowAdsFaq(e.target.checked)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="switch"
+                label="Show Ads in Did You Know"
+                checked={editShowAdsDidYouKnow}
+                onChange={(e) => setEditShowAdsDidYouKnow(e.target.checked)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="switch"
+                label="Show Ads in Quiz"
+                checked={editShowAdsQuiz}
+                onChange={(e) => setEditShowAdsQuiz(e.target.checked)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="switch"
+                label="Show Ads in Hardcore Quiz"
+                checked={editShowAdsHardcoreQuiz}
+                onChange={(e) => setEditShowAdsHardcoreQuiz(e.target.checked)}
               />
             </Form.Group>
           </Modal.Body>
