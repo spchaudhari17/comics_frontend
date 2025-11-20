@@ -108,6 +108,11 @@ export const ComicGenerator = () => {
   const [estimatedTime, setEstimatedTime] = useState("");
   const [currentGeneratingPage, setCurrentGeneratingPage] = useState(0);
 
+  const [publicComics, setPublicComics] = useState([]);
+  const [pubPage, setPubPage] = useState(1);
+  const [pubTotalPages, setPubTotalPages] = useState(1);
+
+
   // Style Images Modal
   const [showStyleImgModal, setShowStyleImgModal] = useState(false);
   const openStyleImgModal = () => {
@@ -220,6 +225,39 @@ export const ComicGenerator = () => {
 
     loadResumeComic();
   }, [resumeComicId]);
+
+  const loadPublicComics = async (page = 1) => {
+    try {
+      if (!selectedCountry?.value) return;  // Country not selected → show nothing
+
+      const params = {
+        page,
+        limit: 5,
+        country: selectedCountry.value
+      };
+
+      if (classGrade) params.grade = classGrade;
+      if (subject) params.subjectId = subject;
+      if (concept) params.concept = concept;
+
+      const { data } = await API.get("/user/listComicsforPublic", { params });
+
+      setPublicComics(data.comics);
+      setPubPage(data.page);
+      setPubTotalPages(data.totalPages);
+    } catch (err) {
+      console.error("Error loading comics:", err);
+    }
+  };
+
+
+  useEffect(() => {
+    if (step !== 0) return;   // only run on step 0
+    loadPublicComics(1);
+  }, [selectedCountry, classGrade, subject, concept]);
+
+
+
 
   // LocalStorage management
   useEffect(() => {
@@ -832,6 +870,67 @@ export const ComicGenerator = () => {
                     </div>
                   </div>
                 )}
+
+                {selectedCountry?.value && (
+                  <div className="mt-5 p-4 border rounded bg-white">
+                    <h4 className="mb-3">🌍 Public Comics Library</h4>
+                    <p className="text-muted">Showing comics based on your selections above</p>
+
+                    {/* TABLE */}
+                    <table className="table table-bordered mt-3">
+                      <thead>
+                        <tr>
+                          <th>Title</th>
+                          <th>Concept</th>
+                          <th>Grade</th>
+                          <th>Country</th>
+                          <th>Subject</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {publicComics.length === 0 ? (
+                          <tr>
+                            <td colSpan="5" className="text-center text-muted">
+                              No comics found matching your selections
+                            </td>
+                          </tr>
+                        ) : (
+                          publicComics.map((c) => (
+                            <tr key={c._id}>
+                              <td>{c.title}</td>
+                              <td>{c.concept}</td>
+                              <td>{c.grade}</td>
+                              <td>{c.country}</td>
+                              <td>{c.subject}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+
+                    {/* PAGINATION */}
+                    <div className="d-flex justify-content-between mt-3">
+                      <Button
+                        disabled={pubPage === 1}
+                        onClick={() => loadPublicComics(pubPage - 1)}
+                      >
+                        Previous
+                      </Button>
+
+                      <span>Page {pubPage} / {pubTotalPages}</span>
+
+                      <Button
+                        disabled={pubTotalPages === pubPage}
+                        onClick={() => loadPublicComics(pubPage + 1)}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+
+
               </Form>
             )}
 

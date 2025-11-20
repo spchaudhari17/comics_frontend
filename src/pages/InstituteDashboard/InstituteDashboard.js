@@ -11,29 +11,44 @@ import * as XLSX from "xlsx";
 const InstituteDashboard = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+
+  // Filters
+  const [schools, setSchools] = useState([]);
+  const [selectedSchool, setSelectedSchool] = useState("All");
+  const [classes, setClasses] = useState([]);
+  const [selectedClass, setSelectedClass] = useState("All");
+  const [countries, setCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState("All");
+
+  // Import States
   const [showImportModal, setShowImportModal] = useState(false);
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // Delete modal state
+  // Delete States
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null); // studentId or "all"
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Class filters
-  const [classes, setClasses] = useState([]);
-  const [selectedClass, setSelectedClass] = useState("All");
-
-  // 🔹 Fetch all students
+  // Get all students
   const fetchStudents = async () => {
     try {
       setLoading(true);
       const { data } = await API.get("/user/get-students");
+
       if (!data.error) {
         setStudents(data.data);
 
+        // Unique Schools
+        const uniqueSchools = [...new Set(data.data.map((s) => s.classInfo?.school))];
+        setSchools(uniqueSchools);
+
+        // Unique Countries
+        const uniqueCountries = [...new Set(data.data.map((s) => s.classInfo?.country))];
+        setCountries(uniqueCountries);
+
+        // Unique Classes
         const uniqueClasses = [
           ...new Set(
             data.data.map(
@@ -43,11 +58,9 @@ const InstituteDashboard = () => {
           ),
         ];
         setClasses(uniqueClasses);
-      } else {
-        setError(data.message || "Failed to fetch students");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong");
+      toast.error("Error loading students");
     } finally {
       setLoading(false);
     }
@@ -57,9 +70,10 @@ const InstituteDashboard = () => {
     fetchStudents();
   }, []);
 
-  // 🔹 Upload Excel
+  // Upload Excel
   const handleUpload = async () => {
     if (!file) return toast.warning("Please select an Excel file first.");
+
     setUploading(true);
     try {
       const formData = new FormData();
@@ -69,41 +83,34 @@ const InstituteDashboard = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      if (res.data.error) {
-        toast.error(res.data.message);
-      } else {
-        toast.success("✅ Students imported successfully!");
+      if (res.data.error) toast.error(res.data.message);
+      else {
+        toast.success("Students imported successfully!");
         setShowImportModal(false);
         setFile(null);
         fetchStudents();
       }
-    } catch (e) {
+    } catch {
       toast.error("Upload failed");
     } finally {
       setUploading(false);
     }
   };
 
-  // 🔹 Reset Student Password
+  // Reset Password
   const handleResetPassword = async (studentId) => {
     if (!window.confirm("Reset this student's password?")) return;
+
     try {
       const res = await API.post("/user/reset-student-password", { studentId });
-      if (!res.data.error) {
-        toast.success(
-          `Password reset for ${res.data.username}: ${res.data.newPassword}`
-        );
-        fetchStudents();
-      } else {
-        toast.error(res.data.message);
-      }
-    } catch (e) {
-      toast.error("Failed to reset password");
+      if (!res.data.error) toast.success(`New Password: ${res.data.newPassword}`);
+      fetchStudents();
+    } catch {
+      toast.error("Error resetting password");
     }
   };
 
-  // 🔹 Confirm delete (for single or all)
-  // 🔹 Confirm delete (for single or all)
+  // Delete student(s)
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -161,37 +168,39 @@ const InstituteDashboard = () => {
     }
   };
 
-
-
-  // 🔹 Filter logic
+  // Filter Logic
   const filteredStudents = students.filter((s) => {
     const term = search.toLowerCase();
+
     const matchSearch =
       s.username.toLowerCase().includes(term) ||
-      s.classInfo?.class?.toString().toLowerCase().includes(term) ||
+      s.classInfo?.class?.toLowerCase().includes(term) ||
       s.classInfo?.section?.toLowerCase().includes(term);
 
     const classKey = `${s.classInfo?.school}-${s.classInfo?.year}-${s.classInfo?.class}-${s.classInfo?.section}`;
     const matchClass = selectedClass === "All" || classKey === selectedClass;
 
-    return matchSearch && matchClass;
+    const matchSchool = selectedSchool === "All" || s.classInfo?.school === selectedSchool;
+
+    const matchCountry =
+      selectedCountry === "All" || s.classInfo?.country === selectedCountry;
+
+    return matchSearch && matchClass && matchSchool && matchCountry;
   });
 
-  // 🔹 Download Excel
+  // Excel Download
   const handleDownloadExcel = () => {
-    if (!filteredStudents.length) {
-      toast.warning("No students to download!");
-      return;
-    }
+    if (!filteredStudents.length) return toast.warning("No students to download!");
 
     const exportData = filteredStudents.map((s, i) => ({
       "#": i + 1,
       Username: s.username,
       Password: s.plain_password,
-      School: s.classInfo?.school || "",
-      Year: s.classInfo?.year || "",
-      Class: s.classInfo?.class || "",
-      Section: s.classInfo?.section || "",
+      School: s.classInfo?.school,
+      Year: s.classInfo?.year,
+      Class: s.classInfo?.class,
+      Section: s.classInfo?.section,
+      Country: s.classInfo?.country,
       Created_At: new Date(s.createdAt).toLocaleDateString("en-IN"),
     }));
 
@@ -200,64 +209,46 @@ const InstituteDashboard = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
 
     const filename =
-      selectedClass === "All"
-        ? "All_Students_List.xlsx"
-        : `${selectedClass.replaceAll("-", "_")}_Students.xlsx`;
+      selectedSchool !== "All"
+        ? `${selectedSchool}_Students.xlsx`
+        : selectedClass !== "All"
+          ? `${selectedClass.replaceAll("-", "_")}_Students.xlsx`
+          : selectedCountry !== "All"
+            ? `${selectedCountry}_Students.xlsx`
+            : "All_Students.xlsx";
 
     XLSX.writeFile(workbook, filename);
   };
 
-  // 🔹 Table Columns
   const columns = [
     { name: "#", selector: (row, i) => i + 1, width: "60px" },
-    { name: "Username", selector: (row) => row.username, minWidth: "180px" },
-    {
-      name: "Password",
-      selector: (row) => row.plain_password || "—",
-      minWidth: "130px",
-    },
-    {
-      name: "School",
-      selector: (row) => row.classInfo?.school || "—",
-      minWidth: "100px",
-    },
-    {
-      name: "Year",
-      selector: (row) => row.classInfo?.year || "—",
-      width: "80px",
-    },
-    {
-      name: "Class",
-      selector: (row) => row.classInfo?.class || "—",
-      width: "80px",
-    },
+    { name: "Username", selector: (row) => row.username },
+    { name: "Password", selector: (row) => row.plain_password },
+    { name: "School", selector: (row) => row.classInfo?.school },
+    { name: "Year", selector: (row) => row.classInfo?.year },
+    { name: "Class", selector: (row) => row.classInfo?.class },
     {
       name: "Section",
-      selector: (row) => row.classInfo?.section || "—",
-      width: "100px",
-      cell: (row) => (
-        <Badge bg="info" className="fs-6">
-          {row.classInfo?.section || "—"}
-        </Badge>
-      ),
+      selector: (row) => row.classInfo?.section,
+      cell: (row) => <Badge bg="info">{row.classInfo?.section}</Badge>,
     },
     {
+      name: "Roll No",
+      selector: (row) => row.classInfo?.rollNo || "—",
+      width: "100px"
+    },
+
+    { name: "Country", selector: (row) => row.classInfo?.country },
+    {
       name: "Actions",
-      minWidth: "180px",
       cell: (row) => (
         <div className="d-flex gap-2">
-          <Button
-            size="sm"
-            variant="warning"
-            title="Reset Password"
-            onClick={() => handleResetPassword(row._id)}
-          >
+          <Button size="sm" variant="warning" onClick={() => handleResetPassword(row._id)}>
             <i className="bi bi-key"></i>
           </Button>
           <Button
             size="sm"
             variant="danger"
-            title="Delete Student"
             onClick={() => {
               setDeleteTarget(row._id);
               setShowDeleteModal(true);
@@ -267,16 +258,6 @@ const InstituteDashboard = () => {
           </Button>
         </div>
       ),
-    },
-    {
-      name: "Created At",
-      selector: (row) =>
-        new Date(row.createdAt).toLocaleDateString("en-IN", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
-      width: "160px",
     },
   ];
 
@@ -288,38 +269,74 @@ const InstituteDashboard = () => {
         ) : (
           <div className="info-wrapper bg-white rounded-4 p-3 shadow-sm">
             {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-              <div className="main-heading fs-4 fw-bold text-dark">
-                🎓 Students List
-              </div>
-              <div className="d-flex align-items-center gap-2 flex-wrap">
-                <div className="fs-6 text-primary fw-semibold">
+            <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <h4 className="fw-bold">🎓 Students List</h4>
+              <div className="d-flex gap-2 flex-wrap">
+                <div className="text-primary fw-semibold mt-3">
                   Total: {filteredStudents.length}
                 </div>
 
+                {/* School Filter */}
                 <Form.Select
                   size="sm"
-                  style={{ width: "200px" }}
-                  value={selectedClass}
-                  onChange={(e) => setSelectedClass(e.target.value)}
+                  style={{ width: "160px" }}
+                  value={selectedSchool}
+                  onChange={(e) => {
+                    setSelectedSchool(e.target.value);
+                    setSelectedClass("All");
+                  }}
                 >
-                  <option value="All">All Classes</option>
-                  {classes.map((cls, i) => (
-                    <option key={i} value={cls}>
-                      {cls.replaceAll("-", " ")}
+                  <option value="All">All Schools</option>
+                  {schools.map((s, i) => (
+                    <option key={i} value={s}>
+                      {s}
                     </option>
                   ))}
                 </Form.Select>
 
-                <Button
-                  variant="primary"
-                  onClick={() => setShowImportModal(true)}
+                {/* Class Filter - Auto filtered by School */}
+                <Form.Select
+                  size="sm"
+                  style={{ width: "160px" }}
+                  value={selectedClass}
+                  onChange={(e) => setSelectedClass(e.target.value)}
                 >
+                  <option value="All">All Classes</option>
+                  {classes
+                    .filter(
+                      (cls) =>
+                        selectedSchool === "All" || cls.startsWith(selectedSchool)
+                    )
+                    .map((cls, i) => (
+                      <option key={i} value={cls}>
+                        {cls.replaceAll("-", " ")}
+                      </option>
+                    ))}
+                </Form.Select>
+
+                {/* Country Filter */}
+                <Form.Select
+                  size="sm"
+                  style={{ width: "150px" }}
+                  value={selectedCountry}
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                >
+                  <option value="All">All Countries</option>
+                  {countries.map((c, i) => (
+                    <option key={i} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </Form.Select>
+
+                <Button variant="primary" onClick={() => setShowImportModal(true)}>
                   <i className="bi bi-upload"></i> Import
                 </Button>
+
                 <Button variant="success" onClick={handleDownloadExcel}>
                   <i className="bi bi-download"></i> Download
                 </Button>
+
                 <Button
                   variant="danger"
                   onClick={() => {
@@ -332,7 +349,7 @@ const InstituteDashboard = () => {
               </div>
             </div>
 
-            {/* Search Box */}
+            {/* Search */}
             <Form.Control
               type="text"
               placeholder="Search by username, class or section..."
@@ -345,12 +362,12 @@ const InstituteDashboard = () => {
             <DataTable
               columns={columns}
               data={filteredStudents}
-              highlightOnHover
-              responsive
-              pagination
               customStyles={dataTableCustomStyles}
-              noDataComponent={<NoDataComponent />}
+              pagination
+              responsive
+              highlightOnHover
               striped
+              noDataComponent={<NoDataComponent />}
             />
           </div>
         )}
@@ -369,20 +386,20 @@ const InstituteDashboard = () => {
             onChange={(e) => setFile(e.target.files[0])}
           />
           <small className="text-muted">
-            Required columns: <b>School, Year, Class, Section, Roll No.</b>
+            Required columns: <b>School, Year, Class, Section, Roll No., Country</b>
           </small>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowImportModal(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleUpload} disabled={uploading}>
+          <Button variant="primary" disabled={uploading} onClick={handleUpload}>
             {uploading ? "Uploading..." : "Upload"}
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation */}
       <Modal show={showDeleteModal} centered onHide={() => setShowDeleteModal(false)}>
         <Modal.Body>
           <div className="content-wrapper text-center">
