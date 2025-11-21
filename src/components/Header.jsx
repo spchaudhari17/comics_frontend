@@ -91,7 +91,12 @@ export const Header = () => {
                           onClick={() => {
                             if (!userInfo) {
                               navigate("/login"); // agar login nahi hai to login page bhejo
-                            } else {
+                            }
+                            else if (userInfo.userType === "moderator") {
+                              navigate("/super-admin");
+                              return alert("Moderators are not allowed to create comics.");
+                            }
+                            else {
                               navigate("/create-comic"); // agar login hai to create comic page bhejo
                             }
                           }}
@@ -103,10 +108,12 @@ export const Header = () => {
                     </>
                   )
                 }
+
               </ul>
 
               <ul className="navbar-nav icons-nav align-items-center justify-content-end flex-grow-1 gap-3">
-                {userInfo && userInfo.userType === "admin" && (
+
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
                   <li className="nav-item">
                     <Link to={'/super-admin'} className="nav-link p-0">
                       <i className="bi bi-grid-fill"></i>
@@ -114,7 +121,7 @@ export const Header = () => {
                   </li>
                 )}
 
-                {userInfo && userInfo.userType === "admin" && (
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
                   <li className="nav-item">
                     <Link to={'/allUsers'} className="nav-link p-0">
                       <i className="bi bi-people-fill"></i>
@@ -122,7 +129,7 @@ export const Header = () => {
                   </li>
                 )}
 
-                {userInfo && userInfo.userType === "admin" && (
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
                   <li className="nav-item">
                     <Link to={'/contactList'} className="nav-link p-0">
                       <i className="bi bi-envelope-fill"></i>
@@ -130,7 +137,7 @@ export const Header = () => {
                   </li>
                 )}
 
-                {userInfo && userInfo.userType === "admin" && (
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
                   <li className="nav-item">
                     <Link to={'/subjectlist'} className="nav-link p-0">
                       <i className="bi bi-list-ul"></i>
@@ -156,7 +163,7 @@ export const Header = () => {
                 )}
 
                 {/* <div className="divider vr d-none d-md-block me-2"></div> */}
-                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") ? (
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user" || userInfo.userType === "moderator") ? (
                   <Dropdown align="end" className="account-menu">
                     <Dropdown.Toggle variant="white" className="bg-transparent border-0 p-0">
                       <div className="chip-wrapper">
