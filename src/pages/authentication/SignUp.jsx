@@ -223,7 +223,7 @@ export const SignUp = () => {
                                     >
                                         <option value="" disabled>Select user type</option>
                                         {/* <option value="student">Student</option> */}
-                                        <option value="teacher">Teacher</option>
+                                        <option value="user">Teacher</option>
                                         <option value="parent">Parent</option>
                                     </Form.Select>
                                 </Form.Group>

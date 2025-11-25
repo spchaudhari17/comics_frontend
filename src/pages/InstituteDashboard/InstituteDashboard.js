@@ -7,8 +7,11 @@ import { Loader } from "../../lib/loader";
 import API from "../../API";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
+import { useNavigate } from "react-router-dom";
 
 const InstituteDashboard = () => {
+  const navigate = useNavigate();
+
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -243,6 +246,16 @@ const InstituteDashboard = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex gap-2">
+
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={() => navigate(`/activity/${row._id}`)}
+            title="View learning activity"
+          >
+            <i className="bi bi-graph-up-arrow"></i>
+          </Button>
+
           <Button size="sm" variant="warning" onClick={() => handleResetPassword(row._id)}>
             <i className="bi bi-key"></i>
           </Button>

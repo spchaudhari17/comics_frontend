@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Dropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import BellIcon from "../assets/images/icons/bell.svg";
@@ -14,6 +14,17 @@ export const Header = () => {
   const userInfo = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
+
+  useEffect(() => {
+    if (!userInfo) return;
+
+    // if (userInfo.userType === "parent") {
+    //   navigate("/parent/manage-children");
+    // }
+
+   
+  }, [userInfo]);
+
 
 
   const handleLogout = () => {
@@ -86,7 +97,7 @@ export const Header = () => {
                   (
                     <>
                       <li className="nav-item">
-                        <button
+                        {/* <button
                           className="nav-link p-0 btn btn-link text-decoration-none"
                           onClick={() => {
                             if (!userInfo) {
@@ -96,13 +107,43 @@ export const Header = () => {
                               navigate("/super-admin");
                               return alert("Moderators are not allowed to create comics.");
                             }
+                            else if (userInfo.userType === "parent") {
+                              navigate("/parent/manage-children");
+                              // return alert("Moderators are not allowed to create comics.");
+                            }
                             else {
                               navigate("/create-comic"); // agar login hai to create comic page bhejo
                             }
                           }}
                         >
                           Create Comics
-                        </button>
+                        </button> */}
+
+                        {userInfo && userInfo.userType !== "parent" && (
+                          <li className="nav-item">
+                            <button
+                              className="nav-link p-0 btn btn-link text-decoration-none"
+                              onClick={() => {
+                                if (!userInfo) {
+                                  navigate("/login");
+                                }
+                                else if (userInfo.userType === "parent") {
+                                  navigate("/parent/manage-children");
+                                }
+                                else if (userInfo.userType === "moderator") {
+                                  navigate("/super-admin");
+                                  return alert("Moderators are not allowed to create comics.");
+                                }
+                                else {
+                                  navigate("/create-comic");
+                                }
+                              }}
+                            >
+                              Create Comics
+                            </button>
+                          </li>
+                        )}
+
                       </li>
 
                     </>
@@ -162,8 +203,17 @@ export const Header = () => {
                   </li>
                 )}
 
+                {userInfo && (userInfo.userType === "parent") && (
+                  <li className="nav-item">
+                    <Link to={'/parent/manage-children'} className="nav-link p-0">
+                      {/* <i className="bi bi-book-half"></i> */}
+                      <i className="bi bi-speedometer2"></i>
+                    </Link>
+                  </li>
+                )}
+
                 {/* <div className="divider vr d-none d-md-block me-2"></div> */}
-                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user" || userInfo.userType === "moderator") ? (
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user" || userInfo.userType === "moderator" || userInfo.userType === "parent") ? (
                   <Dropdown align="end" className="account-menu">
                     <Dropdown.Toggle variant="white" className="bg-transparent border-0 p-0">
                       <div className="chip-wrapper">

@@ -153,7 +153,8 @@ export const SuperAdmin = () => {
 
 
   //  Filtered comics based on search term
-  const filteredComics = comics.filter((comic) => {
+  const filteredComics = (comics || []).filter((comic) => {
+
     const searchTerm = search.toLowerCase();
     return (
       comic?.user_id?.firstname?.toLowerCase().includes(searchTerm) ||
