@@ -219,12 +219,12 @@ export const AboutUs = () => {
             {/* Our Team Section */}
             <section className="our-team-sec bg-white py-5">
                 <div className="container-xl my-md-4">
-                    <div className="heading-wrapper text-center mx-auto mb-4 pb-2 pb-md-4" style={{ maxWidth: '600px' }}>
+                    <div className="heading-wrapper text-center mx-auto mb-5 pb-sm-2" style={{ maxWidth: '600px' }}>
                         <h1 className="section-heading mb-2">Meet The Expert Team</h1>
                         <div className="sub-title text-muted">Leaders, innovators, and professionals dedicated to shaping the future.</div>
                     </div>
 
-                    <div className="team-wrapper mx-auto" style={{ maxWidth: '900px' }}>
+                    {/* <div className="team-wrapper mx-auto" style={{ maxWidth: '900px' }}>
                         <Row className="align-items-center g-4 gx-md-5">
                             <Col md={5}>
                                 <div data-aos="zoom-in" className="img-cover border border-primary mx-auto p-3" style={{ maxWidth: '350px' }}>
@@ -236,30 +236,37 @@ export const AboutUs = () => {
                                     <div className="name fs-4 fw-bold text-black text-capitalize mb-2">Ajinkya Sham Vidhate</div>
                                     <div className="designation fs-14 text-primary fw-medium mb-4">PMP® | MBA in Logistics & Supply Chain Management | M.S. in Supply Chain Analytics</div>
                                     <div className="description mb-2">
-                                        <p>Founder of Kridemy and a certified project management professional, with dual master’s degrees in <span className="text-theme4 fw-semibold">Supply Chain Analytics (Rutgers Business School, USA)</span> and <span className="text-theme4 fw-semibold">Logistics & Supply Chain Management (XLRI Jamshedpur, India).</span></p>
-                                        <p>Previously led the end-to-end development and operations of <span className="text-theme4 fw-semibold">Shree Gurudatta Lawns</span>, a large-scale event venue in India, and managed multiple supply chain analytics projects across education and industry domains.</p>
+                                        <p>Founder of Kridemy and a certified project management professional, with dual master’s degrees in <span className="highlight">Supply Chain Analytics (Rutgers Business School, USA)</span> and <span className="highlight">Logistics & Supply Chain Management (XLRI Jamshedpur, India).</span></p>
+                                        <p>Previously led the end-to-end development and operations of <span className="highlight">Shree Gurudatta Lawns</span>, a large-scale event venue in India, and managed multiple supply chain analytics projects across education and industry domains.</p>
                                         <p>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</p>
                                     </div>
-                                    {/* <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
+                                    <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                             <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                             <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
                                             <Link to="https://www.instagram.com/" className="fs-16"><i className="bi bi-instagram"></i></Link>
                                             <Link to="https://in.linkedin.com/" className="fs-16"><i className="bi bi-linkedin"></i></Link>
-                                        </div> */}
+                                        </div>
                                 </div>
                             </Col>
                         </Row>
-                    </div>
+                    </div> */}
 
-                    {/* <Row className="gx-md-5 gy-5">
-                        <Col lg={3} md={6}>
-                            <div className="team-wrapper text-center">
-                                <div className="img-wrapper position-relative p-3 p-md-4">
+                    <Row className="gx-md-5 gy-5">
+                        <Col lg={3} sm={6}>
+                            <div data-aos="slide-right" className="team-wrapper text-center">
+                                <div className="img-wrapper p-3">
                                     <img src={require('../assets/images/team1.jpeg')} className="img-fluid" alt="Team Member" />
+                                    <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
+                                        <div className="content-wrapper p-3">
+                                            <div className="mb-3">Founder of Kridemy and a certified project management professional, with dual master’s degrees in <span className="highlight">Supply Chain Analytics (Rutgers Business School, USA)</span> and <span className="highlight">Logistics & Supply Chain Management (XLRI Jamshedpur, India).</span></div>
+                                            <div className="mb-3">Previously led the end-to-end development and operations of <span className="highlight">Shree Gurudatta Lawns</span>, a large-scale event venue in India, and managed multiple supply chain analytics projects across education and industry domains.</div>
+                                            <div>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="team-info text-center mt-3">
                                     <div className="name fs-18 fw-semibold text-black text-capitalize mb-1">Ajinkya Sham Vidhate</div>
-                                    <div className="designation small text-muted text-capitalize mb-2">PMP® | MBA in Logistics & Supply Chain Management | M.S. in Supply Chain Analytics</div>
+                                    <div className="designation fs-12 text-muted text-capitalize mb-2">PMP® | MBA in Logistics & Supply Chain Management | M.S. in Supply Chain Analytics</div>
                                     <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                         <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                         <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
@@ -269,14 +276,20 @@ export const AboutUs = () => {
                                 </div>
                             </div>
                         </Col>
-                        <Col lg={3} md={6}>
+                        <Col lg={3} sm={6}>
                             <div className="team-wrapper text-center">
-                                <div className="img-wrapper position-relative p-3 p-md-4">
+                                <div className="img-wrapper p-3">
                                     <img src={require('../assets/images/team2.jpeg')} className="img-fluid" alt="Team Member" />
+                                    <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
+                                        <div className="content-wrapper p-3">
+                                            <div className="mb-3">Previously led the end-to-end development and operations of <span className="highlight">Shree Gurudatta Lawns</span>, a large-scale event venue in India, and managed multiple supply chain analytics projects across education and industry domains.</div>
+                                            <div>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="team-info text-center mt-3">
                                     <div className="name fs-18 fw-semibold text-black text-capitalize mb-1">Davin Martin</div>
-                                    <div className="designation small text-muted text-capitalize mb-2">Developer (Supply chain, education tech, analytics)</div>
+                                    <div className="designation fs-12 text-muted text-capitalize mb-2">Developer (Supply chain, education tech, analytics)</div>
                                     <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                         <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                         <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
@@ -286,14 +299,20 @@ export const AboutUs = () => {
                                 </div>
                             </div>
                         </Col>
-                        <Col lg={3} md={6}>
+                        <Col lg={3} sm={6}>
                             <div className="team-wrapper text-center">
-                                <div className="img-wrapper position-relative p-3 p-md-4">
+                                <div className="img-wrapper p-3">
                                     <img src={require('../assets/images/team3.jpeg')} className="img-fluid" alt="Team Member" />
+                                    <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
+                                        <div className="content-wrapper p-3">
+                                            <div className="mb-3">Founder of Kridemy and a certified project management professional, with dual master’s degrees in <span className="highlight">Supply Chain Analytics (Rutgers Business School, USA)</span> and <span className="highlight">Logistics & Supply Chain Management (XLRI Jamshedpur, India).</span></div>
+                                            <div>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="team-info text-center mt-3">
                                     <div className="name fs-18 fw-semibold text-black text-capitalize mb-1">Jason Mark</div>
-                                    <div className="designation small text-muted text-capitalize mb-2">Designer (Supply chain, education tech, analytics)</div>
+                                    <div className="designation fs-12 text-muted text-capitalize mb-2">Designer (Supply chain, education tech, analytics)</div>
                                     <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                         <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                         <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
@@ -303,14 +322,20 @@ export const AboutUs = () => {
                                 </div>
                             </div>
                         </Col>
-                        <Col lg={3} md={6}>
-                            <div className="team-wrapper text-center">
-                                <div className="img-wrapper position-relative p-3 p-md-4">
+                        <Col lg={3} sm={6}>
+                            <div data-aos="slide-left" className="team-wrapper text-center">
+                                <div className="img-wrapper p-3">
                                     <img src={require('../assets/images/team4.jpeg')} className="img-fluid" alt="Team Member" />
+                                    <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
+                                        <div className="content-wrapper p-3">
+                                            <div className="mb-3">Founder of Kridemy and a certified project management professional, with dual master’s degrees in <span className="highlight">Supply Chain Analytics (Rutgers Business School, USA)</span> and <span className="highlight">Logistics & Supply Chain Management (XLRI Jamshedpur, India).</span></div>
+                                            <div>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="team-info text-center mt-3">
                                     <div className="name fs-18 fw-semibold text-black text-capitalize mb-1">Jason Phillip</div>
-                                    <div className="designation small text-muted text-capitalize mb-2">Lead Architect (Supply chain, education tech, analytics)</div>
+                                    <div className="designation fs-12 text-muted text-capitalize mb-2">Lead Architect (Supply chain, education tech, analytics)</div>
                                     <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                         <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                         <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
@@ -320,7 +345,7 @@ export const AboutUs = () => {
                                 </div>
                             </div>
                         </Col>
-                    </Row> */}
+                    </Row>
                 </div>
             </section>
         </div>

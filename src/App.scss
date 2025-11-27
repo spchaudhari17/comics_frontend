@@ -383,6 +383,7 @@ input[type="time"]:invalid:before {
   width: 100%;
   min-height: 30vh;
   transition: all 0.3s;
+  overflow-x: hidden;
 }
 
 // End: Top Header CSS
@@ -523,32 +524,64 @@ footer {
 
 /* team */
 .our-team-sec {
-  .img-wrapper:after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 5px;
-    background: transparent;
-    border: 1px solid $theme3;
-    /* opacity: .1; */
-    transform: rotate(-2deg);
-    z-index: 1;
-    transition: all .7s;
+  .img-wrapper {
+    position: relative;
+    img {
+      max-height: 316px;
+    }
+    &:after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: transparent;
+      border: 1px solid $theme3;
+      /* opacity: .1; */
+      transform: rotate(-2deg);
+      z-index: 1;
+      transition: all .7s;
 
-    @include media-breakpoint-up(lg) {
-      transform: rotate(-5deg);
+      @include media-breakpoint-up(lg) {
+        transform: rotate(-5deg);
+      }
     }
   }
 
-  .team-wrapper:hover .img-wrapper:after {
-    border-color: $warning;
-    opacity: 1;
-    transform: rotate(0deg) !important;
+  .team-wrapper {
+    .member-description {
+      color: $theme1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      font-size: 12px;
+      visibility: hidden;
+
+      .content-wrapper {
+        max-height: calc(100% - 30px);
+        overflow: auto;
+      }
+
+      .highlight {
+        color: $theme4;
+        font-weight: 600;
+      }
+    }
+
+    &:hover .img-wrapper:after {
+      background: rgba($primary, 0.8);
+      border-color: $warning;
+      opacity: 1;
+      transform: rotate(0deg) !important;
+    }
+
+    &:hover .member-description {
+      visibility: visible;
+    }
   }
 
-  .social-wrapper a {
+  .team-wrapper .social-wrapper a {
     color: $primary;
     transition: all .3s;
 
