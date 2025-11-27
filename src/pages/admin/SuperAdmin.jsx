@@ -20,6 +20,11 @@ export const SuperAdmin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const userInfo = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : null;
+
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedComicId, setSelectedComicId] = useState(null);
   const [search, setSearch] = useState("");
@@ -148,7 +153,8 @@ export const SuperAdmin = () => {
 
 
   //  Filtered comics based on search term
-  const filteredComics = comics.filter((comic) => {
+  const filteredComics = (comics || []).filter((comic) => {
+
     const searchTerm = search.toLowerCase();
     return (
       comic?.user_id?.firstname?.toLowerCase().includes(searchTerm) ||
@@ -322,11 +328,18 @@ export const SuperAdmin = () => {
             🌍 Edit Country
           </Button>
 
-          {(row.status === "approved" || row.status === "rejected") && (
-            <Button size="sm" variant="outline-danger" onClick={() => openDeleteModal(row._id)} >
-              <i className="bi bi-trash3"></i>
-            </Button>
-          )}
+          {userInfo?.userType === "admin" &&
+            (row.status === "approved" || row.status === "rejected") && (
+              <Button
+                size="sm"
+                variant="outline-danger"
+                onClick={() => openDeleteModal(row._id)}
+              >
+                <i className="bi bi-trash3"></i>
+              </Button>
+            )}
+
+
         </div>
       ),
     },

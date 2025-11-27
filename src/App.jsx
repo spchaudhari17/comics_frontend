@@ -27,7 +27,7 @@ import OtpVerification from './pages/authentication/OtpVerification';
 import { SuperAdmin } from './pages/admin/SuperAdmin';
 import MyComics from './pages/mycomics/MyComics';
 import ComicGenerator from './pages/ComicGenerator/ComicGenerator';
-import ParentActivity from './pages/parentsPages/ParentActivity';
+import ParentActivity from './pages/ParentActivity/ParentActivity';
 import Privacy from './pages/PrivacyPolicy/Privacy';
 import TermsAndCondition from './pages/TermsCondition/TermsAndCondition';
 import ComicsList from './pages/ComicsList/ComicsList';
@@ -41,6 +41,7 @@ import AdminComicDetails from "./pages/admin/AdminComicDetails";
 import MyComicsDetails from "./pages/mycomics/MyComicsDetails";
 import SubjectList from "./pages/admin/SubjectList";
 import InstituteDashboard from "./pages/InstituteDashboard/InstituteDashboard";
+import ParentManageChildren from "./pages/ParentActivity/ParentManageChildren";
 
 
 function App() {
@@ -94,7 +95,8 @@ function App() {
             <Route path="terms-and-condition" element={<TermsAndCondition />} />
             <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
             <Route path="contactList" element={<ContactList />} />
-            <Route path="ParentActivity" element={<ParentActivity />} />
+            <Route path="/parent/manage-children" element={<ParentManageChildren />} />
+            <Route path="/activity/:childId" element={<ParentActivity />} />
             <Route path="my-comics-details/:id" element={<MyComicsDetails />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
