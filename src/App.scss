@@ -524,6 +524,9 @@ footer {
 
 /* team */
 .our-team-sec {
+  .swiper-wrapper {
+    margin: 40px 0;
+  }
   .img-wrapper {
     position: relative;
     img {
