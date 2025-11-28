@@ -345,7 +345,7 @@ export const AboutUs = () => {
                         </div>
                         <div data-aos="slide-left" className="team-wrapper text-center">
                             <div className="img-wrapper p-3">
-                                <img src={require('../assets/images/team2.jpeg')} className="img-fluid" alt="Team Member" />
+                                <img src={require('../assets/images/team4.jpeg')} className="img-fluid" alt="Team Member" />
                                 <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
                                     <div className="content-wrapper p-3">
                                         <div className="mb-3">Founder of Kridemy and a certified project management professional, with dual master’s degrees in <span className="highlight">Supply Chain Analytics (Rutgers Business School, USA)</span> and <span className="highlight">Logistics & Supply Chain Management (XLRI Jamshedpur, India).</span></div>
