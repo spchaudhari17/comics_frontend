@@ -5,11 +5,13 @@ import BellIcon from "../assets/images/icons/bell.svg";
 import UserIcon from "../assets/images/icons/user.svg";
 import LogoutIcon from "../assets/images/icons/log-out.svg";
 import { logoutUser } from "../redux/actions/userActions";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+
 
 export const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  // const { userInfo } = useSelector((state) => state.userLogin);
 
   const userInfo = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
@@ -22,7 +24,7 @@ export const Header = () => {
     //   navigate("/parent/manage-children");
     // }
 
-   
+
   }, [userInfo]);
 
 
@@ -71,23 +73,23 @@ export const Header = () => {
                 {(
                   <>
                     <li className="nav-item">
-                      <Link to={'/about'} className="nav-link p-0">About Us</Link>
+                      <Link to={'/about'} title="about" className="nav-link p-0">About Us</Link>
                     </li>
                     <li className="nav-item">
-                      <Link to={'/our-library'} className="nav-link p-0">Library</Link>
+                      <Link to={'/our-library'} title="our-library" className="nav-link p-0">Library</Link>
                     </li>
 
                     <li className="nav-item">
-                      <Link to={'/for-teacher'} className="nav-link p-0">For Teachers</Link>
+                      <Link to={'/for-teacher'} title="for-teacher" className="nav-link p-0">For Teachers</Link>
                     </li>
                     <li className="nav-item">
-                      <Link to={'/for-student'} className="nav-link p-0">For Students</Link>
+                      <Link to={'/for-student'} title="for-studen" className="nav-link p-0">For Students</Link>
                     </li>
                     <li className="nav-item">
-                      <Link to={'/for-parent'} className="nav-link p-0">For Parents</Link>
+                      <Link to={'/for-parent'} title="for-parent" className="nav-link p-0">For Parents</Link>
                     </li>
                     <li className="nav-item">
-                      <Link to={'/contact'} className="nav-link p-0">Contact</Link>
+                      <Link to={'/contact'} title="contact" className="nav-link p-0">Contact</Link>
                     </li>
                   </>
                 )
@@ -122,7 +124,7 @@ export const Header = () => {
                         {userInfo && userInfo.userType !== "parent" && (
                           <li className="nav-item">
                             <button
-                              className="nav-link p-0 btn btn-link text-decoration-none"
+                              className="nav-link p-0 btn btn-link text-decoration-none" title="create-comic"
                               onClick={() => {
                                 if (!userInfo) {
                                   navigate("/login");
@@ -156,7 +158,7 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
                   <li className="nav-item">
-                    <Link to={'/super-admin'} className="nav-link p-0">
+                    <Link to={'/super-admin'} title="super-admin" className="nav-link p-0">
                       <i className="bi bi-grid-fill"></i>
                     </Link>
                   </li>
@@ -164,7 +166,7 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
                   <li className="nav-item">
-                    <Link to={'/allUsers'} className="nav-link p-0">
+                    <Link to={'/allUsers'} title='allUsers' className="nav-link p-0">
                       <i className="bi bi-people-fill"></i>
                     </Link>
                   </li>
@@ -172,15 +174,15 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
                   <li className="nav-item">
-                    <Link to={'/contactList'} className="nav-link p-0">
+                    <Link to={'/contactList'} title="contactList" className="nav-link p-0">
                       <i className="bi bi-envelope-fill"></i>
                     </Link>
                   </li>
                 )}
 
-                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
+                {userInfo && (userInfo.userType === "admin") && (
                   <li className="nav-item">
-                    <Link to={'/subjectlist'} className="nav-link p-0">
+                    <Link to={'/subjectlist'} title="subjectlist" className="nav-link p-0">
                       <i className="bi bi-list-ul"></i>
                     </Link>
                   </li>
@@ -188,7 +190,7 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                   <li className="nav-item">
-                    <Link to={'/my-comics'} className="nav-link p-0">
+                    <Link to={'/my-comics'} title="my-comics" className="nav-link p-0">
                       <i className="bi bi-book-half"></i>
                     </Link>
                   </li>
@@ -196,16 +198,24 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                   <li className="nav-item">
-                    <Link to={'/institute-dashboard'} className="nav-link p-0">
+                    <Link to={'/institute-dashboard'} title="institute-dashboard" className="nav-link p-0">
                       {/* <i className="bi bi-book-half"></i> */}
                       <i className="bi bi-speedometer2"></i>
                     </Link>
                   </li>
                 )}
 
+                {userInfo && (userInfo.userType === "admin") && (
+                  <li className="nav-item">
+                    <Link to={'/adUnitManager'} title="ComicRevenueReport" className="nav-link p-0">
+                      <i class="bi bi-graph-up-arrow"></i>
+                    </Link>
+                  </li>
+                )}
+
                 {userInfo && (userInfo.userType === "parent") && (
                   <li className="nav-item">
-                    <Link to={'/parent/manage-children'} className="nav-link p-0">
+                    <Link to={'/parent/manage-children'} title='manage-children' className="nav-link p-0">
                       {/* <i className="bi bi-book-half"></i> */}
                       <i className="bi bi-speedometer2"></i>
                     </Link>
@@ -235,13 +245,22 @@ export const Header = () => {
                         </div>
                       </div>
                       <Dropdown.Divider className="my-1" />
-                      <Dropdown.Item className="text-theme3">
+
+                      <Dropdown.Item className="text-theme3" as={Link} to="/my-profile">
                         <img src={UserIcon} alt="User Icon" className="img-fluid" /> Profile
                       </Dropdown.Item>
+
                       <Dropdown.Divider className="my-1" />
+
+                      <Dropdown.Item as={Link} to="/changepassword" className="text-theme3">
+                        <i className="bi bi-key-fill me-2"></i> Change Password
+                      </Dropdown.Item>
+
+
                       <Dropdown.Item onClick={handleLogout} className="text-theme3">
                         <img src={LogoutIcon} alt="Logout Icon" className="img-fluid" /> Log out
                       </Dropdown.Item>
+
                     </Dropdown.Menu>
                   </Dropdown>
                 ) : (
