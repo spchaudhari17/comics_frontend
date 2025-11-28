@@ -42,6 +42,10 @@ import MyComicsDetails from "./pages/mycomics/MyComicsDetails";
 import SubjectList from "./pages/admin/SubjectList";
 import InstituteDashboard from "./pages/InstituteDashboard/InstituteDashboard";
 import ParentManageChildren from "./pages/ParentActivity/ParentManageChildren";
+import ChangePassword from "./pages/authentication/ChangePassword";
+import ProfileDetails from "./pages/authentication/ProfileDetails";
+import ComicRevenueReport from "./pages/admin/ComicRevenueReport";
+import AdUnitManager from "./pages/admin/AdUnitManager";
 
 
 function App() {
@@ -87,7 +91,11 @@ function App() {
             <Route path="allUsers" element={<AllUsers />} />
             <Route path="comic-details/:id" element={<AdminComicDetails />} />
             <Route path="subjectlist" element={<SubjectList />} />
+            <Route path="adUnitManager" element={<AdUnitManager />} />
+            <Route path="comic-revenue-report" element={<ComicRevenueReport />} />
 
+            <Route path="changepassword" element={<ChangePassword />} />
+            <Route path="my-profile" element={<ProfileDetails />} />
             <Route path="my-comics" element={<MyComics />} />
             <Route path="institute-dashboard" element={<InstituteDashboard />} />
             <Route path="create-comic" element={<ComicGenerator />} />

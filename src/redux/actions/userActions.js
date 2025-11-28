@@ -46,6 +46,19 @@ export const loginUser = (formData, navigate) => async (dispatch) => {
             { headers: { "Content-Type": "application/json" } }
         );
 
+        // CASE 1: Email not verified (Backend sends OTP)
+        if (data.error && data.data?.is_emailVerified === 0) {
+            dispatch({ type: USER_LOGIN_FAIL, payload: data.message });
+
+            // Redirect to OTP page
+            navigate("/OtpVerification", {
+                state: { email: data.data.email }
+            });
+
+            return; // stop here
+        }
+
+        //  CASE 2: Login success
         if (!data.error) {
             localStorage.setItem("token", data.data.token);
             localStorage.setItem("user", JSON.stringify(data.data));
@@ -74,11 +87,12 @@ export const verifyOtp = (formData, navigate) => async (dispatch) => {
             { headers: { "Content-Type": "application/json" } }
         );
 
-        localStorage.setItem("token", data.data.token);
-        localStorage.setItem("user", JSON.stringify(data.data));
+        // localStorage.setItem("token", data.data.token);
+        // localStorage.setItem("user", JSON.stringify(data.data));
 
         dispatch({ type: USER_VERIFY_OTP_SUCCESS, payload: data.data });
-        navigate("/create-comic");
+        navigate("/login");
+        window.location.reload();
 
     } catch (error) {
         dispatch({
