@@ -279,14 +279,14 @@ export const AboutUs = () => {
                                 <img src={require('../assets/images/team2.jpeg')} className="img-fluid" alt="Team Member" />
                                 <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
                                     <div className="content-wrapper p-3">
-                                        <div className="mb-3">Previously led the end-to-end development and operations of <span className="highlight">Shree Gurudatta Lawns</span>, a large-scale event venue in India, and managed multiple supply chain analytics projects across education and industry domains.</div>
-                                        <div>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</div>
+                                        <div className="mb-3">Lead a cross-functional team of <span className="highlight">mobile developer, web developer, and web designer</span>, ensuring seamless coordination across all development streams. Defined and executed the technical strategy to align with project goals and milestones. <span className="highlight">Monitored team performance, tracked progress, and ensured timely delivery</span> with high-quality standards.</div>
+                                        <div>Provided continuous mentorship, guidance, and technical support to the team, helping resolve challenges and maintaining overall project efficiency throughout the development lifecycle.</div>
                                     </div>
                                 </div>
                             </div>
                             <div className="team-info text-center mt-3">
-                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Davin Martin</div>
-                                <div className="designation fs-12 text-muted text-capitalize mb-2">Developer (Supply chain, education tech, analytics)</div>
+                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Mohammad Yunus</div>
+                                <div className="designation fs-12 text-muted text-capitalize mb-2">Tech Lead (Mobile app and Website development)</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                     <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                     <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
@@ -300,14 +300,20 @@ export const AboutUs = () => {
                                 <img src={require('../assets/images/team3.jpeg')} className="img-fluid" alt="Team Member" />
                                 <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
                                     <div className="content-wrapper p-3">
-                                        <div className="mb-3">Founder of Kridemy and a certified project management professional, with dual master’s degrees in <span className="highlight">Supply Chain Analytics (Rutgers Business School, USA)</span> and <span className="highlight">Logistics & Supply Chain Management (XLRI Jamshedpur, India).</span></div>
-                                        <div>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</div>
+                                        <div className="mb-3">
+                                            As a Senior Web Designer, I design <span className="highlight">responsive, modern, and user-focused</span> web interfaces. 
+                                            I transform requirements into visually appealing web pages using <span className="highlight">React, Bootstrap, custom UI components, icons, images, and animations.</span>
+                                        </div>
+                                        <div>
+                                            I ensure consistent branding, high usability, and smooth navigation across all devices. 
+                                            I also contributed to the Kridemy project by building major pages with clean layouts, interactive features, animation effects, and fully responsive designs.
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="team-info text-center mt-3">
-                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Jason Mark</div>
-                                <div className="designation fs-12 text-muted text-capitalize mb-2">Designer (Supply chain, education tech, analytics)</div>
+                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Vasheem Ahmad</div>
+                                <div className="designation fs-12 text-muted text-capitalize mb-2">Senior Web Designer (Expert in Website Design | Mobile-First Layouts)</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                     <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                     <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
@@ -327,8 +333,8 @@ export const AboutUs = () => {
                                 </div>
                             </div>
                             <div className="team-info text-center mt-3">
-                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Jason Phillip</div>
-                                <div className="designation fs-12 text-muted text-capitalize mb-2">Lead Architect (Supply chain, education tech, analytics)</div>
+                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Shubham Prakash Chaudhari</div>
+                                <div className="designation fs-12 text-muted text-capitalize mb-2">Software Engineer (Designated role is Full Stack Developer)</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                     <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                     <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
@@ -348,8 +354,8 @@ export const AboutUs = () => {
                                 </div>
                             </div>
                             <div className="team-info text-center mt-3">
-                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Jason Phillip</div>
-                                <div className="designation fs-12 text-muted text-capitalize mb-2">Lead Architect (Supply chain, education tech, analytics)</div>
+                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Charul</div>
+                                <div className="designation fs-12 text-muted text-capitalize mb-2">Software Engineer (Mobile App Development)</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                     <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                     <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
