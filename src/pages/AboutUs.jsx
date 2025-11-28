@@ -301,11 +301,11 @@ export const AboutUs = () => {
                                 <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
                                     <div className="content-wrapper p-3">
                                         <div className="mb-3">
-                                            As a Senior Web Designer, I design <span className="highlight">responsive, modern, and user-focused</span> web interfaces. 
+                                            As a Senior Web Designer, I design <span className="highlight">responsive, modern, and user-focused</span> web interfaces.
                                             I transform requirements into visually appealing web pages using <span className="highlight">React, Bootstrap, custom UI components, icons, images, and animations.</span>
                                         </div>
                                         <div>
-                                            I ensure consistent branding, high usability, and smooth navigation across all devices. 
+                                            I ensure consistent branding, high usability, and smooth navigation across all devices.
                                             I also contributed to the Kridemy project by building major pages with clean layouts, interactive features, animation effects, and fully responsive designs.
                                         </div>
                                     </div>
@@ -327,14 +327,15 @@ export const AboutUs = () => {
                                 <img src={require('../assets/images/team4.jpeg')} className="img-fluid" alt="Team Member" />
                                 <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
                                     <div className="content-wrapper p-3">
-                                        <div className="mb-3">Founder of Kridemy and a certified project management professional, with dual master’s degrees in <span className="highlight">Supply Chain Analytics (Rutgers Business School, USA)</span> and <span className="highlight">Logistics & Supply Chain Management (XLRI Jamshedpur, India).</span></div>
-                                        <div>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</div>
+                                        <div className='mb-3'>At Kridemy, I led the <span className='highlight'>entire backend and server architecture</span>, ensuring a secure, fast, and highly scalable system. I developed all major backend functionalities, including <span className='highlight'>comic content pipelines, quiz & hardcore quiz engines, FAQs, and “Did You Know?” automation modules.</span></div>
+                                        <div>I also built the Admin Dashboard, along with dedicated <span className='highlight'>Teacher</span> and <span className='highlight'>Parent Dashboards</span>, enabling real-time tracking of a child’s <span className='highlight'>learning progress, quiz performance, activity insights</span>, and overall engagement.
+                                            Additionally, I handled complete <span className='highlight'>DevOps operations</span>—server setup, CI/CD pipelines, performance optimization, and system monitoring—ensuring the platform runs smoothly with robust, production-grade backend support.</div>
                                     </div>
                                 </div>
                             </div>
                             <div className="team-info text-center mt-3">
-                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Shubham Prakash Chaudhari</div>
-                                <div className="designation fs-12 text-muted text-capitalize mb-2">Software Engineer (Designated role is Full Stack Developer)</div>
+                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Shubham Chaudhari</div>
+                                <div className="designation fs-12 text-muted text-capitalize mb-2">Senior Software Engineer (Designated role is Full Stack Developer)</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                     <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                     <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
@@ -348,14 +349,15 @@ export const AboutUs = () => {
                                 <img src={require('../assets/images/team4.jpeg')} className="img-fluid" alt="Team Member" />
                                 <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
                                     <div className="content-wrapper p-3">
-                                        <div className="mb-3">Founder of Kridemy and a certified project management professional, with dual master’s degrees in <span className="highlight">Supply Chain Analytics (Rutgers Business School, USA)</span> and <span className="highlight">Logistics & Supply Chain Management (XLRI Jamshedpur, India).</span></div>
-                                        <div>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</div>
+                                        <div className='mb-3'>Work done in Kridemy:As a Flutter Developer for <span className="highlight">Kridemy</span>, I was responsible for transforming the app from concept to a fully functional, live product available on both Android and iOS. I designed and developed a <span className="highlight">beautiful, user-friendly UI/UX</span>, ensuring smooth navigation and an engaging experience for users. I integrated the complete <span className="highlight">comic viewing module</span>, allowing users to explore and read comics seamlessly. Additionally, I implemented the full <span className="highlight">quiz system</span>, including normal quizzes, hardcore quizzes, and reward-based features. Users can
+                                            <span className="highlight">watch ads to revive, double their rewards, or use power cards</span>, creating a dynamic and interactive learning experience.</div>
+                                        <div>I also worked on backend integration, optimized performance, and ensured the app followed store guidelines for both Play Store and App Store publishing. Overall, I played a key role in bringing Kridemy to life with a polished interface, advanced features, and a stable cross-platform experience.</div>
                                     </div>
                                 </div>
                             </div>
                             <div className="team-info text-center mt-3">
-                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Charul</div>
-                                <div className="designation fs-12 text-muted text-capitalize mb-2">Software Engineer (Mobile App Development)</div>
+                                <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Charul Budania</div>
+                                <div className="designation fs-12 text-muted text-capitalize mb-2">Software Engineer (Flutter Developer)</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
                                     <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
                                     <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>

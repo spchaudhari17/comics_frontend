@@ -70,6 +70,26 @@ const AllUsers = () => {
     }
   };
 
+  // Toggle Unlimited Access
+  const handleUnlimitedToggle = async (userId, currentValue) => {
+    try {
+      const { data } = await API.post("/admin/unlimited", {
+        userId,
+        isUnlimited: !currentValue  // toggle
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        fetchUsers(); // refresh list
+      } else {
+        toast.error(data.error || "Action failed");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Something went wrong");
+    }
+  };
+
+
   // Open Delete Modal
   const handleDeleteOpen = (userId) => {
     setSelectedUserId(userId);
@@ -134,18 +154,18 @@ const AllUsers = () => {
       name: "User Type",
       selector: (row) => row.userType,
       sortable: true,
-      minWidth: "150px",
+      minWidth: "50px",
       cell: (row) => <Badge bg="info">{row.userType || "N/A"}</Badge>,
     },
     {
       name: "Joined On",
       selector: (row) => new Date(row.createdAt).toLocaleDateString(),
       sortable: true,
-      minWidth: "150px",
+      minWidth: "50px",
     },
     {
       name: "Actions",
-      minWidth: "160px",
+      minWidth: "350px",
       cell: (row) => (
         <div className="d-flex gap-2">
 
@@ -171,6 +191,30 @@ const AllUsers = () => {
               Remove Moderator
             </button>
           )}
+
+          {/* Unlimited Access Toggle (Only admin → only for normal user) */}
+          {(userInfo.userType === "admin" &&
+            (row.userType === "user" || row.userType === "admin")) && (
+
+              <button
+                className={`btn btn-sm ${row.isUnlimited ? "btn-warning" : "btn-success"
+                  } d-flex align-items-center gap-1`}
+                onClick={() => handleUnlimitedToggle(row._id, row.isUnlimited)}
+              >
+                {row.isUnlimited ? (
+                  <>
+                    <i className="bi bi-unlock-fill"></i> Disable Unlimited
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-lock-fill"></i> Enable Unlimited
+                  </>
+                )}
+              </button>
+            )}
+
+
+
 
 
           {/* View Info Button */}
