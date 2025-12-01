@@ -5,6 +5,8 @@ import dataTableCustomStyles from "../../assets/styles/dataTableCustomStyles";
 import { NoDataComponent } from "../../components/NoDataComponent";
 import { Loader } from "../../lib/loader";
 import API from "../../API";
+import { toast } from "react-toastify";
+
 
 const ContactList = () => {
   const [contacts, setContacts] = useState([]);
@@ -20,6 +22,10 @@ const ContactList = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
 
   // Fetch contacts
   const fetchContacts = async () => {
@@ -61,9 +67,14 @@ const ContactList = () => {
       setDeleting(true);
       await API.delete(`/user/contact/${deleteId}`);
       setContacts((prev) => prev.filter((c) => c._id !== deleteId));
+
+      toast.success("Contact deleted successfully!");
+
       setShowDeleteModal(false);
     } catch (err) {
-      alert("Failed to delete contact");
+      toast.error(
+        err.response?.data?.message || "Failed to delete contact"
+      );
     } finally {
       setDeleting(false);
       setDeleteId(null);
@@ -74,7 +85,7 @@ const ContactList = () => {
   const columns = [
     {
       name: "#",
-      selector: (row, index) => index + 1,
+      selector: (row, index) => (currentPage - 1) * perPage + index + 1,
       width: "60px",
     },
     {
@@ -181,6 +192,8 @@ const ContactList = () => {
                 customStyles={dataTableCustomStyles}
                 noDataComponent={<NoDataComponent />}
                 striped
+                onChangePage={(page) => setCurrentPage(page)}
+                onChangeRowsPerPage={(rows) => setPerPage(rows)}
               />
             </div>
           </div>

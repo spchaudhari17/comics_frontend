@@ -64,7 +64,20 @@ export const loginUser = (formData, navigate) => async (dispatch) => {
             localStorage.setItem("user", JSON.stringify(data.data));
 
             dispatch({ type: USER_LOGIN_SUCCESS, payload: data.data });
-            navigate("/create-comic");
+            // navigate("/create-comic");
+
+            const userType = data.data.userType;
+
+            //  ROLE BASED REDIRECT HERE
+            if (userType === "admin" || userType === "moderator") {
+                navigate("/super-admin");
+            }
+            else if (userType === "parent") {
+                navigate("/parent/manage-children");
+            }
+            else {
+                navigate("/create-comic"); // normal user
+            }
         } else {
             dispatch({ type: USER_LOGIN_FAIL, payload: data.message });
         }

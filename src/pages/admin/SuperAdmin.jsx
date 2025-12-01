@@ -35,6 +35,9 @@ export const SuperAdmin = () => {
   const [selectedSeriesId, setSelectedSeriesId] = useState(null);
   const [newCountry, setNewCountry] = useState("");
   const [updatingCountry, setUpdatingCountry] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
 
 
   // Redux state
@@ -190,11 +193,11 @@ export const SuperAdmin = () => {
 
 
   const columns = [
-    // {
-    //   name: "#",
-    //   selector: (row, index) => index + 1,
-    //   width: "60px",
-    // },
+    {
+      name: "#",
+      selector: (row, index) => (currentPage - 1) * perPage + index + 1,
+      width: "60px",
+    },
     {
       name: "Creator Name",
       selector: row => row.user_id?.firstname || "Unknown",
@@ -452,6 +455,8 @@ export const SuperAdmin = () => {
                   customStyles={dataTableCustomStyles}
                   noDataComponent={<NoDataComponent />}
                   striped
+                  onChangePage={(page) => setCurrentPage(page)}
+                  onChangeRowsPerPage={(rows) => setPerPage(rows)}
                 />
               </div>
               {updating && <p className="text-info">Updating status...</p>}

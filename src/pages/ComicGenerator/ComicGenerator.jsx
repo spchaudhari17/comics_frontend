@@ -666,13 +666,13 @@ export const ComicGenerator = () => {
           </div>
 
           {/* Debug Step Control (optional for development) */}
-          <div className="d-flex gap-2 mb-3">
+          {/* <div className="d-flex gap-2 mb-3">
             <Button variant="outline-primary" onClick={() => setStep(0)}>Step 0: Story</Button>
             <Button variant="outline-primary" onClick={() => setStep(1)}>Step 1: Breakdown</Button>
             <Button variant="outline-primary" onClick={() => setStep(2)}>Step 2: Prompt</Button>
             <Button variant="outline-primary" onClick={() => setStep(3)}>Step 3: Preview</Button>
             <Button variant="outline-primary" onClick={() => setStep(4)}>Step 4: Publish</Button>
-          </div>
+          </div> */}
 
           {successMsg && (
             <Alert variant="success" className="mb-4">

@@ -6,6 +6,8 @@ import { NoDataComponent } from "../../components/NoDataComponent";
 import { Loader } from "../../lib/loader";
 import API from "../../API";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
 
 const ParentManageChildren = () => {
     const navigate = useNavigate()
@@ -45,7 +47,10 @@ const ParentManageChildren = () => {
 
     // ---------- ADD CHILD ----------
     const handleAddChild = async () => {
-        if (!username.trim()) return alert("Please enter a username.");
+        if (!username.trim()) {
+            toast.error("Please enter a username.");
+            return;
+        }
 
         try {
             setAdding(true);
@@ -54,13 +59,16 @@ const ParentManageChildren = () => {
             });
 
             if (data.success) {
+                toast.success("Child added successfully!");
+
                 setUsername("");
                 fetchChildren();
             } else {
-                alert(data.message);
+
+                toast.error(data.message || "Failed to add child");
             }
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to add child");
+            toast.error(err.response?.data?.message || "Failed to add child");
         } finally {
             setAdding(false);
         }
@@ -75,13 +83,15 @@ const ParentManageChildren = () => {
             });
 
             if (data.success) {
+                toast.success("Child removed successfully!");
+
                 setShowDeleteModal(false);
                 fetchChildren();
             } else {
-                alert(data.message);
+                toast.error(data.message || "Failed to delete child");
             }
         } catch (err) {
-            alert("Failed to delete child");
+            toast.error(err.response?.data?.message || "Failed to delete child");
         } finally {
             setDeleting(false);
         }

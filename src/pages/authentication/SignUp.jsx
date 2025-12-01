@@ -6,6 +6,8 @@ import 'react-phone-input-2/lib/style.css';
 import './authentication.scss';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../../redux/actions/userActions';
+import { toast } from "react-toastify";
+
 
 export const SignUp = () => {
     const dispatch = useDispatch();
@@ -47,7 +49,8 @@ export const SignUp = () => {
         e.preventDefault();
 
         if (newPassword !== confirmPassword) {
-            alert("Passwords do not match");
+            toast.error("Passwords do not match!");
+
             return;
         }
 

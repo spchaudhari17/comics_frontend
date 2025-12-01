@@ -13,6 +13,9 @@ const MyComics = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
 
   useEffect(() => {
     const fetchComics = async () => {
@@ -77,6 +80,11 @@ const MyComics = () => {
 
 
   const columns = [
+    {
+      name: "#",
+      selector: (row, index) => (currentPage - 1) * perPage + index + 1,
+      width: "60px"
+    },
     {
       name: "Title",
       sortable: true,
@@ -218,6 +226,8 @@ const MyComics = () => {
                   striped
                   customStyles={dataTableCustomStyles}
                   noDataComponent={<NoDataComponent />}
+                  onChangePage={(page) => setCurrentPage(page)}
+                  onChangeRowsPerPage={(rows) => setPerPage(rows)}
                 />
               </div>
             </div>

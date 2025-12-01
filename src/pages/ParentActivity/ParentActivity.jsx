@@ -27,6 +27,10 @@ const ParentActivity = () => {
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [perPage, setPerPage] = useState(10);
+
+
     useEffect(() => {
         fetchActivity();
     }, []);
@@ -128,7 +132,7 @@ const ParentActivity = () => {
 
     // 📘 Table Columns
     const columns = [
-        { name: "#", selector: (row, i) => i + 1, width: "60px" },
+        { name: "#", selector: (row, index) => (currentPage - 1) * perPage + index + 1, width: "60px" },
 
         {
             name: "Activity Type",
@@ -301,6 +305,8 @@ const ParentActivity = () => {
                         striped
                         highlightOnHover
                         customStyles={dataTableCustomStyles}
+                        onChangePage={(page) => setCurrentPage(page)}
+                        onChangeRowsPerPage={(rows) => setPerPage(rows)}
                     />
                 </div>
 

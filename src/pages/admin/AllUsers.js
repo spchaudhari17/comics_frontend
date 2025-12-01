@@ -21,6 +21,10 @@ const AllUsers = () => {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [selectedUserInfo, setSelectedUserInfo] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
+
   const handleCloseInfo = () => setShowInfoModal(false);
 
 
@@ -135,7 +139,7 @@ const AllUsers = () => {
   const columns = [
     {
       name: "#",
-      selector: (row, index) => index + 1,
+      selector: (row, index) => (currentPage - 1) * perPage + index + 1,
       width: "60px",
     },
     {
@@ -300,6 +304,8 @@ const AllUsers = () => {
                 customStyles={dataTableCustomStyles}
                 noDataComponent={<NoDataComponent />}
                 striped
+                onChangePage={(page) => setCurrentPage(page)}
+                onChangeRowsPerPage={(rows) => setPerPage(rows)}
               />
             </div>
           </div>

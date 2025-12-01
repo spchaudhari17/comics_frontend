@@ -5,6 +5,8 @@ import dataTableCustomStyles from "../../assets/styles/dataTableCustomStyles";
 import { Loader } from "../../lib/loader";
 import { NoDataComponent } from "../../components/NoDataComponent";
 import API from "../../API";
+import { toast } from "react-toastify";
+
 
 const SubjectList = () => {
   const [subjects, setSubjects] = useState([]);
@@ -37,6 +39,10 @@ const SubjectList = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
+
   // Fetch Subjects
   const fetchSubjects = async () => {
     try {
@@ -58,7 +64,10 @@ const SubjectList = () => {
   // Create Subject
   const handleCreateSubject = async (e) => {
     e.preventDefault();
-    if (!newName || !newImage) return alert("Name and image required!");
+    if (!newName || !newImage) {
+      toast.error("Name and image required!");
+      return;
+    }
 
     try {
       setCreating(true);
@@ -74,9 +83,10 @@ const SubjectList = () => {
       setShowAddModal(false);
       setNewName("");
       setNewImage(null);
+      toast.success("Subject created successfully!");
     } catch (err) {
       console.error(err);
-      alert("Failed to create subject");
+      toast.error("Failed to create subject");
     } finally {
       setCreating(false);
     }
@@ -90,9 +100,10 @@ const SubjectList = () => {
       await API.post("/user/delete-subject", { id: deleteId });
       setSubjects((prev) => prev.filter((s) => s._id !== deleteId));
       setShowDeleteModal(false);
+      toast.success("Subject deleted successfully!");
     } catch (err) {
       console.error(err);
-      alert("Failed to delete subject");
+      toast.error("Failed to delete subject");
     } finally {
       setDeleting(false);
       setDeleteId(null);
@@ -139,9 +150,11 @@ const SubjectList = () => {
 
       setShowEditModal(false);
       setEditSubject(null);
+
+      toast.success("Subject updated successfully!");
     } catch (err) {
       console.error(err);
-      alert("Failed to update subject");
+      toast.error("Failed to update subject");
     } finally {
       setUpdating(false);
     }
@@ -166,7 +179,7 @@ const SubjectList = () => {
       );
     } catch (err) {
       console.error(err);
-      alert("Failed to update ads flag");
+      toast.error("Failed to update ads flag");
     }
   };
 
@@ -177,7 +190,7 @@ const SubjectList = () => {
 
   // ✅ Columns with all toggles
   const columns = [
-    { name: "#", selector: (row, index) => index + 1, width: "60px" },
+    { name: "#", selector: (row, index) => (currentPage - 1) * perPage + index + 1, width: "60px" },
     {
       name: "Image",
       cell: (row) =>
@@ -323,6 +336,8 @@ const SubjectList = () => {
                 customStyles={dataTableCustomStyles}
                 noDataComponent={<NoDataComponent />}
                 striped
+                onChangePage={(page) => setCurrentPage(page)}
+                onChangeRowsPerPage={(rows) => setPerPage(rows)}
               />
             </div>
           </div>

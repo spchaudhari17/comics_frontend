@@ -59,6 +59,18 @@ function App() {
     }); // set options as needed
   }, []);
 
+
+  const ProtectedRoute = ({ children }) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return <Navigate to="/login" replace />;
+    }
+
+    return children;
+  };
+
+
   return (
     <>
       <BrowserRouter>
@@ -74,8 +86,6 @@ function App() {
           <Route path="/OtpVerification" element={<OtpVerification />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          {/* Super Admin Route */}
-
           {/* Main Layout Routes */}
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
@@ -86,26 +96,60 @@ function App() {
             <Route path="for-parent" element={<ParentsLanding />} />
             <Route path="faq" element={<FAQLanding />} />
             <Route path="our-library" element={<ComicsList />} />
-
-            <Route path="super-admin" element={<SuperAdmin />} />
-            <Route path="allUsers" element={<AllUsers />} />
-            <Route path="comic-details/:id" element={<AdminComicDetails />} />
-            <Route path="subjectlist" element={<SubjectList />} />
-            <Route path="adUnitManager" element={<AdUnitManager />} />
-            <Route path="comic-revenue-report" element={<ComicRevenueReport />} />
-
-            <Route path="changepassword" element={<ChangePassword />} />
-            <Route path="my-profile" element={<ProfileDetails />} />
-            <Route path="my-comics" element={<MyComics />} />
-            <Route path="institute-dashboard" element={<InstituteDashboard />} />
-            <Route path="create-comic" element={<ComicGenerator />} />
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="terms-and-condition" element={<TermsAndCondition />} />
-            <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} />
-            <Route path="contactList" element={<ContactList />} />
-            <Route path="/parent/manage-children" element={<ParentManageChildren />} />
-            <Route path="/activity/:childId" element={<ParentActivity />} />
-            <Route path="my-comics-details/:id" element={<MyComicsDetails />} />
+
+            {/* protected routes  */}
+
+            {/* <Route path="super-admin" element={<SuperAdmin />} /> */}
+            <Route path="super-admin" element={<ProtectedRoute> <SuperAdmin />  </ProtectedRoute>} />
+
+            {/* <Route path="allUsers" element={<AllUsers />} /> */}
+            <Route path="allUsers" element={<ProtectedRoute><AllUsers /></ProtectedRoute>} />
+
+            {/* <Route path="comic-details/:id" element={<AdminComicDetails />} /> */}
+            <Route path="comic-details/:id" element={<ProtectedRoute>    <AdminComicDetails /></ProtectedRoute>} />
+
+            {/* <Route path="subjectlist" element={<SubjectList />} /> */}
+            <Route path="subjectlist" element={<ProtectedRoute>  <SubjectList /> </ProtectedRoute>} />
+
+            {/* <Route path="adUnitManager" element={<AdUnitManager />} /> */}
+            <Route path="adUnitManager" element={<ProtectedRoute> <AdUnitManager /> </ProtectedRoute>} />
+
+            {/* <Route path="comic-revenue-report" element={<ComicRevenueReport />} /> */}
+            <Route path="comic-revenue-report" element={<ProtectedRoute>  <ComicRevenueReport /> </ProtectedRoute>} />
+
+            {/* <Route path="contactList" element={<ContactList />} /> */}
+            <Route path="contactList" element={<ProtectedRoute><ContactList /></ProtectedRoute>} />
+
+
+            {/* <Route path="institute-dashboard" element={<InstituteDashboard />} /> */}
+            <Route path="institute-dashboard" element={<ProtectedRoute><InstituteDashboard /></ProtectedRoute>} />
+
+            {/* <Route path="changepassword" element={<ChangePassword />} /> */}
+            <Route path="changepassword" element={<ProtectedRoute> <ChangePassword /> </ProtectedRoute>} />
+
+            {/* <Route path="my-profile" element={<ProfileDetails />} /> */}
+            <Route path="my-profile" element={<ProtectedRoute> <ProfileDetails /> </ProtectedRoute>} />
+
+            {/* <Route path="my-comics" element={<MyComics />} /> */}
+            <Route path="my-comics" element={<ProtectedRoute>  <MyComics /></ProtectedRoute>} />
+
+            {/* <Route path="create-comic" element={<ComicGenerator />} /> */}
+            <Route path="create-comic" element={<ProtectedRoute><ComicGenerator /></ProtectedRoute>} />
+
+            {/* <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} /> */}
+            <Route path="comic-successful" element={<ProtectedRoute><ComicSubmittedSuccessfully /></ProtectedRoute>} />
+
+            {/* <Route path="/parent/manage-children" element={<ParentManageChildren />} /> */}
+            <Route path="parent/manage-children" element={<ProtectedRoute><ParentManageChildren /></ProtectedRoute>} />
+
+            {/* <Route path="/activity/:childId" element={<ParentActivity />} /> */}
+            <Route path="activity/:childId" element={<ProtectedRoute> <ParentActivity /> </ProtectedRoute>} />
+
+            {/* <Route path="my-comics-details/:id" element={<MyComicsDetails />} /> */}
+            <Route path="my-comics-details/:id" element={<ProtectedRoute> <MyComicsDetails /> </ProtectedRoute>} />
+
             <Route path="*" element={<PageNotFound />} />
           </Route>
         </Routes>

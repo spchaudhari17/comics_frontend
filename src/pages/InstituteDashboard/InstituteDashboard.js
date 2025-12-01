@@ -15,6 +15,9 @@ const InstituteDashboard = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
 
   // Filters
   const [schools, setSchools] = useState([]);
@@ -224,7 +227,7 @@ const InstituteDashboard = () => {
   };
 
   const columns = [
-    { name: "#", selector: (row, i) => i + 1, width: "60px" },
+    { name: "#", selector: (row, index) => (currentPage - 1) * perPage + index + 1, width: "60px" },
     { name: "Username", selector: (row) => row.username },
     { name: "Password", selector: (row) => row.plain_password },
     { name: "School", selector: (row) => row.classInfo?.school },
@@ -381,6 +384,8 @@ const InstituteDashboard = () => {
               highlightOnHover
               striped
               noDataComponent={<NoDataComponent />}
+              onChangePage={(page) => setCurrentPage(page)}
+              onChangeRowsPerPage={(rows) => setPerPage(rows)}
             />
           </div>
         )}

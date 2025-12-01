@@ -17,16 +17,6 @@ export const Header = () => {
     ? JSON.parse(localStorage.getItem("user"))
     : null;
 
-  useEffect(() => {
-    if (!userInfo) return;
-
-    // if (userInfo.userType === "parent") {
-    //   navigate("/parent/manage-children");
-    // }
-
-
-  }, [userInfo]);
-
 
 
   const handleLogout = () => {
@@ -121,7 +111,7 @@ export const Header = () => {
                           Create Comics
                         </button> */}
 
-                        {userInfo && userInfo.userType !== "parent" && (
+                        {/* {userInfo && userInfo.userType !== "parent" && (
                           <li className="nav-item">
                             <button
                               className="nav-link p-0 btn btn-link text-decoration-none" title="create-comic"
@@ -144,7 +134,20 @@ export const Header = () => {
                               Create Comics
                             </button>
                           </li>
+                        )} */}
+
+                        {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
+                          <li className="nav-item">
+                            <button
+                              className="nav-link p-0 btn btn-link text-decoration-none"
+                              title="create-comic"
+                              onClick={() => navigate("/create-comic")}
+                            >
+                              Create Comics
+                            </button>
+                          </li>
                         )}
+
 
                       </li>
 
