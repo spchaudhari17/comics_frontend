@@ -324,7 +324,7 @@ export const AboutUs = () => {
                         </div>
                         <div data-aos="slide-left" className="team-wrapper text-center">
                             <div className="img-wrapper p-3">
-                                <img src={require('../assets/images/team4.jpeg')} className="img-fluid" alt="Team Member" />
+                                <img src={require('../assets/images/team4.jpg')} className="img-fluid" alt="Team Member" />
                                 <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
                                     <div className="content-wrapper p-3">
                                         <div className='mb-3'>At Kridemy, I led the <span className='highlight'>entire backend and server architecture</span>, ensuring a secure, fast, and highly scalable system. I developed all major backend functionalities, including <span className='highlight'>comic content pipelines, quiz & hardcore quiz engines, FAQs, and “Did You Know?” automation modules.</span></div>
@@ -346,7 +346,7 @@ export const AboutUs = () => {
                         </div>
                         <div data-aos="slide-left" className="team-wrapper text-center">
                             <div className="img-wrapper p-3">
-                                <img src={require('../assets/images/team4.jpeg')} className="img-fluid" alt="Team Member" />
+                                <img src={require('../assets/images/team5.jpeg')} className="img-fluid" alt="Team Member" />
                                 <div className="member-description position-absolute start-0 top-0 end-0 bottom-0 z-2">
                                     <div className="content-wrapper p-3">
                                         <div className='mb-3'>Work done in Kridemy:As a Flutter Developer for <span className="highlight">Kridemy</span>, I was responsible for transforming the app from concept to a fully functional, live product available on both Android and iOS. I designed and developed a <span className="highlight">beautiful, user-friendly UI/UX</span>, ensuring smooth navigation and an engaging experience for users. I integrated the complete <span className="highlight">comic viewing module</span>, allowing users to explore and read comics seamlessly. Additionally, I implemented the full <span className="highlight">quiz system</span>, including normal quizzes, hardcore quizzes, and reward-based features. Users can

@@ -657,6 +657,22 @@ export const ComicGenerator = () => {
     setSelectedImage(null);
   };
 
+
+
+  const isEverythingGenerated =
+    pdfUrl &&
+    comicImages.length > 0 &&
+    quizData[comicId]?.length > 0 &&
+    faqData[comicId]?.length > 0 &&
+    factData[comicId]?.length > 0 &&
+    hardcoreQuizData[comicId]?.length > 0 &&
+    !quizLoading &&
+    !faqLoading &&
+    !factLoading &&
+    !hardcoreQuizLoading;
+
+
+
   return (
     <div className="homePage py-5">
       <div className="container-xl">
@@ -1349,9 +1365,17 @@ export const ComicGenerator = () => {
                 </div>
 
                 <div className="d-flex gap-3 justify-content-center mt-4">
-                  <Button onClick={handlePublish}>
+                  {/* <Button onClick={handlePublish}>
                     Final Submit
+                  </Button> */}
+
+                  <Button
+                    onClick={handlePublish}
+                    disabled={!isEverythingGenerated}
+                  >
+                    {isEverythingGenerated ? "Final Submit" : "Generating Content..."}
                   </Button>
+
 
                   <Button variant="outline-primary" onClick={() => navigate("/my-comics")}>
                     Go to My Comics
