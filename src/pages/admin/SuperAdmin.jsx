@@ -37,6 +37,7 @@ export const SuperAdmin = () => {
   const [updatingCountry, setUpdatingCountry] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
+  const [selectedStatus, setSelectedStatus] = useState("");
 
 
 
@@ -157,17 +158,21 @@ export const SuperAdmin = () => {
 
   //  Filtered comics based on search term
   const filteredComics = (comics || []).filter((comic) => {
-
     const searchTerm = search.toLowerCase();
-    return (
+
+    const matchesSearch =
       comic?.user_id?.firstname?.toLowerCase().includes(searchTerm) ||
       comic?.user_id?.email?.toLowerCase().includes(searchTerm) ||
       comic?.subject?.toLowerCase().includes(searchTerm) ||
       comic?.title?.toLowerCase().includes(searchTerm) ||
-      comic?.country?.toLowerCase().includes(searchTerm) ||
-      comic?.user_id?.userType?.toLowerCase().includes(searchTerm)
-    );
+      comic?.user_id?.userType?.toLowerCase().includes(searchTerm);
+
+    const matchesStatus =
+      selectedStatus === "" || comic.status === selectedStatus;
+
+    return matchesSearch && matchesStatus;
   });
+
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -430,6 +435,27 @@ export const SuperAdmin = () => {
                     placeholder="Select or search country..."
                     isSearchable
                     className="react-select-country"
+                  />
+                </div>
+
+                {/* ✅ Status Filter */}
+                <div style={{ width: "200px" }}>
+                  <Select
+                    options={[
+                      { value: "", label: "📌 All Status" },
+                      { value: "pending", label: "🟡 Pending" },
+                      { value: "approved", label: "🟢 Approved" },
+                    ]}
+                    value={
+                      [
+                        { value: "", label: "📌 All Status" },
+                        { value: "pending", label: "🟡 Pending" },
+                        { value: "approved", label: "🟢 Approved" },
+                      ].find((s) => s.value === selectedStatus)
+                    }
+                    onChange={(selected) => setSelectedStatus(selected?.value || "")}
+                    placeholder="Filter by status..."
+                    isSearchable={false}
                   />
                 </div>
 
