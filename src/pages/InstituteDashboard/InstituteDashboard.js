@@ -12,6 +12,10 @@ import { useNavigate } from "react-router-dom";
 const InstituteDashboard = () => {
   const navigate = useNavigate();
 
+  const [subscription, setSubscription] = useState(null);
+  const [subLoading, setSubLoading] = useState(true);
+
+
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -36,6 +40,22 @@ const InstituteDashboard = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        const { data } = await API.get("/subscription/me");
+        setSubscription(data);
+      } catch {
+        setSubscription(null);
+      } finally {
+        setSubLoading(false);
+      }
+    };
+
+    fetchSubscription();
+  }, []);
+
 
   // Get all students
   const fetchStudents = async () => {
@@ -277,6 +297,39 @@ const InstituteDashboard = () => {
     },
   ];
 
+  if (subLoading) {
+    return (
+      <div className="text-center py-5">
+        <Loader />
+        <p>Checking subscription…</p>
+      </div>
+    );
+  }
+
+
+  if (!subscription?.hasSubscription) {
+    return (
+      <div className="container py-5 text-center">
+        <h3>🚫 Subscription Required</h3>
+        <p className="text-muted">
+          You need an active subscription to manage students.
+        </p>
+
+        <Button onClick={() => navigate("/subscriptions-plan")}>
+          View Subscription Plans
+        </Button>
+      </div>
+    );
+  }
+
+  const studentsUsed = students.length;
+  const studentsLimit = subscription.studentsLimit;
+
+  const isStudentLimitReached =
+    studentsLimit > 0 && studentsUsed >= studentsLimit;
+
+
+
   return (
     <div className="student-list-page pt-4 pb-3">
       <div className="container-xl">
@@ -291,6 +344,11 @@ const InstituteDashboard = () => {
                 <div className="text-primary fw-semibold mt-3">
                   Total: {filteredStudents.length}
                 </div>
+
+                <Badge bg={isStudentLimitReached ? "danger" : "success"}>
+                  Students: {studentsUsed} / {studentsLimit}
+                </Badge>
+
 
                 {/* School Filter */}
                 <Form.Select
@@ -345,9 +403,19 @@ const InstituteDashboard = () => {
                   ))}
                 </Form.Select>
 
-                <Button variant="primary" onClick={() => setShowImportModal(true)}>
+                {/* <Button variant="primary" onClick={() => setShowImportModal(true)}>
                   <i className="bi bi-upload"></i> Import
+                </Button> */}
+
+                <Button
+                  variant="primary"
+                  onClick={() => setShowImportModal(true)}
+                  disabled={isStudentLimitReached}
+                >
+                  <i className="bi bi-upload"></i>{" "}
+                  {isStudentLimitReached ? "Limit Reached" : "Import"}
                 </Button>
+
 
                 <Button variant="success" onClick={handleDownloadExcel}>
                   <i className="bi bi-download"></i> Download

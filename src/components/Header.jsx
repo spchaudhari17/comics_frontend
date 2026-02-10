@@ -79,6 +79,9 @@ export const Header = () => {
                       <Link to={'/for-parent'} title="for-parent" className="nav-link p-0">For Parents</Link>
                     </li>
                     <li className="nav-item">
+                      <Link to={'/subscriptions-plan'} title="subscriptions-plan" className="nav-link p-0">Subscriptions</Link>
+                    </li>
+                    <li className="nav-item">
                       <Link to={'/contact'} title="contact" className="nav-link p-0">Contact</Link>
                     </li>
                   </>
@@ -249,7 +252,7 @@ export const Header = () => {
                       </div>
                       <Dropdown.Divider className="my-1" />
 
-                      <Dropdown.Item className="text-theme3" as={Link} to="/my-profile">
+                      <Dropdown.Item className="text-theme3" as={Link} to="/my-account">
                         <img src={UserIcon} alt="User Icon" className="img-fluid" /> Profile
                       </Dropdown.Item>
 

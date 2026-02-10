@@ -53,6 +53,10 @@ export const ComicGenerator = () => {
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 0));
 
+  const [subscription, setSubscription] = useState(null);
+  const [subLoading, setSubLoading] = useState(true);
+
+
   // business state
   const [comicId, setComicId] = useState(null);
   const [pages, setPages] = useState([]);
@@ -111,6 +115,22 @@ export const ComicGenerator = () => {
   const [publicComics, setPublicComics] = useState([]);
   const [pubPage, setPubPage] = useState(1);
   const [pubTotalPages, setPubTotalPages] = useState(1);
+
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        const { data } = await API.get("/subscription/me");
+        setSubscription(data);
+      } catch (err) {
+        setSubscription(null);
+      } finally {
+        setSubLoading(false);
+      }
+    };
+
+    fetchSubscription();
+  }, []);
+
 
 
   // Style Images Modal
@@ -531,12 +551,14 @@ export const ComicGenerator = () => {
 
     try {
       let finalPages = pages;
+
       try {
         const maybeParsed = JSON.parse(prompt);
         if (Array.isArray(maybeParsed)) {
           finalPages = maybeParsed;
           setPages(maybeParsed);
         }
+
       } catch {
         // keep previous pages
       }
@@ -671,6 +693,33 @@ export const ComicGenerator = () => {
     !factLoading &&
     !hardcoreQuizLoading;
 
+  if (subLoading) {
+    return (
+      <div className="text-center py-5">
+        <Spinner />
+        <p>Checking subscription...</p>
+      </div>
+    );
+  }
+
+  if (!subscription?.hasSubscription) {
+    return (
+      <div className="container py-5 text-center">
+        <h3>🚫 Subscription Required</h3>
+        <p className="text-muted">
+          You need an active subscription to create comics.
+        </p>
+
+        <Button onClick={() => navigate("/subscriptions-plan")}>
+          View Subscription Plans
+        </Button>
+      </div>
+    );
+  }
+
+const isWeeklyLimitReached =
+  subscription.comicsPerWeek > 0 &&
+  subscription.comicsLeft === 0;
 
 
   return (
@@ -680,6 +729,8 @@ export const ComicGenerator = () => {
           <div className="wrapper pb-1">
             <Stepper currentStep={step} />
           </div>
+
+
 
           {/* Debug Step Control (optional for development) */}
           {/* <div className="d-flex gap-2 mb-3">
@@ -839,9 +890,23 @@ export const ComicGenerator = () => {
                   </Col>
                 </Row>
                 <div className="btn-wrapper mt-4 d-flex gap-3">
-                  <Button type="submit" disabled={!isStep0Valid || loadingPrompt}>
+                  {/* <Button type="submit" disabled={!isStep0Valid || loadingPrompt}>
                     {loadingPrompt ? (<><Spinner size="sm" className="me-2" />Generating prompt...</>) : "Convert to Prompt"}
+                  </Button> */}
+
+                  <Button
+                    type="submit"
+                    disabled={
+                      !isStep0Valid ||
+                      loadingPrompt ||
+                      isWeeklyLimitReached
+                    }
+                  >
+                    {isWeeklyLimitReached
+                      ? "Weekly Limit Reached"
+                      : "Convert to Prompt"}
                   </Button>
+
                 </div>
 
                 {existingComic && (
@@ -969,7 +1034,11 @@ export const ComicGenerator = () => {
                             Part {p.part}: {p.title}{" "}
                             {isDone && <span className="badge bg-success">Done</span>}
                           </h5>
-                          <p><strong>Key Terms:</strong> {p.keyTerms.join(", ")}</p>
+                          {/* <p><strong>Key Terms:</strong> {p.keyTerms.join(", ")}</p> */}
+                          <p>
+                            <strong>Key Terms:</strong>{" "}
+                            {Array.isArray(p.keyTerms) ? p.keyTerms.join(", ") : "N/A"}
+                          </p>
                           <p><strong>From:</strong> {p.start} → {p.end}</p>
 
                           {!isDone && (

@@ -46,6 +46,9 @@ import ChangePassword from "./pages/authentication/ChangePassword";
 import ProfileDetails from "./pages/authentication/ProfileDetails";
 import ComicRevenueReport from "./pages/admin/ComicRevenueReport";
 import AdUnitManager from "./pages/admin/AdUnitManager";
+import SubscriptionPlans from "./pages/subscriptions/SubscriptionPlans";
+import SubscriptionSuccess from "./pages/subscriptions/SubscriptionSuccess";
+import MyAccount from "./pages/MyAccount/MyAccount";
 
 
 function App() {
@@ -98,6 +101,10 @@ function App() {
             <Route path="our-library" element={<ComicsList />} />
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="terms-and-condition" element={<TermsAndCondition />} />
+
+            <Route path="subscriptions-plan" element={<SubscriptionPlans />} />
+            <Route path="/success" element={<SubscriptionSuccess />} />
+            <Route path="/my-account" element={<MyAccount />} />
 
             {/* protected routes  */}
 

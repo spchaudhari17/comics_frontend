@@ -1,0 +1,60 @@
+.subscription-plans-section {
+  background: linear-gradient(180deg, #f8f9ff, #ffffff);
+}
+
+.plan-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px 24px;
+  border: 1px solid #e6e8f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+.plan-header .plan-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2b3cff;
+}
+
+.plan-header .duration {
+  font-size: 14px;
+  color: #6c757d;
+  margin-left: 4px;
+}
+
+.plan-features li {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 12px;
+}
+
+.plan-features i {
+  color: #2b3cff;
+}
+
+.plan-badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: linear-gradient(90deg, #ff7a18, #ffb347);
+  color: #fff;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 20px;
+}
+
+.btn-custom {
+  background: linear-gradient(90deg, #2b3cff, #4f6dff);
+  border: none;
+  color: #fff;
+}
+
+.btn-custom:hover {
+  opacity: 0.9;
+}
