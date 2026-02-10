@@ -102,7 +102,7 @@ function App() {
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="terms-and-condition" element={<TermsAndCondition />} />
 
-            <Route path="subscriptions-plan" element={<SubscriptionPlans />} />
+            <Route path="/subscriptions-plan" element={<SubscriptionPlans />} />
             <Route path="/success" element={<SubscriptionSuccess />} />
             <Route path="/my-account" element={<MyAccount />} />
 
