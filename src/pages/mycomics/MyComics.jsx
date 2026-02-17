@@ -10,13 +10,30 @@ import { NoDataComponent } from "../../components/NoDataComponent";
 const MyComics = () => {
   const navigate = useNavigate();
   const [comics, setComics] = useState([]);
+  const [subscription, setSubscription] = useState(null);
+  const [subLoading, setSubLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
+  // FETCH SUBSCRIPTION
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        const { data } = await API.get("/subscription/me");
+        setSubscription(data);
+      } catch {
+        setSubscription(null);
+      } finally {
+        setSubLoading(false);
+      }
+    };
+    fetchSubscription();
+  }, []);
 
+  // FETCH COMICS
   useEffect(() => {
     const fetchComics = async () => {
       try {
@@ -31,6 +48,19 @@ const MyComics = () => {
     };
     fetchComics();
   }, []);
+
+  //  PLAN FLAGS
+  const planType = subscription?.planType || "FREE";
+
+  const isFreeUser = planType === "FREE";
+  const isDashboardUser = planType === "dashboard";
+  const isBundleUser = planType === "bundle";
+  const isUnlimitedUser = planType === "unlimited";
+
+  const totalComicsCreated = comics.length;
+
+
+
 
   const handleResume = (comic) => {
     if (comic.seriesId) {
@@ -134,33 +164,59 @@ const MyComics = () => {
       ),
       minWidth: "120px",
     },
+    // {
+    //   name: "Actions",
+    //   minWidth: "150px",
+    //   cell: row => (
+    //     <div className="d-flex gap-2">
+    //       {row.comicStatus === "draft" ? (
+    //         <Button
+    //           size="sm"
+    //           variant="outline-warning"
+    //           onClick={() => handleResume(row)}
+    //         >
+    //           <i className="bi bi-pencil-square me-1"></i> Resume
+    //         </Button>
+    //       ) : (
+    //         <>
+    //           {/* <Button
+    //             size="sm"
+    //             variant="outline-primary"
+    //             onClick={() => window.open(row.pdfUrl, "_blank")}
+    //             disabled={!row.pdfUrl}
+    //           >
+    //             <i className="bi bi-filetype-pdf me-1"></i> View
+    //           </Button> */}
+    //         </>
+    //       )}
+    //     </div>
+    //   ),
+    // },
+
     {
       name: "Actions",
-      minWidth: "150px",
-      cell: row => (
-        <div className="d-flex gap-2">
-          {row.comicStatus === "draft" ? (
-            <Button
-              size="sm"
-              variant="outline-warning"
-              onClick={() => handleResume(row)}
-            >
-              <i className="bi bi-pencil-square me-1"></i> Resume
-            </Button>
-          ) : (
-            <>
-              {/* <Button
-                size="sm"
-                variant="outline-primary"
-                onClick={() => window.open(row.pdfUrl, "_blank")}
-                disabled={!row.pdfUrl}
-              >
-                <i className="bi bi-filetype-pdf me-1"></i> View
-              </Button> */}
-            </>
-          )}
-        </div>
-      ),
+      cell: (row) => {
+        if (row.comicStatus !== "draft") return null;
+
+        // ❌ Dashboard cannot resume
+        if (isDashboardUser) return null;
+
+        // 🟡 FREE USER LIMIT
+        if (isFreeUser && totalComicsCreated >= 1) {
+          return null; // hide completely
+        }
+
+        // 🟢 Bundle / Unlimited OR free with 0 comics
+        return (
+          <Button
+            size="sm"
+            variant="outline-warning"
+            onClick={() => handleResume(row)}
+          >
+            Resume
+          </Button>
+        );
+      },
     },
   ];
 

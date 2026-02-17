@@ -307,26 +307,31 @@ const InstituteDashboard = () => {
   }
 
 
-  if (!subscription?.hasSubscription) {
+  if (!subscription?.hasSubscription || subscription.planType === "FREE") {
     return (
       <div className="container py-5 text-center">
-        <h3>🚫 Subscription Required</h3>
+        <h3>🚫 Dashboard Access Locked</h3>
         <p className="text-muted">
-          You need an active subscription to manage students.
+          You need an active Dashboard or Bundle subscription to manage students.
         </p>
-
         <Button onClick={() => navigate("/subscriptions-plan")}>
-          View Subscription Plans
+          Upgrade Plan
         </Button>
       </div>
     );
   }
 
+
   const studentsUsed = students.length;
   const studentsLimit = subscription.studentsLimit;
 
+  const isUnlimited = subscription.planType === "UNLIMITED";
+
   const isStudentLimitReached =
-    studentsLimit > 0 && studentsUsed >= studentsLimit;
+    !isUnlimited &&
+    studentsLimit > 0 &&
+    studentsUsed >= studentsLimit;
+
 
 
 
@@ -413,7 +418,7 @@ const InstituteDashboard = () => {
                   disabled={isStudentLimitReached}
                 >
                   <i className="bi bi-upload"></i>{" "}
-                  {isStudentLimitReached ? "Limit Reached" : "Import"}
+                  {isStudentLimitReached ? "Student Limit Reached" : "Import"}
                 </Button>
 
 

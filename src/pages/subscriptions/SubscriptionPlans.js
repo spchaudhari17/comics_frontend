@@ -202,6 +202,23 @@ const SubscriptionPlans = () => {
                     </Row>
                 </Container>
             </section>
+
+            {/* ===== Subscription Rules Link ===== */}
+            <section className="py-4 bg-light">
+                <Container className="text-center">
+                    <p className="mb-2 text-muted">
+                        By purchasing a subscription, you agree to our subscription terms and conditions.
+                    </p>
+                    <Button
+                        variant="outline-dark"
+                        size="sm"
+                        onClick={() => navigate("/subscription-rules")}
+                    >
+                        View Subscription Rules
+                    </Button>
+                </Container>
+            </section>
+
         </>
     );
 };

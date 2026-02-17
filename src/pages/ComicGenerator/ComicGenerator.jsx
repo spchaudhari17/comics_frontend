@@ -56,6 +56,14 @@ export const ComicGenerator = () => {
   const [subscription, setSubscription] = useState(null);
   const [subLoading, setSubLoading] = useState(true);
 
+  const subscriptionType = subscription?.subscriptionType || "FREE";
+
+  const isDashboardOnly = subscriptionType === "DASHBOARD";
+  const isFreeUser = subscriptionType === "FREE";
+  const isBundle = subscriptionType === "bundle";
+  const isUnlimited = subscriptionType === "UNLIMITED";
+
+
 
   // business state
   const [comicId, setComicId] = useState(null);
@@ -702,24 +710,11 @@ export const ComicGenerator = () => {
     );
   }
 
-  if (!subscription?.hasSubscription) {
-    return (
-      <div className="container py-5 text-center">
-        <h3>🚫 Subscription Required</h3>
-        <p className="text-muted">
-          You need an active subscription to create comics.
-        </p>
 
-        <Button onClick={() => navigate("/subscriptions-plan")}>
-          View Subscription Plans
-        </Button>
-      </div>
-    );
-  }
 
-const isWeeklyLimitReached =
-  subscription.comicsPerWeek > 0 &&
-  subscription.comicsLeft === 0;
+  const isWeeklyLimitReached =
+    subscription.comicsPerWeek > 0 &&
+    subscription.comicsLeft === 0;
 
 
   return (
@@ -899,12 +894,17 @@ const isWeeklyLimitReached =
                     disabled={
                       !isStep0Valid ||
                       loadingPrompt ||
-                      isWeeklyLimitReached
+                      isWeeklyLimitReached ||
+                      isDashboardOnly
                     }
+
                   >
-                    {isWeeklyLimitReached
-                      ? "Weekly Limit Reached"
-                      : "Convert to Prompt"}
+                    {isDashboardOnly
+                      ? "Upgrade to Bundle to Create Comics"
+                      : isWeeklyLimitReached
+                        ? "Weekly Limit Reached"
+                        : "Convert to Prompt"}
+
                   </Button>
 
                 </div>
@@ -1026,22 +1026,60 @@ const isWeeklyLimitReached =
                 ) : (
                   <div className="d-flex flex-column gap-3">
                     {parts.map((p) => {
-                      const isDone = completedParts.includes(p.comicId);
+
+                      const isLocked =
+                        isFreeUser && p.part > 1;
+
+                      const isDone =
+                        completedParts.includes(p.comicId);
 
                       return (
-                        <div key={p.part} className="p-3 border rounded bg-light">
+                        <div key={p.part} className="p-3 border rounded bg-light position-relative">
+
+                          {/* 🔒 Lock Overlay */}
+                          {isLocked && (
+                            <div
+                              className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                              style={{
+                                background: "rgba(255,255,255,0.85)",
+                                backdropFilter: "blur(4px)",
+                                zIndex: 5,
+                                borderRadius: "8px"
+                              }}
+                            >
+                              <div className="text-center">
+                                <h6 className="mb-2">🔒 Unlock Full Series</h6>
+                                <Button
+                                  variant="warning"
+                                  size="sm"
+                                  onClick={() => navigate("/subscriptions-plan")}
+                                >
+                                  Upgrade to Bundle
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
                           <h5>
                             Part {p.part}: {p.title}{" "}
-                            {isDone && <span className="badge bg-success">Done</span>}
+                            {isDone && (
+                              <span className="badge bg-success">Done</span>
+                            )}
                           </h5>
-                          {/* <p><strong>Key Terms:</strong> {p.keyTerms.join(", ")}</p> */}
+
                           <p>
                             <strong>Key Terms:</strong>{" "}
-                            {Array.isArray(p.keyTerms) ? p.keyTerms.join(", ") : "N/A"}
+                            {Array.isArray(p.keyTerms)
+                              ? p.keyTerms.join(", ")
+                              : "N/A"}
                           </p>
-                          <p><strong>From:</strong> {p.start} → {p.end}</p>
 
-                          {!isDone && (
+                          <p>
+                            <strong>From:</strong> {p.start} → {p.end}
+                          </p>
+
+                          {/* 🟢 Allow only if not locked */}
+                          {!isDone && !isLocked && (
                             <Button
                               variant="primary"
                               onClick={() => loadPartData(p)}
@@ -1055,9 +1093,11 @@ const isWeeklyLimitReached =
                               Already Generated
                             </Button>
                           )}
+
                         </div>
                       );
                     })}
+
                   </div>
                 )}
 

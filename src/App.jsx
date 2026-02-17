@@ -49,6 +49,7 @@ import AdUnitManager from "./pages/admin/AdUnitManager";
 import SubscriptionPlans from "./pages/subscriptions/SubscriptionPlans";
 import SubscriptionSuccess from "./pages/subscriptions/SubscriptionSuccess";
 import MyAccount from "./pages/MyAccount/MyAccount";
+import SubscriptionRules from "./pages/subscriptions/SubscriptionRules";
 
 
 function App() {
@@ -105,6 +106,7 @@ function App() {
             <Route path="/subscriptions-plan" element={<SubscriptionPlans />} />
             <Route path="/success" element={<SubscriptionSuccess />} />
             <Route path="/my-account" element={<MyAccount />} />
+            <Route path="/subscription-rules" element={<SubscriptionRules />} />
 
             {/* protected routes  */}
 
