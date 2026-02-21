@@ -777,6 +777,7 @@ export const ComicGenerator = () => {
                       <Form.Label>Class/Grade</Form.Label>
                       <Form.Select
                         value={classGrade}
+                        required
                         onChange={(e) => setClassGrade(e.target.value)}
                       >
                         <option value="" disabled>Select Class/Grade</option>
@@ -897,16 +898,22 @@ export const ComicGenerator = () => {
                       isWeeklyLimitReached ||
                       isDashboardOnly
                     }
-
                   >
-                    {isDashboardOnly
-                      ? "Upgrade to Bundle to Create Comics"
-                      : isWeeklyLimitReached
-                        ? "Weekly Limit Reached"
-                        : "Convert to Prompt"}
-
+                    {isDashboardOnly ? (
+                      "Upgrade to Bundle to Create Comics"
+                    ) : isWeeklyLimitReached ? (
+                      "Weekly Limit Reached"
+                    ) : loadingPrompt ? (
+                      <>
+                        <Spinner size="sm" className="me-2" />
+                        Generating Prompt...
+                      </>
+                    ) : (
+                      "Convert to Prompt"
+                    )}
                   </Button>
 
+                  
                 </div>
 
                 {existingComic && (

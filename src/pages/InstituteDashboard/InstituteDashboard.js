@@ -21,6 +21,15 @@ const InstituteDashboard = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newStudent, setNewStudent] = useState({
+    School: "",
+    Year: "",
+    Class: "",
+    Section: "",
+    RollNo: "",
+    Country: "",
+  });
 
 
   // Filters
@@ -194,6 +203,31 @@ const InstituteDashboard = () => {
     }
   };
 
+  // addSingleStudent
+  const handleAddStudent = async () => {
+    try {
+      const res = await API.post("/user/add-student", newStudent);
+
+      if (res.data.error) {
+        toast.error(res.data.message);
+      } else {
+        toast.success("Student Added Successfully!");
+        setShowAddModal(false);
+        fetchStudents();
+        setNewStudent({
+          School: "",
+          Year: "",
+          Class: "",
+          Section: "",
+          RollNo: "",
+          Country: "",
+        });
+      }
+    } catch (e) {
+      toast.error("Error adding student");
+    }
+  };
+
   // Filter Logic
   const filteredStudents = students.filter((s) => {
     const term = search.toLowerCase();
@@ -346,9 +380,9 @@ const InstituteDashboard = () => {
             <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
               <h4 className="fw-bold">🎓 Students List</h4>
               <div className="d-flex gap-2 flex-wrap">
-                <div className="text-primary fw-semibold mt-3">
+                {/* <div className="text-primary fw-semibold mt-3">
                   Total: {filteredStudents.length}
-                </div>
+                </div> */}
 
                 <Badge bg={isStudentLimitReached ? "danger" : "success"}>
                   Students: {studentsUsed} / {studentsLimit}
@@ -408,9 +442,6 @@ const InstituteDashboard = () => {
                   ))}
                 </Form.Select>
 
-                {/* <Button variant="primary" onClick={() => setShowImportModal(true)}>
-                  <i className="bi bi-upload"></i> Import
-                </Button> */}
 
                 <Button
                   variant="primary"
@@ -419,6 +450,14 @@ const InstituteDashboard = () => {
                 >
                   <i className="bi bi-upload"></i>{" "}
                   {isStudentLimitReached ? "Student Limit Reached" : "Import"}
+                </Button>
+
+                <Button
+                  variant="dark"
+                  onClick={() => setShowAddModal(true)}
+                  disabled={isStudentLimitReached}
+                >
+                  <i className="bi bi-person-plus"></i> Add Student
                 </Button>
 
 
@@ -486,6 +525,95 @@ const InstituteDashboard = () => {
           </Button>
           <Button variant="primary" disabled={uploading} onClick={handleUpload}>
             {uploading ? "Uploading..." : "Upload"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* addSingleStudent Modal */}
+      <Modal show={showAddModal} centered onHide={() => setShowAddModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>➕ Add Student</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group className="mb-2">
+            <Form.Label>School</Form.Label>
+            <Form.Control
+              value={newStudent.School}
+              placeholder="Enter school name e.g. ABC"
+              required
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, School: e.target.value })
+              }
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-2">
+            <Form.Label>Year</Form.Label>
+            <Form.Control
+              value={newStudent.Year}
+              placeholder="Enter Year"
+              required
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, Year: e.target.value })
+              }
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-2">
+            <Form.Label>Class</Form.Label>
+            <Form.Control
+              value={newStudent.Class}
+              placeholder="Enter Class"
+              required
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, Class: e.target.value })
+              }
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-2">
+            <Form.Label>Section</Form.Label>
+            <Form.Control
+              value={newStudent.Section}
+              placeholder="Enter Section"
+              required
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, Section: e.target.value })
+              }
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-2">
+            <Form.Label>Roll No</Form.Label>
+            <Form.Control
+              value={newStudent.RollNo}
+              placeholder="Enter Roll no"
+              required
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, RollNo: e.target.value })
+              }
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-2">
+            <Form.Label>Country</Form.Label>
+            <Form.Control
+              value={newStudent.Country}
+              placeholder="Enter Country"
+              required
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, Country: e.target.value })
+              }
+            />
+          </Form.Group>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleAddStudent}>
+            Add Student
           </Button>
         </Modal.Footer>
       </Modal>
