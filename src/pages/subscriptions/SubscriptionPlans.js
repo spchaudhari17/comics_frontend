@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Badge } from "react-bootstrap";
 import "./SubscriptionPlans.css";
 import API from "../../API";
 import { useNavigate } from "react-router-dom";
+import { Modal, Spinner } from "react-bootstrap";
 
 
 const plans = [
@@ -71,8 +72,38 @@ const dashboardPlans = [
     },
 ];
 
+
+
+
 const SubscriptionPlans = () => {
+
     const navigate = useNavigate();
+
+    const [currentSub, setCurrentSub] = useState(null);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [selectedPriceId, setSelectedPriceId] = useState(null);
+    const [selectedPlanType, setSelectedPlanType] = useState(null);
+    const [upgradeLoading, setUpgradeLoading] = useState(false);
+    const [upgradeMode, setUpgradeMode] = useState(null);
+
+    const getPriceAmount = (priceId) => {
+        const allPlans = [...plans, ...dashboardPlans];
+        const found = allPlans.find(p => p.priceId === priceId);
+        return parseFloat(found.price.replace("$", ""));
+    };
+
+
+    useEffect(() => {
+        if (isLoggedIn()) {
+            API.get("/subscription/me")
+                .then(res => {
+                    if (res.data.hasSubscription) {
+                        setCurrentSub(res.data);
+                    }
+                })
+                .catch(() => { });
+        }
+    }, []);
 
     const isLoggedIn = () => {
         const user = localStorage.getItem("user");
@@ -82,29 +113,70 @@ const SubscriptionPlans = () => {
 
     const handleSelectPlan = async (priceId, planType) => {
 
-        // 🚫 NOT LOGGED IN
         if (!isLoggedIn()) {
-            // optional: save intent (real-world UX)
-            localStorage.setItem("redirectAfterLogin", "/subscription-plans");
-
             navigate("/login");
             return;
         }
 
-        // ✅ LOGGED IN → STRIPE
-        try {
+        if (!currentSub) {
             const res = await API.post("/user/create-checkout-session", {
                 priceId,
                 planType,
             });
+            window.location.href = res.data.url;
+            return;
+        }
 
-            if (res.data.url) {
-                window.location.href = res.data.url;
+        if (priceId === currentSub.priceId) {
+            return;
+        }
+
+        const currentPrice = getPriceAmount(currentSub.priceId);
+        const newPrice = getPriceAmount(priceId);
+
+        setSelectedPriceId(priceId);
+        setSelectedPlanType(planType);
+
+        if (newPrice > currentPrice) {
+            setUpgradeMode("upgrade");
+        } else {
+            setUpgradeMode("downgrade");
+        }
+
+        setShowUpgradeModal(true);
+    };
+
+
+
+    const handleUpgrade = async (mode) => {
+        try {
+            setUpgradeLoading(true);
+
+            if (mode === "immediate") {
+                await API.post("/subscription/upgrade-immediate", {
+                    priceId: selectedPriceId,
+                    planType: selectedPlanType,
+                });
+            } else {
+                await API.post("/subscription/upgrade-scheduled", {
+                    priceId: selectedPriceId,
+                    planType: selectedPlanType,
+                });
             }
+
+            const updated = await API.get("/subscription/me");
+            setCurrentSub(updated.data);
+
+            setShowUpgradeModal(false);
+
         } catch (err) {
-            alert(err.response?.data?.message || "Unable to start checkout");
+            alert(err.response?.data?.message || "Action failed");
+        } finally {
+            setUpgradeLoading(false);
         }
     };
+
+
 
 
     return (
@@ -146,12 +218,19 @@ const SubscriptionPlans = () => {
                                         ))}
                                     </ul>
 
-                                    <Button
-                                        className="btn btn-custom w-100 py-2"
-                                        onClick={() => handleSelectPlan(plan.priceId, "bundle")}
-                                    >
-                                        Select Plan
-                                    </Button>
+                                    {currentSub?.priceId === plan.priceId ? (
+                                        <Button disabled className="w-100">
+                                            Current Plan
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            className="btn btn-custom w-100 py-2"
+                                            onClick={() => handleSelectPlan(plan.priceId, "bundle")}
+                                        >
+                                            {currentSub ? "Change Plan" : "Select Plan"}
+                                        </Button>
+                                    )}
+
                                 </div>
                             </Col>
                         ))}
@@ -218,6 +297,95 @@ const SubscriptionPlans = () => {
                     </Button>
                 </Container>
             </section>
+
+            <Modal
+                show={showUpgradeModal}
+                onHide={() => setShowUpgradeModal(false)}
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Change Subscription Plan</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+
+                    {upgradeMode === "upgrade" && (
+                        <>
+                            <p className="mb-3">
+                                This is an upgrade. How would you like to apply it?
+                            </p>
+
+                            <div className="d-grid gap-3">
+
+                                <Button
+                                    variant="primary"
+                                    onClick={() => handleUpgrade("immediate")}
+                                    disabled={upgradeLoading}
+                                >
+                                    {upgradeLoading ? (
+                                        <>
+                                            <Spinner size="sm" className="me-2" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        "Apply Immediately (Prorated Charge)"
+                                    )}
+                                </Button>
+
+                                <Button
+                                    variant="outline-dark"
+                                    onClick={() => handleUpgrade("scheduled")}
+                                    disabled={upgradeLoading}
+                                >
+                                    Apply Next Billing Cycle
+                                </Button>
+                            </div>
+                        </>
+                    )}
+
+                    {upgradeMode === "downgrade" && (
+                        <>
+                            <p className="mb-3">
+                                This is a downgrade.
+                            </p>
+
+                            <p className="text-muted small">
+                                Downgrades are applied at the next billing cycle.
+                                You will keep your current access until then.
+                            </p>
+
+                            <Button
+                                variant="dark"
+                                onClick={() => handleUpgrade("scheduled")}
+                                disabled={upgradeLoading}
+                            >
+                                {upgradeLoading ? (
+                                    <>
+                                        <Spinner size="sm" className="me-2" />
+                                        Scheduling...
+                                    </>
+                                ) : (
+                                    "Schedule Downgrade"
+                                )}
+                            </Button>
+                        </>
+                    )}
+
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <Button
+                        variant="secondary"
+                        onClick={() => setShowUpgradeModal(false)}
+                        disabled={upgradeLoading}
+                    >
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+
+
 
         </>
     );
