@@ -89,7 +89,7 @@ const SubscriptionPlans = () => {
     const getPriceAmount = (priceId) => {
         const allPlans = [...plans, ...dashboardPlans];
         const found = allPlans.find(p => p.priceId === priceId);
-        return parseFloat(found.price.replace("$", ""));
+        return found ? parseFloat(found.price.replace("$", "")) : 0;
     };
 
 
@@ -155,7 +155,7 @@ const SubscriptionPlans = () => {
             if (mode === "immediate") {
                 await API.post("/subscription/upgrade-immediate", {
                     priceId: selectedPriceId,
-                    planType: selectedPlanType,
+                    // planType: selectedPlanType,
                 });
             } else {
                 await API.post("/subscription/upgrade-scheduled", {
@@ -165,7 +165,10 @@ const SubscriptionPlans = () => {
             }
 
             const updated = await API.get("/subscription/me");
-            setCurrentSub(updated.data);
+
+            if (updated.data.hasSubscription) {
+                setCurrentSub(updated.data);
+            }
 
             setShowUpgradeModal(false);
 
@@ -183,7 +186,29 @@ const SubscriptionPlans = () => {
         <>
             {/* ===== Bundled Plans (UNCHANGED) ===== */}
             <section className="subscription-plans-section py-5">
+                {currentSub && (
+                    <p className="text-center text-muted small mb-4">
+                        Current plan renews on{" "}
+                        {currentSub.endDate &&
+                            new Date(currentSub.endDate).toLocaleDateString()}
+                    </p>
+                )}
                 <Container>
+                    {currentSub?.hasPendingChange && (
+                        <div className="text-center mb-4">
+                            <div className="alert alert-info">
+                                <strong>Plan change scheduled.</strong>
+                                <br />
+                                New plan will activate on{" "}
+                                {currentSub.pendingApplyDate &&
+                                    new Date(currentSub.pendingApplyDate).toLocaleDateString()}
+                                <p className="text-muted small mt-2">
+                                    You cannot schedule another change until this one is applied.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="text-center mb-5">
                         <div className="section-heading mb-2">
                             Choose Your Subscription Plan
@@ -218,7 +243,11 @@ const SubscriptionPlans = () => {
                                         ))}
                                     </ul>
 
-                                    {currentSub?.priceId === plan.priceId ? (
+                                    {currentSub?.hasPendingChange ? (
+                                        <Button disabled className="w-100">
+                                            Change Scheduled
+                                        </Button>
+                                    ) : currentSub?.priceId === plan.priceId ? (
                                         <Button disabled className="w-100">
                                             Current Plan
                                         </Button>
@@ -269,12 +298,22 @@ const SubscriptionPlans = () => {
                                         </li>
                                     </ul>
 
-                                    <Button
-                                        className="btn btn-custom w-100 py-2"
-                                        onClick={() => handleSelectPlan(plan.priceId, "dashboard")}
-                                    >
-                                        Select Plan
-                                    </Button>
+                                    {currentSub?.hasPendingChange ? (
+                                        <Button disabled className="w-100">
+                                            Change Scheduled
+                                        </Button>
+                                    ) : currentSub?.priceId === plan.priceId ? (
+                                        <Button disabled className="w-100">
+                                            Current Plan
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            className="btn btn-custom w-100 py-2"
+                                            onClick={() => handleSelectPlan(plan.priceId, "dashboard")}
+                                        >
+                                            {currentSub ? "Change Plan" : "Select Plan"}
+                                        </Button>
+                                    )}
                                 </div>
                             </Col>
                         ))}

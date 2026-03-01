@@ -56,7 +56,7 @@ export const ComicGenerator = () => {
   const [subscription, setSubscription] = useState(null);
   const [subLoading, setSubLoading] = useState(true);
 
-  const subscriptionType = subscription?.subscriptionType || "FREE";
+  const subscriptionType = subscription?.planType || "FREE";
 
   const isDashboardOnly = subscriptionType === "DASHBOARD";
   const isFreeUser = subscriptionType === "FREE";
@@ -723,6 +723,28 @@ export const ComicGenerator = () => {
         <div className="custom-wrapper mx-auto" style={{ maxWidth: "1000px" }}>
           <div className="wrapper pb-1">
             <Stepper currentStep={step} />
+
+            {subscription?.hasSubscription && (
+              <div className="mb-4 p-3 border rounded bg-light">
+                <div className="d-flex justify-content-between align-items-center flex-wrap">
+                  <div>
+                    <strong>📊 This Week Usage</strong>
+                    <div className="text-muted small">
+                      Generated: {subscription.usedThisWeek} / {subscription.comicsPerWeek}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className={`badge ${subscription.comicsLeft === 0
+                      ? "bg-danger"
+                      : "bg-success"
+                      }`}>
+                      Remaining: {subscription.comicsLeft}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
 
@@ -913,7 +935,7 @@ export const ComicGenerator = () => {
                     )}
                   </Button>
 
-                  
+
                 </div>
 
                 {existingComic && (

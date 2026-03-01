@@ -5,23 +5,24 @@ import API from "../../API";
 const MySubscription = () => {
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
-
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
 
-  const fetchSubscription = () => {
-    setLoading(true);
+  const fetchSubscription = async () => {
+    try {
+      setLoading(true);
+      const res = await API.get("/subscription/me");
 
-    API.get("/subscription/me")
-      .then(res => {
-        if (res.data.hasSubscription) {
-          setSubscription(res.data);
-        } else {
-          setSubscription(null);
-        }
-      })
-      .catch(() => setSubscription(null))
-      .finally(() => setLoading(false));
+      if (res.data.hasSubscription) {
+        setSubscription(res.data);
+      } else {
+        setSubscription(null);
+      }
+    } catch {
+      setSubscription(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -53,7 +54,7 @@ const MySubscription = () => {
           clearInterval(interval);
         }
 
-      }, 1500);
+      }, 1000);
 
     } catch (err) {
       alert(err.response?.data?.message || "Failed to cancel subscription");
@@ -76,17 +77,27 @@ const MySubscription = () => {
     );
   }
 
-  const formattedStart = new Date(subscription.startDate).toLocaleDateString();
-  const formattedEnd = new Date(subscription.endDate).toLocaleDateString();
+  // 🔥 Safe date formatting
+  const formattedStart = subscription.startDate
+    ? new Date(subscription.startDate).toLocaleDateString()
+    : "-";
+
+  const formattedEnd = subscription.endDate
+    ? new Date(subscription.endDate).toLocaleDateString()
+    : "-";
+
+  const formattedPendingDate = subscription.pendingApplyDate
+    ? new Date(subscription.pendingApplyDate).toLocaleDateString()
+    : null;
 
   return (
     <div>
       <h5 className="fw-bold mb-3">Current Plan</h5>
 
-      {/* ===== STATUS MESSAGE (Persistent after refresh) ===== */}
+      {/* ===== CANCELLED STATE ===== */}
       {subscription.status === "to_cancel" && (
         <Alert variant="warning">
-          <strong>Subscription Cancelled</strong>
+          <strong>Cancellation Scheduled</strong>
           <br />
           You can continue using your plan until{" "}
           <strong>{formattedEnd}</strong>.
@@ -96,6 +107,15 @@ const MySubscription = () => {
       {subscription.status === "cancelled" && (
         <Alert variant="secondary">
           This subscription has ended.
+        </Alert>
+      )}
+
+      {/* ===== PENDING PLAN CHANGE ===== */}
+      {subscription.hasPendingChange && (
+        <Alert variant="info">
+          <strong>Plan change scheduled</strong>
+          <br />
+          New plan activates on <strong>{formattedPendingDate}</strong>.
         </Alert>
       )}
 
@@ -120,12 +140,24 @@ const MySubscription = () => {
         </div>
 
         <div className="col-md-4 mb-3">
+          <label className="fw-semibold">Used This Week</label>
+          <div className="text-muted">
+            {subscription.usedThisWeek} / {subscription.comicsPerWeek}
+          </div>
+        </div>
+
+        <div className="col-md-4 mb-3">
+          <label className="fw-semibold">Comics Left</label>
+          <div className="text-muted">{subscription.comicsLeft}</div>
+        </div>
+
+        <div className="col-md-4 mb-3">
           <label className="fw-semibold">Start Date</label>
           <div className="text-muted">{formattedStart}</div>
         </div>
 
         <div className="col-md-4 mb-3">
-          <label className="fw-semibold">End Date</label>
+          <label className="fw-semibold">Renewal Date</label>
           <div className="text-muted">{formattedEnd}</div>
         </div>
 
@@ -133,19 +165,18 @@ const MySubscription = () => {
           <label className="fw-semibold">Status</label>
           <span
             className={`badge ms-2 ${subscription.status === "active"
-                ? "bg-success"
-                : subscription.status === "to_cancel"
-                  ? "bg-warning text-dark"
-                  : "bg-secondary"
+              ? "bg-success"
+              : subscription.status === "to_cancel"
+                ? "bg-warning text-dark"
+                : "bg-secondary"
               }`}
           >
             {subscription.status}
           </span>
         </div>
-
       </div>
 
-      {/* ===== ACTION ===== */}
+      {/* ===== CANCEL BUTTON ===== */}
       {subscription.status === "active" && (
         <div className="mt-3">
           <Button
@@ -168,10 +199,10 @@ const MySubscription = () => {
         </Modal.Header>
 
         <Modal.Body>
-          Are you sure you want to cancel your subscription?
+          Are you sure?
           <br />
-          <br />
-          Your plan will remain active until the end of the current billing cycle.
+          Your subscription will remain active until{" "}
+          <strong>{formattedEnd}</strong>.
         </Modal.Body>
 
         <Modal.Footer>
@@ -198,7 +229,6 @@ const MySubscription = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
     </div>
   );
 };
