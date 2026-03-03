@@ -21,7 +21,7 @@ const plans = [
             "Monthly consolidated progress report",
             "Full commercial rights to your generated comics",
         ],
-        priceId: "price_1SvojF1hJWq07BPoiLXsGdb2",
+        priceId: "price_1T6wmqKGzJOFnjXyBIZOJshc",
     },
     {
         name: "Growth",
@@ -36,7 +36,7 @@ const plans = [
             "Detailed monthly performance analytics",
             "Commercial rights included",
         ],
-        priceId: "price_1SvokW1hJWq07BPoF5eqF96u",
+        priceId: "price_1T6wnaKGzJOFnjXyp4bSkk8m",
     },
     {
         name: "Pro",
@@ -51,7 +51,7 @@ const plans = [
             "Advanced monthly analytics reports",
             "Commercial rights included",
         ],
-        priceId: "price_1Svoky1hJWq07BPot9vtsvOV",
+        priceId: "price_1T6wnnKGzJOFnjXytLtCaPg3",
     },
 ];
 
@@ -65,7 +65,7 @@ const dashboardPlans = [
             "Weekly performance insights",
             "Monthly progress summary",
         ],
-        priceId: "price_1SvomW1hJWq07BPoTrxz3Tyb",
+        priceId: "price_1T6wozKGzJOFnjXyD61eBJYK",
     },
     {
         name: "Medium Classroom",
@@ -76,7 +76,7 @@ const dashboardPlans = [
             "Weekly performance insights",
             "Monthly progress summary",
         ],
-        priceId: "price_1Svomk1hJWq07BPo9IjJLtZD",
+        priceId: "price_1T6wpFKGzJOFnjXy1u6aLEx0",
     },
     {
         name: "Large Classroom",
@@ -87,7 +87,7 @@ const dashboardPlans = [
             "Weekly performance insights",
             "Monthly progress summary",
         ],
-        priceId: "price_1Svoms1hJWq07BPobzFCz5b8",
+        priceId: "price_1T6wpSKGzJOFnjXyPps9FMUG",
     },
 ];
 

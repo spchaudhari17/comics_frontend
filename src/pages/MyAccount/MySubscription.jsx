@@ -4,14 +4,14 @@ import API from "../../API";
 
 const PRICE_PLAN_MAP = {
   // Bundle Plans
-  price_1SvojF1hJWq07BPoiLXsGdb2: "Starter",
-  price_1SvokW1hJWq07BPoF5eqF96u: "Growth",
-  price_1Svoky1hJWq07BPot9vtsvOV: "Pro",
+  price_1T6wmqKGzJOFnjXyBIZOJshc: "Starter",
+  price_1T6wnaKGzJOFnjXyp4bSkk8m: "Growth",
+  price_1T6wnnKGzJOFnjXytLtCaPg3: "Pro",
 
   // Dashboard Plans
-  price_1SvomW1hJWq07BPoTrxz3Tyb: "Small Classroom",
-  price_1Svomk1hJWq07BPo9IjJLtZD: "Medium Classroom",
-  price_1Svoms1hJWq07BPobzFCz5b8: "Large Classroom",
+  price_1T6wozKGzJOFnjXyD61eBJYK: "Small Classroom",
+  price_1T6wpFKGzJOFnjXy1u6aLEx0: "Medium Classroom",
+  price_1T6wpSKGzJOFnjXyPps9FMUG: "Large Classroom",
 };
 
 const MySubscription = () => {
