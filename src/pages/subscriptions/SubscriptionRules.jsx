@@ -3,8 +3,10 @@ import { Container } from "react-bootstrap";
 
 const SubscriptionRules = () => {
   return (
-    <Container className="py-5" style={{ maxWidth: "900px" }}>
-      <h1 className="mb-4 fw-bold">Subscription Terms & Conditions</h1>
+    <Container className="py-5" style={{ maxWidth: "950px" }}>
+      <h1 className="mb-4 fw-bold">
+        Subscription Terms & Conditions
+      </h1>
 
       <p className="text-muted">
         Last Updated: {new Date().toLocaleDateString()}
@@ -12,86 +14,126 @@ const SubscriptionRules = () => {
 
       <hr />
 
-      <h4>1. Subscription Overview</h4>
-      <p>
-        Our subscription provides access to educational comic creation tools
-        and student dashboard features. Subscription benefits are available
-        only during the active billing period.
-      </p>
+      {/* PART 1 */}
+      <h3 className="mt-4 fw-bold">PART 1 — General Subscription Terms</h3>
 
+      <h5 className="mt-3">1. Subscription Structure</h5>
       <ul>
-        <li>Access to comic generation tools</li>
-        <li>Weekly comic creation limits based on plan</li>
-        <li>Student dashboard access with student limits</li>
-        <li>Access to saved comics and downloads</li>
+        <li>Subscriptions are billed monthly or annually as selected.</li>
+        <li>Subscriptions renew automatically unless canceled before renewal.</li>
+        <li>Pricing may change for new users. Existing users will be notified in advance.</li>
       </ul>
 
-      <h4>2. Billing & Payments</h4>
+      <h5 className="mt-3">2. Comic Generation Limits</h5>
       <ul>
-        <li>Subscription is billed monthly.</li>
-        <li>Payment is charged automatically every billing cycle.</li>
-        <li>Failure of payment may suspend account access.</li>
-        <li>All prices are subject to applicable taxes.</li>
+        <li>Each plan includes a maximum number of AI-generated comics.</li>
+        <li>Comics are distributed weekly (e.g., 5, 10, or 20 per week).</li>
+        <li>Unused weekly limits do not roll over unless explicitly stated.</li>
+        <li>Unused monthly allocations do not carry forward.</li>
+        <li>Limits ensure fair and stable platform performance.</li>
       </ul>
 
-      <h4>3. Usage Limits</h4>
+      <h5 className="mt-3">3. Content Ownership & Commercial Rights</h5>
       <ul>
-        <li>Comic creation is limited per week as per your plan.</li>
-        <li>Student additions are limited based on your plan.</li>
-        <li>Limits reset automatically each week.</li>
-        <li>Unused credits do not roll over to the next cycle.</li>
+        <li>Subscribers retain commercial usage rights during active subscription.</li>
+        <li>Commercial rights apply only while subscription remains active.</li>
+        <li>The platform may use anonymized content for improvements & marketing.</li>
+        <li>Users are responsible for complying with intellectual property laws.</li>
       </ul>
 
-      <h4>4. Free Access Policy</h4>
-      <p>
-        Free users may generate a limited number of comics. Advanced features,
-        additional parts, and student management require an active subscription.
-      </p>
-
-      <h4>5. Upgrades & Downgrades</h4>
+      <h5 className="mt-3">4. Student Access & Dashboard</h5>
       <ul>
-        <li>Users may upgrade at any time.</li>
-        <li>Upgrades take effect immediately after payment confirmation.</li>
-        <li>Downgrades apply at the next billing cycle.</li>
+        <li>Student limits depend on the selected subscription tier.</li>
+        <li>A registered student means a unique student account linked to a teacher dashboard.</li>
+        <li>Sharing login credentials is strictly prohibited.</li>
+        <li>Students may access assigned content but do not receive ownership rights.</li>
       </ul>
 
-      <h4>6. Cancellation Policy</h4>
+      <h5 className="mt-3">5. Reports & Analytics</h5>
       <ul>
-        <li>You may cancel your subscription at any time.</li>
-        <li>Access remains active until the end of the current billing period.</li>
-        <li>No refunds are provided for partial billing cycles.</li>
+        <li>Reports are generated automatically based on student activity.</li>
+        <li>Analytics are for educational support purposes only.</li>
+        <li>No guarantee of academic outcomes is provided.</li>
+        <li>Analytics features may evolve over time.</li>
       </ul>
 
-      <h4>7. Fair Usage Policy</h4>
+      <h5 className="mt-3">6. Payments & Refunds</h5>
       <ul>
-        <li>Accounts are intended for educational use only.</li>
-        <li>Misuse, abuse, or automated scraping is strictly prohibited.</li>
-        <li>We reserve the right to suspend accounts violating our policies.</li>
+        <li>All payments are non-refundable unless required by law.</li>
+        <li>Cancellations take effect at the end of the billing cycle.</li>
+        <li>Failed payments may result in suspended access.</li>
       </ul>
 
-      <h4>8. Data & Content</h4>
+      <h5 className="mt-3">7. Fair Usage & Abuse Policy</h5>
       <ul>
-        <li>Users retain ownership of generated educational content.</li>
-        <li>We store content securely but do not guarantee permanent storage.</li>
-        <li>Users are responsible for backing up downloaded content.</li>
+        <li>Automated scraping or system abuse is strictly prohibited.</li>
+        <li>Excessive or suspicious usage may trigger review.</li>
+        <li>Violation of terms may result in suspension without refund.</li>
       </ul>
 
-      <h4>9. Modifications</h4>
-      <p>
-        We may update subscription pricing, features, or terms at any time.
-        Continued use of the service implies acceptance of updated terms.
-      </p>
+      <h5 className="mt-3">8. Modifications to Service</h5>
+      <ul>
+        <li>The platform may modify or discontinue features at its discretion.</li>
+        <li>Material changes affecting pricing or structure will be notified.</li>
+      </ul>
 
-      <h4>10. Contact</h4>
-      <p>
-        For any subscription-related queries, please contact our support team
-        via the Contact page.
-      </p>
+      <hr />
+
+      {/* PART 2 */}
+      <h3 className="mt-4 fw-bold">PART 2 — Student Dashboard Add-On Terms</h3>
+
+      <ul>
+        <li>Student dashboard requires an active comic subscription.</li>
+        <li>Student capacity limits are strictly enforced (e.g., 20, 50, 100).</li>
+        <li>Removing students does not reset historical usage limits.</li>
+        <li>Reports are generated only for active student accounts.</li>
+        <li>No personally identifiable student data is stored.</li>
+      </ul>
+
+      <hr />
+
+      {/* PART 3 */}
+      <h3 className="mt-4 fw-bold">PART 3 — Founding Teacher Program</h3>
+
+      <h5 className="mt-3">1. Eligibility</h5>
+      <ul>
+        <li>Limited to the first 100 eligible subscribers.</li>
+        <li>Eligibility is determined at the time of confirmed subscription.</li>
+        <li>Once filled, the program will permanently close.</li>
+      </ul>
+
+      <h5 className="mt-3">2. Founding Discount</h5>
+      <ul>
+        <li>Up to 80% lifetime discount while subscription remains uninterrupted.</li>
+        <li>Canceling forfeits the Founding discount permanently.</li>
+        <li>Discount applies only to qualifying subscription plans.</li>
+      </ul>
+
+      <h5 className="mt-3">3. Referral Revenue Share</h5>
+      <ul>
+        <li>20% revenue share on qualifying referred subscriptions.</li>
+        <li>Valid for 24 months from referral start date.</li>
+        <li>Excludes refunds, chargebacks, taxes, and fees.</li>
+        <li>Requires official platform referral tracking.</li>
+      </ul>
+
+      <h5 className="mt-3">4. Program Integrity</h5>
+      <ul>
+        <li>Self-referrals or fraudulent activity will terminate Founding status.</li>
+        <li>Founding status is non-transferable.</li>
+      </ul>
+
+      <h5 className="mt-3">5. Engagement</h5>
+      <ul>
+        <li>Founding members may be invited for feedback or beta testing.</li>
+        <li>Benefits may require reasonable participation.</li>
+      </ul>
 
       <hr />
 
       <p className="text-muted small">
-        By subscribing, you agree to these terms and conditions.
+        By subscribing, you acknowledge that you have read and agree to these
+        Terms & Conditions.
       </p>
     </Container>
   );

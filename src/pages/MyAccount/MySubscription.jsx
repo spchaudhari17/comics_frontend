@@ -2,11 +2,25 @@ import React, { useEffect, useState } from "react";
 import { Button, Modal, Spinner, Alert } from "react-bootstrap";
 import API from "../../API";
 
+const PRICE_PLAN_MAP = {
+  // Bundle Plans
+  price_1SvojF1hJWq07BPoiLXsGdb2: "Starter",
+  price_1SvokW1hJWq07BPoF5eqF96u: "Growth",
+  price_1Svoky1hJWq07BPot9vtsvOV: "Pro",
+
+  // Dashboard Plans
+  price_1SvomW1hJWq07BPoTrxz3Tyb: "Small Classroom",
+  price_1Svomk1hJWq07BPo9IjJLtZD: "Medium Classroom",
+  price_1Svoms1hJWq07BPobzFCz5b8: "Large Classroom",
+};
+
 const MySubscription = () => {
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+
+
 
   const fetchSubscription = async () => {
     try {
@@ -28,6 +42,9 @@ const MySubscription = () => {
   useEffect(() => {
     fetchSubscription();
   }, []);
+
+  // const planName = PRICE_PLAN_MAP[subscription.priceId] || "Unknown Plan";
+  const planName = subscription?.priceId ? PRICE_PLAN_MAP[subscription.priceId] || "Unknown Plan" : "";
 
   const handleCancelSubscription = async () => {
     try {
@@ -123,9 +140,9 @@ const MySubscription = () => {
       <div className="row mt-3">
 
         <div className="col-md-4 mb-3">
-          <label className="fw-semibold">Plan Type</label>
-          <div className="text-muted text-capitalize">
-            {subscription.planType}
+          <label className="fw-semibold">Plan</label>
+          <div className="text-muted fw-semibold">
+            {planName}
           </div>
         </div>
 

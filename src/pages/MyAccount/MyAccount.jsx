@@ -3,6 +3,7 @@ import MySubscription from "./MySubscription";
 import SubscriptionHistory from "./SubscriptionHistory";
 import Invoices from "./Invoices";
 import ProfileDetails from "../authentication/ProfileDetails";
+import MycardsDetails from "./MycardsDetails";
 
 const MyAccount = () => {
   const [activeTab, setActiveTab] = useState("subscription");
@@ -42,12 +43,22 @@ const MyAccount = () => {
               Invoices
             </button>
           </li>
+
+          <li className="nav-item">
+            <button
+              className={`nav-link ${activeTab === "manage" ? "active" : ""}`}
+              onClick={() => setActiveTab("manage")}
+            >
+              Manage Cards
+            </button>
+          </li>
         </ul>
 
         {/* ===== TAB CONTENT ===== */}
         {activeTab === "subscription" && <MySubscription />}
         {activeTab === "history" && <SubscriptionHistory />}
         {activeTab === "invoices" && <Invoices />}
+        {activeTab === "manage" && <MycardsDetails />}
       </div>
     </div>
   );

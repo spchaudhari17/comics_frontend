@@ -13,10 +13,13 @@ const plans = [
         duration: "/month",
         badge: null,
         features: [
-            "5 comics per week",
-            "Student Dashboard included ($5/month)",
-            "Up to 20 students",
-            "Teacher analytics access",
+            "Up to 5 new AI comics each week (20 per month)",
+            "Fully editable stories with rich custom visuals",
+            "Built-in quizzes (Normal + Hardcore mode with powerups)",
+            "Supports up to 20 students",
+            "Weekly student performance insights",
+            "Monthly consolidated progress report",
+            "Full commercial rights to your generated comics",
         ],
         priceId: "price_1SvojF1hJWq07BPoiLXsGdb2",
     },
@@ -26,10 +29,12 @@ const plans = [
         duration: "/month",
         badge: "Best Value",
         features: [
-            "10 comics per week",
-            "Student Dashboard included ($10/month)",
-            "Up to 50 students",
-            "Priority support",
+            "Up to 10 new AI comics each week (40 per month)",
+            "Advanced quiz engine with timed challenges",
+            "Supports up to 50 students",
+            "Enhanced weekly insights",
+            "Detailed monthly performance analytics",
+            "Commercial rights included",
         ],
         priceId: "price_1SvokW1hJWq07BPoF5eqF96u",
     },
@@ -39,10 +44,12 @@ const plans = [
         duration: "/month",
         badge: null,
         features: [
-            "20 comics per week",
-            "Student Dashboard included ($20/month)",
-            "Up to 100 students",
-            "Advanced teacher tools",
+            "Up to 20 new AI comics each week (80 per month)",
+            "Full advanced assessment system (Normal + Hardcore)",
+            "Supports up to 100 students",
+            "Comprehensive weekly tracking",
+            "Advanced monthly analytics reports",
+            "Commercial rights included",
         ],
         priceId: "price_1Svoky1hJWq07BPot9vtsvOV",
     },
@@ -50,24 +57,36 @@ const plans = [
 
 const dashboardPlans = [
     {
-        name: "Dashboard Basic",
-        price: "$5",
+        name: "Small Classroom",
+        price: "$4.99",
         duration: "/month",
-        students: "Up to 20 students",
+        features: [
+            "Up to 20 students",
+            "Weekly performance insights",
+            "Monthly progress summary",
+        ],
         priceId: "price_1SvomW1hJWq07BPoTrxz3Tyb",
     },
     {
-        name: "Dashboard Plus",
-        price: "$10",
+        name: "Medium Classroom",
+        price: "$9.99",
         duration: "/month",
-        students: "Up to 50 students",
+        features: [
+            "Up to 50 students",
+            "Weekly performance insights",
+            "Monthly progress summary",
+        ],
         priceId: "price_1Svomk1hJWq07BPo9IjJLtZD",
     },
     {
-        name: "Dashboard Pro",
-        price: "$20",
+        name: "Large Classroom",
+        price: "$19.99",
         duration: "/month",
-        students: "Up to 100 students",
+        features: [
+            "Up to 100 students",
+            "Weekly performance insights",
+            "Monthly progress summary",
+        ],
         priceId: "price_1Svoms1hJWq07BPobzFCz5b8",
     },
 ];
@@ -186,13 +205,27 @@ const SubscriptionPlans = () => {
         <>
             {/* ===== Bundled Plans (UNCHANGED) ===== */}
             <section className="subscription-plans-section py-5">
-                {currentSub && (
-                    <p className="text-center text-muted small mb-4">
-                        Current plan renews on{" "}
-                        {currentSub.endDate &&
-                            new Date(currentSub.endDate).toLocaleDateString()}
-                    </p>
+                {currentSub?.status === "to_cancel" && (
+                    <div className="alert alert-warning text-center mb-4">
+                        <h6 className="fw-semibold mb-2">
+                            Subscription Cancelled
+                        </h6>
+                        <p className="mb-1">
+                            Your plan will end on{" "}
+                            <strong>
+                                {new Date(currentSub.endDate).toLocaleDateString()}
+                            </strong>.
+                        </p>
+                        <p className="mb-0 small text-muted">
+                            You can continue using all features until this date.
+                        </p>
+                    </div>
                 )}
+
+
+
+
+
                 <Container>
                     {currentSub?.hasPendingChange && (
                         <div className="text-center mb-4">
@@ -243,21 +276,37 @@ const SubscriptionPlans = () => {
                                         ))}
                                     </ul>
 
-                                    {currentSub?.hasPendingChange ? (
-                                        <Button disabled className="w-100">
-                                            Change Scheduled
-                                        </Button>
+                                    {currentSub?.status === "to_cancel" ? (
+                                        <div className="mt-auto">
+                                            <Button disabled className="w-100">
+                                                Cancels on{" "}
+                                                {new Date(currentSub.endDate).toLocaleDateString()}
+                                            </Button>
+                                        </div>
+
+                                    ) : currentSub?.hasPendingChange ? (
+                                        <div className="mt-auto">
+                                            <Button disabled className="w-100">
+                                                Change Scheduled
+                                            </Button>
+                                        </div>
+
                                     ) : currentSub?.priceId === plan.priceId ? (
-                                        <Button disabled className="w-100">
-                                            Current Plan
-                                        </Button>
+                                        <div className="mt-auto">
+                                            <Button disabled className="w-100">
+                                                Current Plan
+                                            </Button>
+                                        </div>
+
                                     ) : (
-                                        <Button
-                                            className="btn btn-custom w-100 py-2"
-                                            onClick={() => handleSelectPlan(plan.priceId, "bundle")}
-                                        >
-                                            {currentSub ? "Change Plan" : "Select Plan"}
-                                        </Button>
+                                        <div className="mt-auto">
+                                            <Button
+                                                className="btn btn-custom w-100 py-2"
+                                                onClick={() => handleSelectPlan(plan.priceId, "bundle")}
+                                            >
+                                                {currentSub ? "Change Plan" : "Select Plan"}
+                                            </Button>
+                                        </div>
                                     )}
 
                                 </div>
@@ -282,10 +331,10 @@ const SubscriptionPlans = () => {
                     <Row className="g-4 justify-content-center">
                         {dashboardPlans.map((plan, index) => (
                             <Col lg={4} md={6} key={index}>
-                                <div className="plan-card h-100 text-center">
+                                <div className="plan-card h-100">
                                     <div className="plan-header mb-4">
-                                        <h5 className="fw-semibold mb-2">{plan.name}</h5>
-                                        <div className="plan-price">
+                                        <h5 className="fw-semibold mb-2 text-center">{plan.name}</h5>
+                                        <div className="plan-price text-center">
                                             <span className="price">{plan.price}</span>
                                             <span className="duration">{plan.duration}</span>
                                         </div>
@@ -293,12 +342,18 @@ const SubscriptionPlans = () => {
 
                                     <ul className="plan-features list-unstyled mb-4">
                                         <li>
-                                            <i className="bi bi-check-circle-fill me-2"></i>
-                                            {plan.students}
+
+
+                                            {plan.features?.map((feature, i) => (
+                                                <li key={i}>
+                                                    <i className="bi bi-check-circle-fill me-2"></i>
+                                                    {feature}
+                                                </li>
+                                            ))}
                                         </li>
                                     </ul>
 
-                                    {currentSub?.hasPendingChange ? (
+                                    {/* {currentSub?.hasPendingChange ? (
                                         <Button disabled className="w-100">
                                             Change Scheduled
                                         </Button>
@@ -313,6 +368,36 @@ const SubscriptionPlans = () => {
                                         >
                                             {currentSub ? "Change Plan" : "Select Plan"}
                                         </Button>
+                                    )} */}
+
+
+                                    {currentSub?.status === "to_cancel" ? (
+                                        <div className="mt-auto">
+                                            <Button disabled className="w-100">
+                                                Cancels on{" "}
+                                                {new Date(currentSub.endDate).toLocaleDateString()}
+                                            </Button>
+                                        </div>
+
+                                    ) : currentSub?.hasPendingChange ? (
+                                        <Button disabled className="w-100">
+                                            Change Scheduled
+                                        </Button>
+
+                                    ) : currentSub?.priceId === plan.priceId ? (
+                                        <Button disabled className="w-100">
+                                            Current Plan
+                                        </Button>
+
+                                    ) : (
+                                        <div className="mt-auto">
+                                            <Button
+                                                className="btn btn-custom w-100 py-2"
+                                                onClick={() => handleSelectPlan(plan.priceId, "dashboard")}
+                                            >
+                                                {currentSub ? "Change Plan" : "Select Plan"}
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
                             </Col>
