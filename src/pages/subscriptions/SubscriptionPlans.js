@@ -6,10 +6,60 @@ import { useNavigate } from "react-router-dom";
 import { Modal, Spinner } from "react-bootstrap";
 
 
+// const plans = [
+//     {
+//         name: "Starter",
+//         price: "$24.99",
+//         duration: "/month",
+//         badge: null,
+//         features: [
+//             "Up to 5 new AI comics each week (20 per month)",
+//             "Fully editable stories with rich custom visuals",
+//             "Built-in quizzes (Normal + Hardcore mode with powerups)",
+//             "Supports up to 20 students",
+//             "Weekly student performance insights",
+//             "Monthly consolidated progress report",
+//             "Full commercial rights to your generated comics",
+//         ],
+//         priceId: "price_1T6wmqKGzJOFnjXyBIZOJshc",
+//     },
+//     {
+//         name: "Growth",
+//         price: "$39.99",
+//         duration: "/month",
+//         badge: "Best Value",
+//         features: [
+//             "Up to 10 new AI comics each week (40 per month)",
+//             "Advanced quiz engine with timed challenges",
+//             "Supports up to 50 students",
+//             "Enhanced weekly insights",
+//             "Detailed monthly performance analytics",
+//             "Commercial rights included",
+//         ],
+//         priceId: "price_1T6wnaKGzJOFnjXyp4bSkk8m",
+//     },
+//     {
+//         name: "Pro",
+//         price: "$59.99",
+//         duration: "/month",
+//         badge: null,
+//         features: [
+//             "Up to 20 new AI comics each week (80 per month)",
+//             "Full advanced assessment system (Normal + Hardcore)",
+//             "Supports up to 100 students",
+//             "Comprehensive weekly tracking",
+//             "Advanced monthly analytics reports",
+//             "Commercial rights included",
+//         ],
+//         priceId: "price_1T6wnnKGzJOFnjXytLtCaPg3",
+//     },
+// ];
+
 const plans = [
     {
         name: "Starter",
-        price: "$24.99",
+        price: "$4.99",
+        originalPrice: "$24.99",
         duration: "/month",
         badge: null,
         features: [
@@ -21,11 +71,12 @@ const plans = [
             "Monthly consolidated progress report",
             "Full commercial rights to your generated comics",
         ],
-        priceId: "price_1T6wmqKGzJOFnjXyBIZOJshc",
+        priceId: "price_1T7C1lKGzJOFnjXyBzb0fvZ6",
     },
     {
         name: "Growth",
-        price: "$39.99",
+        price: "$7.99",
+        originalPrice: "$39.99",
         duration: "/month",
         badge: "Best Value",
         features: [
@@ -36,11 +87,12 @@ const plans = [
             "Detailed monthly performance analytics",
             "Commercial rights included",
         ],
-        priceId: "price_1T6wnaKGzJOFnjXyp4bSkk8m",
+        priceId: "price_1T7C28KGzJOFnjXyfdAo2ToJ",
     },
     {
         name: "Pro",
-        price: "$59.99",
+        price: "$11.99",
+        originalPrice: "$39.99",
         duration: "/month",
         badge: null,
         features: [
@@ -242,6 +294,13 @@ const SubscriptionPlans = () => {
                         </div>
                     )}
 
+                    <div className="text-center mb-3">
+                        <div className="alert alert-warning fw-semibold">
+                            🚀 Hurry Up! First 100 subscribers get <strong>80% OFF</strong> on Comics Plans.
+                        </div>
+                    </div>
+
+
                     <div className="text-center mb-5">
                         <div className="section-heading mb-2">
                             Choose Your Subscription Plan
@@ -261,8 +320,27 @@ const SubscriptionPlans = () => {
 
                                     <div className="plan-header text-center mb-4">
                                         <h5 className="fw-semibold mb-2">{plan.name}</h5>
-                                        <div className="plan-price">
+                                        {/* <div className="plan-price">
                                             <span className="price">{plan.price}</span>
+                                            <span className="duration">{plan.duration}</span>
+                                        </div> */}
+
+                                        <div className="plan-price">
+                                            <div className="d-flex justify-content-center align-items-center gap-2">
+
+                                                <span className="price text-success fw-bold">
+                                                    {plan.price}
+                                                </span>
+
+                                                {plan.originalPrice && (
+                                                    <span className="text-muted text-decoration-line-through">
+                                                        {plan.originalPrice}
+                                                    </span>
+                                                )}
+
+
+                                            </div>
+
                                             <span className="duration">{plan.duration}</span>
                                         </div>
                                     </div>
