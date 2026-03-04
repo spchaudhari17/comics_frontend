@@ -59,7 +59,7 @@ export const Header = () => {
             </div>
 
             <div className="offcanvas-body">
-              <ul className="navbar-nav menu-link-nav align-items-center justify-content-end flex-grow-1 gap-3">
+              <ul className="navbar-nav menu-link-nav align-items-center justify-content-end flex-grow-1 gap-2">
                 {(
                   <>
                     <li className="nav-item">
@@ -78,67 +78,46 @@ export const Header = () => {
                     <li className="nav-item">
                       <Link to={'/for-parent'} title="for-parent" className="nav-link p-0">For Parents</Link>
                     </li>
-                    <li className="nav-item">
+                    {/* <li className="nav-item">
                       <Link to={'/subscriptions-plan'} title="subscriptions-plan" className="nav-link p-0">Subscriptions</Link>
-                    </li>
+                    </li> */}
                     <li className="nav-item">
                       <Link to={'/contact'} title="contact" className="nav-link p-0">Contact</Link>
                     </li>
+
+                    {(!userInfo || userInfo.userType === "admin" || userInfo.userType === "user") && (
+                      <li className="nav-item">
+                        <button
+                          className="nav-link p-0 btn btn-link text-decoration-none"
+                          onClick={() => navigate("/subscriptions-plan")}
+                        >
+                          Subscription Plan
+                        </button>
+                      </li>
+                    )}
+
+                    {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
+                      <li className="nav-item">
+                        <button
+                          className="nav-link p-0 btn btn-link text-decoration-none"
+                          title="create-comic"
+                          onClick={() => navigate("/create-comic")}
+                        >
+                          Create Comics
+                        </button>
+                      </li>
+                    )}
+
+
+
                   </>
                 )
                 }
 
-                {
+                {/* {
                   (
                     <>
                       <li className="nav-item">
-                        {/* <button
-                          className="nav-link p-0 btn btn-link text-decoration-none"
-                          onClick={() => {
-                            if (!userInfo) {
-                              navigate("/login"); // agar login nahi hai to login page bhejo
-                            }
-                            else if (userInfo.userType === "moderator") {
-                              navigate("/super-admin");
-                              return alert("Moderators are not allowed to create comics.");
-                            }
-                            else if (userInfo.userType === "parent") {
-                              navigate("/parent/manage-children");
-                              // return alert("Moderators are not allowed to create comics.");
-                            }
-                            else {
-                              navigate("/create-comic"); // agar login hai to create comic page bhejo
-                            }
-                          }}
-                        >
-                          Create Comics
-                        </button> */}
-
-                        {/* {userInfo && userInfo.userType !== "parent" && (
-                          <li className="nav-item">
-                            <button
-                              className="nav-link p-0 btn btn-link text-decoration-none" title="create-comic"
-                              onClick={() => {
-                                if (!userInfo) {
-                                  navigate("/login");
-                                }
-                                else if (userInfo.userType === "parent") {
-                                  navigate("/parent/manage-children");
-                                }
-                                else if (userInfo.userType === "moderator") {
-                                  navigate("/super-admin");
-                                  return alert("Moderators are not allowed to create comics.");
-                                }
-                                else {
-                                  navigate("/create-comic");
-                                }
-                              }}
-                            >
-                              Create Comics
-                            </button>
-                          </li>
-                        )} */}
-
                         {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                           <li className="nav-item">
                             <button
@@ -151,12 +130,23 @@ export const Header = () => {
                           </li>
                         )}
 
+                        {(!userInfo || userInfo.userType === "admin" || userInfo.userType === "user") && (
+                          <li className="nav-item">
+                            <button
+                              className="nav-link p-0 btn btn-link text-decoration-none"
+                              onClick={() => navigate("/subscriptions-plan")}
+                            >
+                              Subscription Plan
+                            </button>
+                          </li>
+                        )}
+
 
                       </li>
 
                     </>
                   )
-                }
+                } */}
 
               </ul>
 

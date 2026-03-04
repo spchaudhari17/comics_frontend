@@ -87,12 +87,12 @@ const plans = [
             "Detailed monthly performance analytics",
             "Commercial rights included",
         ],
-        priceId: "price_1T7C28KGzJOFnjXyfdAo2ToJ",
+        priceId: "price_1T7C1xKGzJOFnjXyq4FXqK1x",
     },
     {
         name: "Pro",
         price: "$11.99",
-        originalPrice: "$39.99",
+        originalPrice: "$59.99",
         duration: "/month",
         badge: null,
         features: [
@@ -103,7 +103,7 @@ const plans = [
             "Advanced monthly analytics reports",
             "Commercial rights included",
         ],
-        priceId: "price_1T6wnnKGzJOFnjXytLtCaPg3",
+        priceId: "price_1T7C28KGzJOFnjXyfdAo2ToJ",
     },
 ];
 

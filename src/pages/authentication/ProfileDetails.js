@@ -55,7 +55,7 @@ const ProfileDetails = () => {
           <div className="col-md-6 mb-3">
             <label className="fw-semibold">User Type</label>
             <div className="text-muted text-capitalize">
-              {userInfo.userType}
+              {userInfo.userType === "user" ? "Teacher" : userInfo.userType}
             </div>
           </div>
         </div>
@@ -94,9 +94,9 @@ const ProfileDetails = () => {
           </div>
         </div>
 
-        
 
-        
+
+
 
       </div>
     </div>

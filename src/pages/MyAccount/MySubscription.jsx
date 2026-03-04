@@ -4,9 +4,9 @@ import API from "../../API";
 
 const PRICE_PLAN_MAP = {
   // Bundle Plans
-  price_1T7C1lKGzJOFnjXyBzb0fvZ6: "Starter",
-  price_1T7C28KGzJOFnjXyfdAo2ToJ: "Growth",
-  price_1T6wnnKGzJOFnjXytLtCaPg3: "Pro",
+  price_1T7C1lKGzJOFnjXyBzb0fvZ6: "Starter", //4.99
+  price_1T7C1xKGzJOFnjXyq4FXqK1x: "Growth", //7.99
+  price_1T7C28KGzJOFnjXyfdAo2ToJ: "Pro", // 11.99
 
   // Dashboard Plans
   price_1T6wozKGzJOFnjXyD61eBJYK: "Small Classroom",
