@@ -6,10 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { Modal, Spinner } from "react-bootstrap";
 
 
+
 // const plans = [
 //     {
 //         name: "Starter",
-//         price: "$24.99",
+//         price: "$4.99",
+//         originalPrice: "$24.99",
 //         duration: "/month",
 //         badge: null,
 //         features: [
@@ -21,11 +23,12 @@ import { Modal, Spinner } from "react-bootstrap";
 //             "Monthly consolidated progress report",
 //             "Full commercial rights to your generated comics",
 //         ],
-//         priceId: "price_1T6wmqKGzJOFnjXyBIZOJshc",
+//         priceId: "price_1T7C1lKGzJOFnjXyBzb0fvZ6",
 //     },
 //     {
 //         name: "Growth",
-//         price: "$39.99",
+//         price: "$7.99",
+//         originalPrice: "$39.99",
 //         duration: "/month",
 //         badge: "Best Value",
 //         features: [
@@ -36,11 +39,12 @@ import { Modal, Spinner } from "react-bootstrap";
 //             "Detailed monthly performance analytics",
 //             "Commercial rights included",
 //         ],
-//         priceId: "price_1T6wnaKGzJOFnjXyp4bSkk8m",
+//         priceId: "price_1T7C1xKGzJOFnjXyq4FXqK1x",
 //     },
 //     {
 //         name: "Pro",
-//         price: "$59.99",
+//         price: "$11.99",
+//         originalPrice: "$59.99",
 //         duration: "/month",
 //         badge: null,
 //         features: [
@@ -51,10 +55,11 @@ import { Modal, Spinner } from "react-bootstrap";
 //             "Advanced monthly analytics reports",
 //             "Commercial rights included",
 //         ],
-//         priceId: "price_1T6wnnKGzJOFnjXytLtCaPg3",
+//         priceId: "price_1T7C28KGzJOFnjXyfdAo2ToJ",
 //     },
 // ];
 
+// live
 const plans = [
     {
         name: "Starter",
@@ -71,7 +76,7 @@ const plans = [
             "Monthly consolidated progress report",
             "Full commercial rights to your generated comics",
         ],
-        priceId: "price_1T7C1lKGzJOFnjXyBzb0fvZ6",
+        priceId: "price_1T7dNbKGzJOFnjXyfFxrlv7m",
     },
     {
         name: "Growth",
@@ -87,7 +92,7 @@ const plans = [
             "Detailed monthly performance analytics",
             "Commercial rights included",
         ],
-        priceId: "price_1T7C1xKGzJOFnjXyq4FXqK1x",
+        priceId: "price_1T7dO3KGzJOFnjXy2lPD3Ldz",
     },
     {
         name: "Pro",
@@ -103,10 +108,49 @@ const plans = [
             "Advanced monthly analytics reports",
             "Commercial rights included",
         ],
-        priceId: "price_1T7C28KGzJOFnjXyfdAo2ToJ",
+        priceId: "price_1T7dODKGzJOFnjXywACAu03j",
     },
 ];
 
+
+
+// const dashboardPlans = [
+//     {
+//         name: "Small Classroom",
+//         price: "$4.99",
+//         duration: "/month",
+//         features: [
+//             "Up to 20 students",
+//             "Weekly performance insights",
+//             "Monthly progress summary",
+//         ],
+//         priceId: "price_1T6wozKGzJOFnjXyD61eBJYK",
+//     },
+//     {
+//         name: "Medium Classroom",
+//         price: "$9.99",
+//         duration: "/month",
+//         features: [
+//             "Up to 50 students",
+//             "Weekly performance insights",
+//             "Monthly progress summary",
+//         ],
+//         priceId: "price_1T6wpFKGzJOFnjXy1u6aLEx0",
+//     },
+//     {
+//         name: "Large Classroom",
+//         price: "$19.99",
+//         duration: "/month",
+//         features: [
+//             "Up to 100 students",
+//             "Weekly performance insights",
+//             "Monthly progress summary",
+//         ],
+//         priceId: "price_1T6wpSKGzJOFnjXyPps9FMUG",
+//     },
+// ];
+
+// live
 const dashboardPlans = [
     {
         name: "Small Classroom",
@@ -117,7 +161,7 @@ const dashboardPlans = [
             "Weekly performance insights",
             "Monthly progress summary",
         ],
-        priceId: "price_1T6wozKGzJOFnjXyD61eBJYK",
+        priceId: "price_1T7dOiKGzJOFnjXyWL0P3An7",
     },
     {
         name: "Medium Classroom",
@@ -128,7 +172,7 @@ const dashboardPlans = [
             "Weekly performance insights",
             "Monthly progress summary",
         ],
-        priceId: "price_1T6wpFKGzJOFnjXy1u6aLEx0",
+        priceId: "price_1T7dP6KGzJOFnjXyrAE0ZL0E",
     },
     {
         name: "Large Classroom",
@@ -139,7 +183,7 @@ const dashboardPlans = [
             "Weekly performance insights",
             "Monthly progress summary",
         ],
-        priceId: "price_1T6wpSKGzJOFnjXyPps9FMUG",
+        priceId: "price_1T7dPIKGzJOFnjXyfI8vdrc8",
     },
 ];
 
