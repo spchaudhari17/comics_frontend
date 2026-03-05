@@ -52,12 +52,13 @@
   border-radius: 20px;
 }
 
-.btn-custom {
-  background: linear-gradient(90deg, #2b3cff, #4f6dff);
+.subscription-plans-section .btn-custom {
+  /* background: linear-gradient(90deg, #2b3cff, #4f6dff); */
+  background: linear-gradient(90deg, #b8892b, #e3c46b);
   border: none;
   color: #fff;
 }
 
-.btn-custom:hover {
+.subscription-plans-section .btn-custom:hover {
   opacity: 0.9;
 }

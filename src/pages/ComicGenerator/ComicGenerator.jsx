@@ -229,8 +229,10 @@ export const ComicGenerator = () => {
             setStep(4);
           } else if (comic?.images && comic.images.length > 0) {
             // Images already generated - go to step 3 (preview)
-            setComicImages(comic.images.map(img => img.imageUrl));
-            setSelectedImage(comic.images[0]?.imageUrl);
+            // setComicImages(comic.images.map(img => img.imageUrl));
+            // setSelectedImage(comic.images[0]?.imageUrl);
+            setComicImages(comic.images);
+            setSelectedImage(comic.images[0]);
             setStep(3);
           } else if (comic?.prompt) {
             // Prompt generated but no images - go to step 2 (prompt editor)
@@ -621,7 +623,9 @@ export const ComicGenerator = () => {
       }
 
       // 🖼️ Process actual images
-      const imgs = (data?.images || []).map(it => it.imageUrl).filter(Boolean);
+      // const imgs = (data?.images || []).map(it => it.imageUrl).filter(Boolean);
+      const imgs = (data?.images || []).filter(it => it.imageUrl);
+
       if (imgs.length === 0) throw new Error("No images generated.");
 
       // ✅ FINAL PROGRESS - Show actual completion
@@ -639,6 +643,8 @@ export const ComicGenerator = () => {
 
       setLoadingImage(false);
       setIsGenerating(false);
+
+      console.log("Generated images:", data.images);
 
     } catch (err) {
       console.error(err);
@@ -1267,38 +1273,68 @@ export const ComicGenerator = () => {
                     <Row>
                       <Col md={3} className="border-end pe-3" style={{ maxHeight: "500px", overflowY: "auto" }}>
                         <div className="d-flex flex-column gap-2">
+
                           {comicImages.map((img, idx) => (
-                            <img
-                              key={idx}
-                              src={img}
-                              alt={`comic-${idx}`}
-                              onClick={() => setSelectedImage(img)}
-                              className={`img-thumbnail ${selectedImage === img ? "border-primary border-3" : ""}`}
-                              style={{
-                                cursor: "pointer",
-                                objectFit: "cover",
-                                height: "80px",
-                              }}
-                            />
+                            <div key={idx} className="text-center">
+                              <img
+                                src={img.imageUrl}
+                                alt={`comic-${idx}`}
+                                onClick={() => setSelectedImage(img)}
+                                className={`img-thumbnail ${selectedImage?.imageUrl === img.imageUrl
+                                  ? "border-primary border-3"
+                                  : ""
+                                  }`}
+                                style={{
+                                  cursor: "pointer",
+                                  objectFit: "cover",
+                                  height: "80px",
+                                }}
+                              />
+
+                              <small className="d-block mt-1 text-muted" style={{
+                                fontSize: "11px",
+                                lineHeight: "1.2",
+                                maxHeight: "30px",
+                                overflow: "hidden"
+                              }}>
+                                {img.caption}
+                              </small>
+                            </div>
                           ))}
+
+
                         </div>
                       </Col>
 
                       <Col md={9} className="d-flex justify-content-center align-items-center">
+
                         {selectedImage ? (
-                          <img
-                            src={selectedImage}
-                            alt="selected-comic"
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "500px",
-                              borderRadius: "8px",
-                              border: "2px solid #ccc",
-                            }}
-                          />
+                          <div className="text-center">
+                            <img
+                              src={selectedImage.imageUrl}
+                              alt="selected-comic"
+                              style={{
+                                maxWidth: "100%",
+                                maxHeight: "500px",
+                                borderRadius: "8px",
+                                border: "2px solid #ccc",
+                              }}
+                            />
+
+                            {selectedImage.caption && (
+                              <div className="mt-3">
+                                <Badge bg="dark" className="p-2">
+                                  {selectedImage.caption}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
                         ) : (
-                          <p className="text-muted">Click on a thumbnail to preview the image.</p>
+                          <p className="text-muted">
+                            Click on a thumbnail to preview the image.
+                          </p>
                         )}
+
                       </Col>
                     </Row>
 

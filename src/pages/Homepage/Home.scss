@@ -187,6 +187,7 @@
             @include media-breakpoint-between(sm, lg) {
                 max-width: 180px;
             }
+
             @include media-breakpoint-between(lg, xl) {
                 max-width: 160px;
             }

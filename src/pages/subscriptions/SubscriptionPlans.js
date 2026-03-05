@@ -475,23 +475,6 @@ const SubscriptionPlans = () => {
                                         </li>
                                     </ul>
 
-                                    {/* {currentSub?.hasPendingChange ? (
-                                        <Button disabled className="w-100">
-                                            Change Scheduled
-                                        </Button>
-                                    ) : currentSub?.priceId === plan.priceId ? (
-                                        <Button disabled className="w-100">
-                                            Current Plan
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            className="btn btn-custom w-100 py-2"
-                                            onClick={() => handleSelectPlan(plan.priceId, "dashboard")}
-                                        >
-                                            {currentSub ? "Change Plan" : "Select Plan"}
-                                        </Button>
-                                    )} */}
-
 
                                     {currentSub?.status === "to_cancel" ? (
                                         <div className="mt-auto">
