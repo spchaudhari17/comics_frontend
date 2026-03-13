@@ -107,12 +107,26 @@ const ParentActivity = () => {
     };
 
     // 🔍 Search
+    // const filtered = tableData.filter((x) => {
+    //     const s = search.toLowerCase();
+    //     return (
+    //         x.title.toLowerCase().includes(s) ||
+    //         x.subject.toLowerCase().includes(s) ||
+    //         x.status.toLowerCase().includes(s)
+    //     );
+    // });
+
     const filtered = tableData.filter((x) => {
         const s = search.toLowerCase();
+
+        const title = x.title?.toLowerCase() || "";
+        const subject = x.subject?.toLowerCase() || "";
+        const status = x.status?.toLowerCase() || "";
+
         return (
-            x.title.toLowerCase().includes(s) ||
-            x.subject.toLowerCase().includes(s) ||
-            x.status.toLowerCase().includes(s)
+            title.includes(s) ||
+            subject.includes(s) ||
+            status.includes(s)
         );
     });
 
