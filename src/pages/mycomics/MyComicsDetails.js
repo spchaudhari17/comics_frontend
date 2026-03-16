@@ -161,14 +161,33 @@ const MyComicDetails = () => {
                     />
                     <div className="fw-semibold mb-1">Page {page.pageNumber}</div>
                     {page.panels && page.panels.length > 0 && (
-                      <>
-                        <div className="small text-muted">
-                          <strong>Scene:</strong> {page.panels[0].scene}
-                        </div>
-                        <div className="small text-secondary">
-                          <strong>Caption:</strong> {page.panels[0].caption}
-                        </div>
-                      </>
+                      <div className="mt-2 text-start">
+                        {page.panels.map((panel, idx) => (
+                          <div key={idx} className="mb-2 small">
+                            {panel.scene && (
+                              <div className="text-muted">
+                                <strong>Scene:</strong> {panel.scene}
+                              </div>
+                            )}
+
+                            {panel.caption && (
+                              <div className="text-secondary">
+                                <strong>Caption:</strong> {panel.caption}
+                              </div>
+                            )}
+
+                            {panel.dialogue && panel.dialogue.length > 0 && (
+                              <div className="text-dark">
+                                {panel.dialogue.map((d, i) => (
+                                  <div key={i}>
+                                    <strong>{d.character}:</strong> {d.text}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </Col>
