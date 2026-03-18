@@ -624,8 +624,17 @@ export const ComicGenerator = () => {
 
       // 🖼️ Process actual images
       // const imgs = (data?.images || []).map(it => it.imageUrl).filter(Boolean);
-      const imgs = (data?.images || []).filter(it => it.imageUrl);
-
+      // const imgs = (data?.images || []).filter(it => it.imageUrl);
+      const imgs = (data?.images || []).map((img, index) => ({
+        imageUrl: img.imageUrl,
+        caption:
+          finalPages?.[index]?.panels
+            ?.map(p => p.caption)
+            .filter(Boolean)
+            .join("\n") ||
+          finalPages?.[index]?.caption ||
+          ""
+      }));
       if (imgs.length === 0) throw new Error("No images generated.");
 
       // ✅ FINAL PROGRESS - Show actual completion
