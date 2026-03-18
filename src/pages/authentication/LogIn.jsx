@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button, Spinner, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../redux/actions/userActions';
+import { clearError } from "../../redux/actions/userActions";
 
 export const LogIn = () => {
     const navigate = useNavigate();
@@ -23,12 +24,16 @@ export const LogIn = () => {
         dispatch(loginUser({ email, password }, navigate));
     };
 
+    useEffect(() => {
+        dispatch(clearError());
+    }, [dispatch]);
+
     return (
         <div className="auth-page login-page d-flex justify-content-center align-items-center min-vh-100 py-4">
             <div className="container-xl" style={{ maxWidth: '550px' }}>
                 <div className="content-wrapper bg-theme1 border">
                     <div className="logo-wrapper text-center mb-4">
-                        <img src={require('../../assets/images/logo.png')} onClick={()=>navigate("/")} style={{ cursor: "pointer" }} alt="Logo" className="img-fluid" />
+                        <img src={require('../../assets/images/logo.png')} onClick={() => navigate("/")} style={{ cursor: "pointer" }} alt="Logo" className="img-fluid" />
                     </div>
                     <div className="heading-wrapper text-dark mb-4">
                         <div className="fs-4 fw-bold font-roboto lh-sm mb-1">Welcome!</div>
@@ -40,35 +45,35 @@ export const LogIn = () => {
                     <Form onSubmit={handleLogin}>
                         <Form.Group className="mb-3" controlId="userEmailId">
                             <Form.Label>Email ID<span className="text-danger">*</span></Form.Label>
-                            <Form.Control 
-                                type="email" 
-                                value={email} 
-                                onChange={(e) => setEmail(e.target.value)} 
-                                placeholder="Enter email" 
-                                autoComplete='off' 
-                                required 
+                            <Form.Control
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Enter email"
+                                autoComplete='off'
+                                required
                             />
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="formBasicPassword">
                             <Form.Label>Password<span className="text-danger">*</span></Form.Label>
                             <div className="position-relative">
-                                <Form.Control 
-                                    type={passwordVisible ? 'text' : 'password'} 
-                                    value={password} 
-                                    onChange={(e) => setPassword(e.target.value)} 
+                                <Form.Control
+                                    type={passwordVisible ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     className='pe-5'
-                                    placeholder="Enter password" 
+                                    placeholder="Enter password"
                                     // minLength="8"
                                     // pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
                                     // title="Must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character."
                                     autoComplete='new-password'
                                     required
                                 />
-                                <span 
-                                    role="button" 
-                                    className="position-absolute top-50 translate-middle-y text-secondary" 
-                                    onClick={togglePasswordVisibility} 
+                                <span
+                                    role="button"
+                                    className="position-absolute top-50 translate-middle-y text-secondary"
+                                    onClick={togglePasswordVisibility}
                                     style={{ right: '10px' }}
                                 >
                                     {passwordVisible ? <i className="bi bi-eye-slash-fill fs-16"></i> : <i className="bi bi-eye-fill fs-16"></i>}
@@ -85,9 +90,9 @@ export const LogIn = () => {
                         </div>
 
                         <div className="btn-wrapper mt-4">
-                            <Button 
-                                variant="primary" 
-                                type="submit" 
+                            <Button
+                                variant="primary"
+                                type="submit"
                                 className="w-100 btn-custom py-2"
                                 disabled={loading}
                             >

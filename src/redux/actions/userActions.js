@@ -13,6 +13,7 @@ import {
     USER_VERIFY_OTP_REQUEST,
     USER_VERIFY_OTP_SUCCESS,
     USER_VERIFY_OTP_FAIL,
+    USER_CLEAR_ERROR,
 } from '../constants/userConstants';
 
 
@@ -36,6 +37,9 @@ export const registerUser = (userData) => async (dispatch) => {
     }
 };
 
+export const clearError = () => (dispatch) => {
+    dispatch({ type: USER_CLEAR_ERROR });
+};
 
 
 export const loginUser = (formData, navigate) => async (dispatch) => {
