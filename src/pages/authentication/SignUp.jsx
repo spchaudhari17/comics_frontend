@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import PhoneInput from 'react-phone-input-2';
@@ -6,6 +6,7 @@ import 'react-phone-input-2/lib/style.css';
 import './authentication.scss';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../../redux/actions/userActions';
+import { clearError } from "../../redux/actions/userActions";
 import { toast } from "react-toastify";
 
 
@@ -30,6 +31,10 @@ export const SignUp = () => {
         countryCode: '+91',
         mobileNumber: ''
     });
+
+    useEffect(() => {
+        dispatch(clearError());
+    }, [dispatch]);
 
     const togglePassVisibility = () => setPasswordVisible(!passwordVisible);
     const toggleConfirmPassVisibility = () => setConfirmPassVisible(!confirmPassVisible);

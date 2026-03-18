@@ -9,6 +9,7 @@ import {
     USER_VERIFY_OTP_REQUEST,
     USER_VERIFY_OTP_SUCCESS,
     USER_VERIFY_OTP_FAIL,
+    USER_CLEAR_ERROR,
 } from '../constants/userConstants';
 
 export const userRegisterReducer = (state = {}, action) => {
@@ -21,6 +22,9 @@ export const userRegisterReducer = (state = {}, action) => {
 
         case USER_REGISTER_FAIL:
             return { loading: false, error: action.payload };
+
+        case USER_CLEAR_ERROR:
+            return { ...state, error: null };
 
         default:
             return state;
@@ -36,6 +40,10 @@ export const userLoginReducer = (state = {}, action) => {
             return { loading: false, userInfo: action.payload };
         case USER_LOGIN_FAIL:
             return { loading: false, error: action.payload };
+
+        case USER_CLEAR_ERROR:
+            return { ...state, error: null };
+
         case USER_LOGOUT:
             return {};
         default:
