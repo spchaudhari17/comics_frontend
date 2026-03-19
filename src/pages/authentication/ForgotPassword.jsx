@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Row, Col, Button } from "react-bootstrap";
+import { Form, Row, Col, Button, InputGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import API from "../../API";
@@ -7,7 +7,10 @@ import API from "../../API";
 export const ForgotPassword = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
+    const [loginMethod, setLoginMethod] = useState("email"); // "email" or "username"
     const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
+    const [registeredEmail, setRegisteredEmail] = useState(""); // Store email from backend
     const [otp, setOtp] = useState("");
     const [resetKey, setResetKey] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -20,14 +23,23 @@ export const ForgotPassword = () => {
     const toggleConfirmPassVisibility = () =>
         setConfirmPassVisible(!confirmPassVisible);
 
-    // 1. Email Submit
-    const handleEmailSubmit = async (e) => {
+    // 1. Email/Username Submit
+    const handleUserSubmit = async (e) => {
         e.preventDefault();
+
+        const payload = loginMethod === "email"
+            ? { email }
+            : { username };
+
         try {
-            await API.post("/user/forgotPassword", {
-                email,
-            });
-            toast.success("OTP sent to email!");
+            const response = await API.post("/user/forgotPassword", payload);
+
+            // Store the registered email if returned from backend
+            if (response.data.email) {
+                setRegisteredEmail(response.data.email);
+            }
+
+            toast.success("OTP sent to registered email!");
             setStep(2);
         } catch (err) {
             toast.error(err.response?.data?.message || "Something went wrong");
@@ -37,10 +49,14 @@ export const ForgotPassword = () => {
     // 2. OTP Verify
     const handleOtpSubmit = async (e) => {
         e.preventDefault();
+
+        // Use registeredEmail if available, otherwise use the entered email
+        const emailToUse = registeredEmail || email;
+
         try {
             const res = await API.post(
                 "/user/verify_otp",
-                { email, otp }
+                { email: emailToUse, otp } // Always use email for OTP verification
             );
 
             console.log("resetkey response", res.data);
@@ -75,11 +91,19 @@ export const ForgotPassword = () => {
                 reset_key: resetKey,
                 password: newPassword,
             });
-            toast.success("Password reset successful. Please login");;
+            toast.success("Password reset successful. Please login");
             navigate("/login");
         } catch (err) {
             toast.error(err.response?.data?.message || "Something went wrong");
         }
+    };
+
+    // Toggle between email and username
+    const toggleLoginMethod = () => {
+        setLoginMethod(prev => prev === "email" ? "username" : "email");
+        // Clear fields when switching
+        setEmail("");
+        setUsername("");
     };
 
     return (
@@ -89,31 +113,73 @@ export const ForgotPassword = () => {
                     <div className="logo-wrapper text-center mb-4 pb-2">
                         <img src={require('../../assets/images/logo.png')} alt="Logo" className="img-fluid" />
                     </div>
-                    {/* STEP 1 - Email */}
+
+                    {/* STEP 1 - Email or Username */}
                     {step === 1 && (
-                        <Form onSubmit={handleEmailSubmit}>
+                        <Form onSubmit={handleUserSubmit}>
                             <div className="heading-wrapper text-dark mb-4">
                                 <div className="fs-4 fw-bold font-roboto lh-sm mb-1">
                                     Forgot Password
                                 </div>
                                 <div className="fs-14 text-muted">
-                                    Kindly enter the Email Address tied to your account, we would
-                                    help you to reset your password
+                                    Enter your registered {loginMethod === "email" ? "email address" : "username"} to reset your password
                                 </div>
                             </div>
-                            <Form.Group className="mb-3" controlId="formEmail">
-                                <Form.Label>
-                                    Email address<span className="text-danger">*</span>
-                                </Form.Label>
-                                <Form.Control
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    autoComplete="off"
-                                    required
-                                />
-                            </Form.Group>
+
+                            {/* Method Toggle */}
+                            <div className="method-toggle mb-3">
+                                <InputGroup>
+                                    <Button
+                                        variant={loginMethod === "email" ? "primary" : "outline-primary"}
+                                        onClick={() => setLoginMethod("email")}
+                                        className="w-50"
+                                    >
+                                        <i className="bi bi-envelope me-2"></i>Email
+                                    </Button>
+                                    <Button
+                                        variant={loginMethod === "username" ? "primary" : "outline-primary"}
+                                        onClick={() => setLoginMethod("username")}
+                                        className="w-50"
+                                    >
+                                        <i className="bi bi-person me-2"></i>Username
+                                    </Button>
+                                </InputGroup>
+                            </div>
+
+                            {/* Email Input */}
+                            {loginMethod === "email" && (
+                                <Form.Group className="mb-3" controlId="formEmail">
+                                    <Form.Label>
+                                        Email address<span className="text-danger">*</span>
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        autoComplete="off"
+                                        required
+                                    />
+                                </Form.Group>
+                            )}
+
+                            {/* Username Input */}
+                            {loginMethod === "username" && (
+                                <Form.Group className="mb-3" controlId="formUsername">
+                                    <Form.Label>
+                                        Username<span className="text-danger">*</span>
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter your username"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        autoComplete="off"
+                                        required
+                                    />
+                                </Form.Group>
+                            )}
+
                             <div className="btn-wrapper mt-4 pt-2">
                                 <Row className="g-2 gx-md-3">
                                     <Col>
@@ -146,8 +212,12 @@ export const ForgotPassword = () => {
                             <div className="heading-wrapper text-dark mb-4 pb-2">
                                 <div className="fs-2 fw-bold font-roboto lh-sm mb-1">Enter OTP</div>
                                 <div className="fs-14 text-muted">
-                                    An 4 digit code has been sent to your{" "}
-                                    <span className="text-primary fw-semibold">{email}</span>
+                                    An 4 digit code has been sent to your registered email
+                                    {registeredEmail && (
+                                        <span className="text-primary fw-semibold d-block mt-1">
+                                            {registeredEmail}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                             <Form.Group className="mb-3" controlId="formOtp">
