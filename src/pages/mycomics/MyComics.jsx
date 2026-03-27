@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Badge, Card, Row, Col, Form } from "react-bootstrap";
+import { Button, Badge, Card, Row, Col, Form, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import { Loader } from "../../lib/loader";
@@ -17,6 +17,15 @@ const MyComics = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
+
+  const [selectedComics, setSelectedComics] = useState([]);
+  const [showBundleModal, setShowBundleModal] = useState(false);
+
+  const [bundleData, setBundleData] = useState({
+    title: "",
+    description: "",
+    price: ""
+  });
 
   // FETCH SUBSCRIPTION
   useEffect(() => {
@@ -96,6 +105,48 @@ const MyComics = () => {
     }
   };
 
+  const handleSelectComic = (comicId) => {
+    if (selectedComics.includes(comicId)) {
+      setSelectedComics(selectedComics.filter(id => id !== comicId));
+    } else {
+      setSelectedComics([...selectedComics, comicId]);
+    }
+  };
+
+  const handleCreateBundle = async () => {
+    try {
+      if (!bundleData.title || !bundleData.price) {
+        alert("Title and price required");
+        return;
+      }
+
+      const payload = {
+        title: bundleData.title,
+        description: bundleData.description,
+        price: bundleData.price,
+        comics: selectedComics
+      };
+
+      const { data } = await API.post("/user/createBundle", payload);
+
+      if (!data.error) {
+        alert("Bundle created successfully");
+
+        setShowBundleModal(false);
+        setSelectedComics([]);
+
+        setBundleData({
+          title: "",
+          description: "",
+          price: ""
+        });
+      }
+
+    } catch (err) {
+      alert(err.response?.data?.message || "Error creating bundle");
+    }
+  };
+
   // Filter comics based on search input
   const filteredComics = comics.filter((comic) => {
     const searchTerm = search.toLowerCase();
@@ -110,10 +161,21 @@ const MyComics = () => {
 
 
   const columns = [
+    // {
+    //   name: "#",
+    //   selector: (row, index) => (currentPage - 1) * perPage + index + 1,
+    //   width: "60px"
+    // },
     {
-      name: "#",
-      selector: (row, index) => (currentPage - 1) * perPage + index + 1,
-      width: "60px"
+      name: "",
+      width: "50px",
+      cell: (row) => (
+        <Form.Check
+          type="checkbox"
+          checked={selectedComics.includes(row._id)}
+          onChange={() => handleSelectComic(row._id)}
+        />
+      )
     },
     {
       name: "Title",
@@ -269,6 +331,13 @@ const MyComics = () => {
                 <div className="main-heading">My Comics - </div>
                 <div className="search-wrapper w-100" style={{ maxWidth: "300px" }}>
                   <Form.Control type="search" className="ms-auto rounded-3" placeholder="Search by title, subject, status..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                  <Button
+                    variant="primary"
+                    disabled={selectedComics.length === 0}
+                    onClick={() => setShowBundleModal(true)}
+                  >
+                    Create Bundle ({selectedComics.length})
+                  </Button>
                 </div>
               </div>
               <div className="table-responsive table-custom-wrapper">
@@ -287,6 +356,60 @@ const MyComics = () => {
                 />
               </div>
             </div>
+
+
+            <Modal show={showBundleModal} onHide={() => setShowBundleModal(false)}>
+              <Modal.Header closeButton>
+                <Modal.Title>Create Bundle</Modal.Title>
+              </Modal.Header>
+
+              <Modal.Body>
+                <Form>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Title</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={bundleData.title}
+                      onChange={(e) =>
+                        setBundleData({ ...bundleData, title: e.target.value })
+                      }
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Description</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      value={bundleData.description}
+                      onChange={(e) =>
+                        setBundleData({ ...bundleData, description: e.target.value })
+                      }
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Price</Form.Label>
+                    <Form.Control
+                      type="number"
+                      value={bundleData.price}
+                      onChange={(e) =>
+                        setBundleData({ ...bundleData, price: e.target.value })
+                      }
+                    />
+                  </Form.Group>
+                </Form>
+              </Modal.Body>
+
+              <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowBundleModal(false)}>
+                  Cancel
+                </Button>
+                <Button variant="success" onClick={handleCreateBundle}>
+                  Create
+                </Button>
+              </Modal.Footer>
+            </Modal>
           </>
         )}
       </div>

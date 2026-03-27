@@ -78,11 +78,13 @@ export const Header = () => {
                     <li className="nav-item">
                       <Link to={'/for-parent'} title="for-parent" className="nav-link p-0">For Parents</Link>
                     </li>
-                    {/* <li className="nav-item">
-                      <Link to={'/subscriptions-plan'} title="subscriptions-plan" className="nav-link p-0">Subscriptions</Link>
-                    </li> */}
+
                     <li className="nav-item">
                       <Link to={'/contact'} title="contact" className="nav-link p-0">Contact</Link>
+                    </li>
+
+                    <li className="nav-item">
+                      <Link to={'/market-Place'} title="marketPlace" className="nav-link p-0">MarketPlace</Link>
                     </li>
 
                     {(!userInfo || userInfo.userType === "admin" || userInfo.userType === "user") && (
@@ -247,6 +249,10 @@ export const Header = () => {
                       </Dropdown.Item>
 
                       <Dropdown.Divider className="my-1" />
+
+                      <Dropdown.Item as={Link} to="/mymarketList" className="text-theme3">
+                        <i className="bi bi-key-fill me-2"></i> My Bundle List
+                      </Dropdown.Item>
 
                       <Dropdown.Item as={Link} to="/changepassword" className="text-theme3">
                         <i className="bi bi-key-fill me-2"></i> Change Password

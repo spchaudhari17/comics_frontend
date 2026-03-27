@@ -50,6 +50,8 @@ import SubscriptionPlans from "./pages/subscriptions/SubscriptionPlans";
 import SubscriptionSuccess from "./pages/subscriptions/SubscriptionSuccess";
 import MyAccount from "./pages/MyAccount/MyAccount";
 import SubscriptionRules from "./pages/subscriptions/SubscriptionRules";
+import MarketPlace from "./pages/MarketPlace/MarketPlace";
+import MymarketList from "./pages/MarketPlace/MymarketList";
 
 
 function App() {
@@ -107,6 +109,9 @@ function App() {
             <Route path="/success" element={<SubscriptionSuccess />} />
             <Route path="/my-account" element={<MyAccount />} />
             <Route path="/subscription-rules" element={<SubscriptionRules />} />
+
+            <Route path="/market-place" element={<MarketPlace />} />
+            <Route path="/mymarketList" element={<MymarketList />} />
 
             {/* protected routes  */}
 
