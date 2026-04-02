@@ -52,6 +52,8 @@ import MyAccount from "./pages/MyAccount/MyAccount";
 import SubscriptionRules from "./pages/subscriptions/SubscriptionRules";
 import MarketPlace from "./pages/MarketPlace/MarketPlace";
 import MymarketList from "./pages/MarketPlace/MymarketList";
+import MarketPlaceDetails from "./pages/MarketPlace/MarketPlaceDetails";
+import AddToCart from "./pages/MarketPlace/AddToCart";
 
 
 function App() {
@@ -111,7 +113,9 @@ function App() {
             <Route path="/subscription-rules" element={<SubscriptionRules />} />
 
             <Route path="/market-place" element={<MarketPlace />} />
+            <Route path="/marketPlaceDetails/:id" element={<MarketPlaceDetails />} />
             <Route path="/mymarketList" element={<MymarketList />} />
+            <Route path="/cart" element={<AddToCart />} />
 
             {/* protected routes  */}
 

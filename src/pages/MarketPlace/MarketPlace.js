@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import API from "../../API";
 import { Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const MarketPlace = () => {
+    const navigate = useNavigate();
     const [bundles, setBundles] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -23,19 +25,20 @@ const MarketPlace = () => {
     }, []);
 
     const handleView = (bundle) => {
-        console.log("Bundle Details:", bundle);
-        // 👉 next step: navigate to bundle detail page
+        navigate(`/marketPlaceDetails/${bundle._id}`);
     };
 
-    const handlePurchase = async (bundleId) => {
+    const handleAddToCart = async (bundleId) => {
         try {
-            const res = await API.post("/user/purchase", { bundleId });
+            const res = await API.post("/user/addToCart", { bundleId });
 
             if (!res.data.error) {
-                alert("Purchase successful");
+                alert("Added to cart");
+            } else {
+                alert(res.data.message);
             }
         } catch (err) {
-            alert(err.response?.data?.message || "Purchase failed");
+            alert("Error adding to cart");
         }
     };
 
@@ -117,9 +120,10 @@ const MarketPlace = () => {
                                             <Button
                                                 variant="success"
                                                 size="sm"
-                                                onClick={() => handlePurchase(bundle._id)}
+                                                onClick={() => handleAddToCart(bundle._id)}
                                             >
-                                                Buy Now
+                                                <i className="bi bi-cart-plus me-1"></i>
+                                                Add To Cart
                                             </Button>
                                         </div>
 

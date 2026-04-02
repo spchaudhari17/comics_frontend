@@ -196,6 +196,14 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                   <li className="nav-item">
+                    <Link to={'/cart'} title="cart" className="nav-link p-0">
+                      <i className="bi bi-cart-fill"></i>
+                    </Link>
+                  </li>
+                )}
+
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
+                  <li className="nav-item">
                     <Link to={'/institute-dashboard'} title="institute-dashboard" className="nav-link p-0">
                       {/* <i className="bi bi-book-half"></i> */}
                       <i className="bi bi-speedometer2"></i>
