@@ -54,6 +54,8 @@ import MarketPlace from "./pages/MarketPlace/MarketPlace";
 import MymarketList from "./pages/MarketPlace/MymarketList";
 import MarketPlaceDetails from "./pages/MarketPlace/MarketPlaceDetails";
 import AddToCart from "./pages/MarketPlace/AddToCart";
+import CartSuccess from "./pages/MarketPlace/CartSuccess";
+import CancelPage from "./pages/MarketPlace/CancelPage";
 
 
 function App() {
@@ -109,6 +111,8 @@ function App() {
 
             <Route path="/subscriptions-plan" element={<SubscriptionPlans />} />
             <Route path="/success" element={<SubscriptionSuccess />} />
+            <Route path="/success/cart" element={<CartSuccess />} />
+            <Route path="/cancel" element={<CancelPage />} />
             <Route path="/my-account" element={<MyAccount />} />
             <Route path="/subscription-rules" element={<SubscriptionRules />} />
 

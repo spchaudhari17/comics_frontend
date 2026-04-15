@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import API from "../../API";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const MarketPlace = () => {
     const navigate = useNavigate();
@@ -33,12 +34,12 @@ const MarketPlace = () => {
             const res = await API.post("/user/addToCart", { bundleId });
 
             if (!res.data.error) {
-                alert("Added to cart");
+                toast.success("Added to cart 🛒");
             } else {
-                alert(res.data.message);
+                toast.warning(res.data.message);
             }
         } catch (err) {
-            alert("Error adding to cart");
+            toast.error("Error adding to cart ❌");
         }
     };
 

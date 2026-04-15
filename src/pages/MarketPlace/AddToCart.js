@@ -7,6 +7,12 @@ import { useNavigate } from "react-router-dom";
 const AddToCart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [cartCount, setCartCount] = useState(0);
+
+    const userInfo = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user"))
+        : null;
+
 
     const navigate = useNavigate();
 
@@ -39,6 +45,21 @@ const AddToCart = () => {
             alert("Failed to remove item");
         }
     };
+
+    const fetchCartCount = async () => {
+        try {
+            const res = await API.get("/user/cart");
+            setCartCount(res.data.data.length || 0);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+    useEffect(() => {
+        if (userInfo) {
+            fetchCartCount();
+        }
+    }, []);
+
 
     // 💰 Total Price
     const totalPrice = cartItems.reduce(
