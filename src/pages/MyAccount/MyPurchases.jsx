@@ -85,7 +85,7 @@ const MyPurchases = () => {
                                         <Button
                                             variant="primary"
                                             onClick={() =>
-                                                navigate(`/marketPlaceDetails/${bundle._id}`)
+                                                navigate(`/purchasedBundleDetails/${bundle._id}`)
                                             }
                                         >
                                             Open

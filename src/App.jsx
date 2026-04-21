@@ -56,6 +56,8 @@ import MarketPlaceDetails from "./pages/MarketPlace/MarketPlaceDetails";
 import AddToCart from "./pages/MarketPlace/AddToCart";
 import CartSuccess from "./pages/MarketPlace/CartSuccess";
 import CancelPage from "./pages/MarketPlace/CancelPage";
+import PurchasedBundleDetails from "./pages/MyAccount/PurchasedBundleDetails";
+import ComicReader from "./pages/MyAccount/ComicReader";
 
 
 function App() {
@@ -118,6 +120,8 @@ function App() {
 
             <Route path="/market-place" element={<MarketPlace />} />
             <Route path="/marketPlaceDetails/:id" element={<MarketPlaceDetails />} />
+            <Route path="/purchasedBundleDetails/:id" element={<PurchasedBundleDetails />} />
+            <Route path="/comic-reader/:comicId" element={<ComicReader />} />
             <Route path="/mymarketList" element={<MymarketList />} />
             <Route path="/cart" element={<AddToCart />} />
 
