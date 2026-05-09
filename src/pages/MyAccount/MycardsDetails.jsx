@@ -11,25 +11,55 @@ const MycardsDetails = () => {
     const [bankLoading, setBankLoading] = useState(false);
 
     // 🔥 Fetch BOTH data
+    // const fetchData = async () => {
+    //     try {
+    //         const [cardRes, payoutRes] = await Promise.all([
+    //             API.get("/subscription/payment-method"),
+    //             API.get("/teacher/payout-status")
+    //         ]);
+
+    //         // card
+    //         if (cardRes.data.hasCard) {
+    //             setCard(cardRes.data);
+    //         } else {
+    //             setCard(null);
+    //         }
+
+    //         // payout
+    //         setPayout(payoutRes.data);
+
+    //     } catch (err) {
+    //         console.log(err);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const fetchData = async () => {
         try {
-            const [cardRes, payoutRes] = await Promise.all([
-                API.get("/subscription/payment-method"),
-                API.get("/teacher/payout-status")
-            ]);
-
-            // card
-            if (cardRes.data.hasCard) {
-                setCard(cardRes.data);
-            } else {
+            // 🔥 CARD API
+            try {
+                const cardRes = await API.get("/subscription/payment-method");
+                if (cardRes.data.hasCard) {
+                    setCard(cardRes.data);
+                } else {
+                    setCard(null);
+                }
+            } catch (err) {
+                console.log("Card API Error:", err);
                 setCard(null);
             }
 
-            // payout
-            setPayout(payoutRes.data);
+            // 🔥 PAYOUT API
+            try {
+                const payoutRes = await API.get("/teacher/payout-status");
+                console.log("PAYOUT RESPONSE:", payoutRes.data); // 🔥 debug
+                setPayout(payoutRes.data);
+            } catch (err) {
+                console.log("Payout API Error:", err);
+                setPayout(null);
+            }
 
-        } catch (err) {
-            console.log(err);
         } finally {
             setLoading(false);
         }
@@ -73,6 +103,8 @@ const MycardsDetails = () => {
     };
 
     if (loading) return <Spinner />;
+
+    console.log("PAYOUT:", payout);
 
     return (
         <div>
@@ -127,7 +159,7 @@ const MycardsDetails = () => {
             {/* ===================== */}
             <h5 className="fw-bold mb-3">Receive Payments (Teacher)</h5>
 
-            {!payout?.connected && (
+            {payout && !payout.bank && (
                 <Alert variant="warning">
                     You have not connected a bank account yet.
                 </Alert>
@@ -162,7 +194,7 @@ const MycardsDetails = () => {
                         <Spinner size="sm" className="me-2" />
                         Redirecting...
                     </>
-                ) : payout?.connected ? (
+                ) : payout?.bank ? (
                     "Update Bank Details"
                 ) : (
                     "Connect Bank Account"
