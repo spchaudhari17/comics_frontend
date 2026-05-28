@@ -58,6 +58,8 @@ import CartSuccess from "./pages/MarketPlace/CartSuccess";
 import CancelPage from "./pages/MarketPlace/CancelPage";
 import PurchasedBundleDetails from "./pages/MyAccount/PurchasedBundleDetails";
 import ComicReader from "./pages/MyAccount/ComicReader";
+import CouponPage from "./pages/coupon/Coupon";
+import Offers from "./pages/coupon/Offers";
 
 
 function App() {
@@ -110,6 +112,7 @@ function App() {
             <Route path="our-library" element={<ComicsList />} />
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="terms-and-condition" element={<TermsAndCondition />} />
+            <Route path="coupon-offers" element={<Offers />} />
 
             <Route path="/subscriptions-plan" element={<SubscriptionPlans />} />
             <Route path="/success" element={<SubscriptionSuccess />} />
@@ -129,6 +132,8 @@ function App() {
 
             {/* <Route path="super-admin" element={<SuperAdmin />} /> */}
             <Route path="super-admin" element={<ProtectedRoute> <SuperAdmin />  </ProtectedRoute>} />
+
+            <Route path="Coupon" element={<ProtectedRoute> <CouponPage />  </ProtectedRoute>} />
 
             {/* <Route path="allUsers" element={<AllUsers />} /> */}
             <Route path="allUsers" element={<ProtectedRoute><AllUsers /></ProtectedRoute>} />

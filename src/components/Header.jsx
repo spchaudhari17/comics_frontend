@@ -254,6 +254,14 @@ export const Header = () => {
                   </li>
                 )}
 
+                {userInfo && (userInfo.userType === "admin") && (
+                  <li className="nav-item">
+                    <Link to={'/coupon'} title="coupon" className="nav-link p-0">
+                      <i className="bi bi-ticket-perforated"></i>
+                    </Link>
+                  </li>
+                )}
+
                 {userInfo && (userInfo.userType === "parent") && (
                   <li className="nav-item">
                     <Link to={'/parent/manage-children'} title='manage-children' className="nav-link p-0">
