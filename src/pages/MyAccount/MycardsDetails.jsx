@@ -4,34 +4,77 @@ import API from "../../API";
 
 const MycardsDetails = () => {
     const [card, setCard] = useState(null);
+    const [payout, setPayout] = useState(null);
+
     const [loading, setLoading] = useState(true);
     const [updateLoading, setUpdateLoading] = useState(false);
+    const [bankLoading, setBankLoading] = useState(false);
 
-    const fetchCard = async () => {
+    // 🔥 Fetch BOTH data
+    // const fetchData = async () => {
+    //     try {
+    //         const [cardRes, payoutRes] = await Promise.all([
+    //             API.get("/subscription/payment-method"),
+    //             API.get("/teacher/payout-status")
+    //         ]);
+
+    //         // card
+    //         if (cardRes.data.hasCard) {
+    //             setCard(cardRes.data);
+    //         } else {
+    //             setCard(null);
+    //         }
+
+    //         // payout
+    //         setPayout(payoutRes.data);
+
+    //     } catch (err) {
+    //         console.log(err);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    const fetchData = async () => {
         try {
-            const res = await API.get("/subscription/payment-method");
-
-            if (res.data.hasCard) {
-                setCard(res.data);
-            } else {
+            // 🔥 CARD API
+            try {
+                const cardRes = await API.get("/subscription/payment-method");
+                if (cardRes.data.hasCard) {
+                    setCard(cardRes.data);
+                } else {
+                    setCard(null);
+                }
+            } catch (err) {
+                console.log("Card API Error:", err);
                 setCard(null);
             }
-        } catch {
-            setCard(null);
+
+            // 🔥 PAYOUT API
+            try {
+                const payoutRes = await API.get("/teacher/payout-status");
+                console.log("PAYOUT RESPONSE:", payoutRes.data); // 🔥 debug
+                setPayout(payoutRes.data);
+            } catch (err) {
+                console.log("Payout API Error:", err);
+                setPayout(null);
+            }
+
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchCard();
+        fetchData();
     }, []);
 
+    // 🔥 Update Card
     const handleUpdateCard = async () => {
         try {
             setUpdateLoading(true);
             const res = await API.post("/subscription/update-card");
-            window.location.href = res.data.url; // Redirect to Stripe Billing Portal
+            window.location.href = res.data.url;
         } catch (err) {
             alert(err.response?.data?.message || "Failed to open billing portal");
         } finally {
@@ -39,11 +82,37 @@ const MycardsDetails = () => {
         }
     };
 
+    // 🔥 Connect Bank (Stripe Connect Flow)
+    const handleConnectBank = async () => {
+        try {
+            setBankLoading(true);
+
+            // 1. create account (if not exists)
+            await API.post("/teacher/create-stripe-account");
+
+            // 2. onboarding link
+            const res = await API.post("/teacher/onboard");
+
+            window.location.href = res.data.url;
+
+        } catch (err) {
+            alert("Failed to connect bank");
+        } finally {
+            setBankLoading(false);
+        }
+    };
+
     if (loading) return <Spinner />;
+
+    console.log("PAYOUT:", payout);
 
     return (
         <div>
-            <h5 className="fw-bold mb-3">Payment Method</h5>
+
+            {/* ===================== */}
+            {/* 🔝 SUBSCRIPTION CARD */}
+            {/* ===================== */}
+            <h5 className="fw-bold mb-3">Subscription Payment Method</h5>
 
             {!card && (
                 <Alert variant="warning">
@@ -62,9 +131,7 @@ const MycardsDetails = () => {
                             </div>
                         </div>
 
-                        <div>
-                            <span className="badge bg-success">Default</span>
-                        </div>
+                        <span className="badge bg-success">Default</span>
                     </div>
                 </div>
             )}
@@ -73,6 +140,7 @@ const MycardsDetails = () => {
                 variant="dark"
                 onClick={handleUpdateCard}
                 disabled={updateLoading}
+                className="mb-4"
             >
                 {updateLoading ? (
                     <>
@@ -83,6 +151,56 @@ const MycardsDetails = () => {
                     "Update Payment Method"
                 )}
             </Button>
+
+            <hr />
+
+            {/* ===================== */}
+            {/* 🔻 PAYOUT SECTION */}
+            {/* ===================== */}
+            <h5 className="fw-bold mb-3">Receive Payments (Teacher)</h5>
+
+            {payout && !payout.bank && (
+                <Alert variant="warning">
+                    You have not connected a bank account yet.
+                </Alert>
+            )}
+
+            {payout?.connected && (
+                <div className="border rounded p-3 mb-3">
+
+                    <div className="mb-2">
+                        <strong>Status: </strong>
+                        {payout.payoutsEnabled ? (
+                            <span className="badge bg-success">Ready</span>
+                        ) : (
+                            <span className="badge bg-warning">Pending Verification</span>
+                        )}
+                    </div>
+
+                    <div>
+                        <strong>Bank: </strong>
+                        {payout.bank || "Not added"}
+                    </div>
+                </div>
+            )}
+
+            <Button
+                variant="primary"
+                onClick={handleConnectBank}
+                disabled={bankLoading}
+            >
+                {bankLoading ? (
+                    <>
+                        <Spinner size="sm" className="me-2" />
+                        Redirecting...
+                    </>
+                ) : payout?.bank ? (
+                    "Update Bank Details"
+                ) : (
+                    "Connect Bank Account"
+                )}
+            </Button>
+
         </div>
     );
 };

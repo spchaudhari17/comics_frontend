@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import BellIcon from "../assets/images/icons/bell.svg";
@@ -6,12 +6,14 @@ import UserIcon from "../assets/images/icons/user.svg";
 import LogoutIcon from "../assets/images/icons/log-out.svg";
 import { logoutUser } from "../redux/actions/userActions";
 import { useDispatch, useSelector } from "react-redux";
+import API from "../API";
 
 
 export const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   // const { userInfo } = useSelector((state) => state.userLogin);
+  const [cartCount, setCartCount] = useState(0);
 
   const userInfo = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
@@ -31,6 +33,20 @@ export const Header = () => {
 
     navigate("/login");
   };
+
+  const fetchCartCount = async () => {
+    try {
+      const res = await API.get("/user/cart");
+      setCartCount(res.data.data.length || 0);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  useEffect(() => {
+    if (userInfo) {
+      fetchCartCount();
+    }
+  }, []);
 
   return (
     <div className="top-header sticky-top shadow-sm">
@@ -62,7 +78,7 @@ export const Header = () => {
               <ul className="navbar-nav menu-link-nav align-items-center justify-content-end flex-grow-1 gap-2">
                 {(
                   <>
-                    <li className="nav-item">
+                    {/* <li className="nav-item">
                       <Link to={'/about'} title="about" className="nav-link p-0">About Us</Link>
                     </li>
                     <li className="nav-item">
@@ -74,15 +90,17 @@ export const Header = () => {
                     </li>
                     <li className="nav-item">
                       <Link to={'/for-student'} title="for-studen" className="nav-link p-0">For Students</Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link to={'/for-parent'} title="for-parent" className="nav-link p-0">For Parents</Link>
-                    </li>
-                    {/* <li className="nav-item">
-                      <Link to={'/subscriptions-plan'} title="subscriptions-plan" className="nav-link p-0">Subscriptions</Link>
                     </li> */}
-                    <li className="nav-item">
+                    {/* <li className="nav-item">
+                      <Link to={'/for-parent'} title="for-parent" className="nav-link p-0">For Parents</Link>
+                    </li> */}
+
+                    {/* <li className="nav-item">
                       <Link to={'/contact'} title="contact" className="nav-link p-0">Contact</Link>
+                    </li> */}
+
+                    <li className="nav-item">
+                      <Link to={'/market-Place'} title="marketPlace" className="nav-link p-0">MarketPlace</Link>
                     </li>
 
                     {(!userInfo || userInfo.userType === "admin" || userInfo.userType === "user") && (
@@ -192,6 +210,33 @@ export const Header = () => {
                   </li>
                 )}
 
+                {/* {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
+                  <li className="nav-item">
+                    <Link to={'/cart'} title="cart" className="nav-link p-0">
+                      <i className="bi bi-cart-fill"></i>
+                    </Link>
+                  </li>
+                )} */}
+
+                <li className="nav-item">
+                  <Link to={'/cart'} title="cart" className="nav-link p-0">
+                    <div className="position-relative">
+
+                      <i className="bi bi-cart-fill fs-5"></i>
+
+                      {cartCount > 0 && (
+                        <span
+                          className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style={{ fontSize: "10px" }}
+                        >
+                          {cartCount}
+                        </span>
+                      )}
+
+                    </div>
+                  </Link>
+                </li>
+
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                   <li className="nav-item">
                     <Link to={'/institute-dashboard'} title="institute-dashboard" className="nav-link p-0">
@@ -205,6 +250,14 @@ export const Header = () => {
                   <li className="nav-item">
                     <Link to={'/adUnitManager'} title="ComicRevenueReport" className="nav-link p-0">
                       <i class="bi bi-graph-up-arrow"></i>
+                    </Link>
+                  </li>
+                )}
+
+                {userInfo && (userInfo.userType === "admin") && (
+                  <li className="nav-item">
+                    <Link to={'/coupon'} title="coupon" className="nav-link p-0">
+                      <i className="bi bi-ticket-perforated"></i>
                     </Link>
                   </li>
                 )}
@@ -247,6 +300,10 @@ export const Header = () => {
                       </Dropdown.Item>
 
                       <Dropdown.Divider className="my-1" />
+
+                      <Dropdown.Item as={Link} to="/mymarketList" className="text-theme3">
+                        <i className="bi bi-key-fill me-2"></i> My Bundle List
+                      </Dropdown.Item>
 
                       <Dropdown.Item as={Link} to="/changepassword" className="text-theme3">
                         <i className="bi bi-key-fill me-2"></i> Change Password

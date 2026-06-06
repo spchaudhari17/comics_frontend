@@ -50,6 +50,16 @@ import SubscriptionPlans from "./pages/subscriptions/SubscriptionPlans";
 import SubscriptionSuccess from "./pages/subscriptions/SubscriptionSuccess";
 import MyAccount from "./pages/MyAccount/MyAccount";
 import SubscriptionRules from "./pages/subscriptions/SubscriptionRules";
+import MarketPlace from "./pages/MarketPlace/MarketPlace";
+import MymarketList from "./pages/MarketPlace/MymarketList";
+import MarketPlaceDetails from "./pages/MarketPlace/MarketPlaceDetails";
+import AddToCart from "./pages/MarketPlace/AddToCart";
+import CartSuccess from "./pages/MarketPlace/CartSuccess";
+import CancelPage from "./pages/MarketPlace/CancelPage";
+import PurchasedBundleDetails from "./pages/MyAccount/PurchasedBundleDetails";
+import ComicReader from "./pages/MyAccount/ComicReader";
+import CouponPage from "./pages/coupon/Coupon";
+import Offers from "./pages/coupon/Offers";
 
 
 function App() {
@@ -102,16 +112,28 @@ function App() {
             <Route path="our-library" element={<ComicsList />} />
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="terms-and-condition" element={<TermsAndCondition />} />
+            <Route path="coupon-offers" element={<Offers />} />
 
             <Route path="/subscriptions-plan" element={<SubscriptionPlans />} />
             <Route path="/success" element={<SubscriptionSuccess />} />
+            <Route path="/success/cart" element={<CartSuccess />} />
+            <Route path="/cancel" element={<CancelPage />} />
             <Route path="/my-account" element={<MyAccount />} />
             <Route path="/subscription-rules" element={<SubscriptionRules />} />
+
+            <Route path="/market-place" element={<MarketPlace />} />
+            <Route path="/marketPlaceDetails/:id" element={<MarketPlaceDetails />} />
+            <Route path="/purchasedBundleDetails/:id" element={<PurchasedBundleDetails />} />
+            <Route path="/comic-reader/:comicId" element={<ComicReader />} />
+            <Route path="/mymarketList" element={<MymarketList />} />
+            <Route path="/cart" element={<AddToCart />} />
 
             {/* protected routes  */}
 
             {/* <Route path="super-admin" element={<SuperAdmin />} /> */}
             <Route path="super-admin" element={<ProtectedRoute> <SuperAdmin />  </ProtectedRoute>} />
+
+            <Route path="Coupon" element={<ProtectedRoute> <CouponPage />  </ProtectedRoute>} />
 
             {/* <Route path="allUsers" element={<AllUsers />} /> */}
             <Route path="allUsers" element={<ProtectedRoute><AllUsers /></ProtectedRoute>} />

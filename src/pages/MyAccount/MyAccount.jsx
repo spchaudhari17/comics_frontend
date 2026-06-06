@@ -4,6 +4,9 @@ import SubscriptionHistory from "./SubscriptionHistory";
 import Invoices from "./Invoices";
 import ProfileDetails from "../authentication/ProfileDetails";
 import MycardsDetails from "./MycardsDetails";
+import MyPurchases from "./MyPurchases";
+import TransactionHistory from "./TransactionHistory";
+import MySales from "./MySales";
 
 const MyAccount = () => {
   const [activeTab, setActiveTab] = useState("subscription");
@@ -52,6 +55,34 @@ const MyAccount = () => {
               Manage Cards
             </button>
           </li>
+
+          <li className="nav-item">
+            <button
+              className={`nav-link ${activeTab === "purchases" ? "active" : ""}`}
+              onClick={() => setActiveTab("purchases")}
+            >
+              My Purchases
+            </button>
+          </li>
+
+          <li className="nav-item">
+            <button
+              className={`nav-link ${activeTab === "transactions" ? "active" : ""}`}
+              onClick={() => setActiveTab("transactions")}
+            >
+              Transactions
+            </button>
+          </li>
+
+          <li className="nav-item">
+            <button
+              className={`nav-link ${activeTab === "sales" ? "active" : ""}`}
+              onClick={() => setActiveTab("sales")}
+            >
+              My Sales
+            </button>
+          </li>
+
         </ul>
 
         {/* ===== TAB CONTENT ===== */}
@@ -59,6 +90,10 @@ const MyAccount = () => {
         {activeTab === "history" && <SubscriptionHistory />}
         {activeTab === "invoices" && <Invoices />}
         {activeTab === "manage" && <MycardsDetails />}
+
+        {activeTab === "purchases" && <MyPurchases />}
+        {activeTab === "transactions" && <TransactionHistory />}
+        {activeTab === "sales" && <MySales />}
       </div>
     </div>
   );
