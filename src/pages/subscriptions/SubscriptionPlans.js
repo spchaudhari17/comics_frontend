@@ -7,61 +7,6 @@ import { Modal, Spinner } from "react-bootstrap";
 
 
 
-const plans = [
-    {
-        name: "Starter",
-        price: "$4.99",
-        originalPrice: "$24.99",
-        duration: "/month",
-        badge: null,
-        features: [
-            "Up to 5 new AI comics each week (20 per month)",
-            "Fully editable stories with rich custom visuals",
-            "Built-in quizzes (Normal + Hardcore mode with powerups)",
-            "Supports up to 20 students",
-            "Weekly student performance insights",
-            "Monthly consolidated progress report",
-            "Full commercial rights to your generated comics",
-        ],
-        priceId: "price_1T7C1lKGzJOFnjXyBzb0fvZ6",
-    },
-    {
-        name: "Growth",
-        price: "$7.99",
-        originalPrice: "$39.99",
-        duration: "/month",
-        badge: "Best Value",
-        features: [
-            "Up to 10 new AI comics each week (40 per month)",
-            "Advanced quiz engine with timed challenges",
-            "Supports up to 50 students",
-            "Enhanced weekly insights",
-            "Detailed monthly performance analytics",
-            "Commercial rights included",
-        ],
-        priceId: "price_1T7C1xKGzJOFnjXyq4FXqK1x",
-    },
-    {
-        name: "Pro",
-        price: "$11.99",
-        originalPrice: "$59.99",
-        duration: "/month",
-        badge: null,
-        features: [
-            "Up to 20 new AI comics each week (80 per month)",
-            "Full advanced assessment system (Normal + Hardcore)",
-            "Supports up to 100 students",
-            "Comprehensive weekly tracking",
-            "Advanced monthly analytics reports",
-            "Commercial rights included",
-        ],
-        priceId: "price_1T7C28KGzJOFnjXyfdAo2ToJ",
-    },
-];
-
-// live
-
-
 // const plans = [
 //     {
 //         name: "Starter",
@@ -78,7 +23,7 @@ const plans = [
 //             "Monthly consolidated progress report",
 //             "Full commercial rights to your generated comics",
 //         ],
-//         priceId: "price_1T7dNbKGzJOFnjXyfFxrlv7m",
+//         priceId: "price_1T7C1lKGzJOFnjXyBzb0fvZ6",
 //     },
 //     {
 //         name: "Growth",
@@ -94,12 +39,12 @@ const plans = [
 //             "Detailed monthly performance analytics",
 //             "Commercial rights included",
 //         ],
-//         priceId: "price_1T7dO3KGzJOFnjXy2lPD3Ldz",
+//         priceId: "price_1T7C1xKGzJOFnjXyq4FXqK1x",
 //     },
 //     {
 //         name: "Pro",
 //         price: "$11.99",
-//         originalPrice: "$59.99",
+//         originalPrice: "$74.99",
 //         duration: "/month",
 //         badge: null,
 //         features: [
@@ -110,49 +55,69 @@ const plans = [
 //             "Advanced monthly analytics reports",
 //             "Commercial rights included",
 //         ],
-//         priceId: "price_1T7dODKGzJOFnjXywACAu03j",
+//         priceId: "price_1T7C28KGzJOFnjXyfdAo2ToJ",
 //     },
 // ];
 
+// live
 
 
-const dashboardPlans = [
+const plans = [
     {
-        name: "Small Classroom",
-        price: "$4.99",
+        name: "Starter",
+        price: "$16.49",
+        originalPrice: "$24.99",
         duration: "/month",
+        badge: null,
         features: [
-            "Up to 20 students",
-            "Weekly performance insights",
-            "Monthly progress summary",
+            "Up to 5 new AI comics each week (20 per month)",
+            "Fully editable stories with rich custom visuals",
+            "Built-in quizzes (Normal + Hardcore mode with powerups)",
+            "Supports up to 20 students",
+            "Weekly student performance insights",
+            "Monthly consolidated progress report",
+            "Full commercial rights to your generated comics",
         ],
-        priceId: "price_1T6wozKGzJOFnjXyD61eBJYK",
+        priceId: "price_1Tg6gMKGzJOFnjXy2PgwwAMo",
     },
     {
-        name: "Medium Classroom",
-        price: "$9.99",
+        name: "Growth",
+        price: "$25.99",
+        originalPrice: "$39.99",
         duration: "/month",
+        badge: "Best Value",
         features: [
-            "Up to 50 students",
-            "Weekly performance insights",
-            "Monthly progress summary",
+            "Up to 10 new AI comics each week (40 per month)",
+            "Advanced quiz engine with timed challenges",
+            "Supports up to 50 students",
+            "Enhanced weekly insights",
+            "Detailed monthly performance analytics",
+            "Commercial rights included",
+            "Spotlight up to 2 bundles in the marketplace"
         ],
-        priceId: "price_1T6wpFKGzJOFnjXy1u6aLEx0",
+        priceId: "price_1Tg6gaKGzJOFnjXyHeKvQNek",
     },
     {
-        name: "Large Classroom",
-        price: "$19.99",
+        name: "Pro",
+        price: "$48.75",
+        originalPrice: "$74.99",
         duration: "/month",
+        badge: null,
         features: [
-            "Up to 100 students",
-            "Weekly performance insights",
-            "Monthly progress summary",
+            "Up to 20 new AI comics each week (80 per month)",
+            "Full advanced assessment system (Normal + Hardcore)",
+            "Supports up to 100 students",
+            "Comprehensive weekly tracking",
+            "Advanced monthly analytics reports",
+            "Commercial rights included",
+            "Spotlight up to 8 bundles in the marketplace"
         ],
-        priceId: "price_1T6wpSKGzJOFnjXyPps9FMUG",
+        priceId: "price_1Tg6gmKGzJOFnjXyPWJj1paZ",
     },
 ];
 
-// live
+
+
 // const dashboardPlans = [
 //     {
 //         name: "Small Classroom",
@@ -163,7 +128,7 @@ const dashboardPlans = [
 //             "Weekly performance insights",
 //             "Monthly progress summary",
 //         ],
-//         priceId: "price_1T7dOiKGzJOFnjXyWL0P3An7",
+//         priceId: "price_1T6wozKGzJOFnjXyD61eBJYK",
 //     },
 //     {
 //         name: "Medium Classroom",
@@ -174,7 +139,7 @@ const dashboardPlans = [
 //             "Weekly performance insights",
 //             "Monthly progress summary",
 //         ],
-//         priceId: "price_1T7dP6KGzJOFnjXyrAE0ZL0E",
+//         priceId: "price_1T6wpFKGzJOFnjXy1u6aLEx0",
 //     },
 //     {
 //         name: "Large Classroom",
@@ -185,9 +150,46 @@ const dashboardPlans = [
 //             "Weekly performance insights",
 //             "Monthly progress summary",
 //         ],
-//         priceId: "price_1T7dPIKGzJOFnjXyfI8vdrc8",
+//         priceId: "price_1T6wpSKGzJOFnjXyPps9FMUG",
 //     },
 // ];
+
+// live
+const dashboardPlans = [
+    {
+        name: "Small Classroom",
+        price: "$4.99",
+        duration: "/month",
+        features: [
+            "Up to 20 students",
+            "Weekly performance insights",
+            "Monthly progress summary",
+        ],
+        priceId: "price_1T7dOiKGzJOFnjXyWL0P3An7",
+    },
+    {
+        name: "Medium Classroom",
+        price: "$9.99",
+        duration: "/month",
+        features: [
+            "Up to 50 students",
+            "Weekly performance insights",
+            "Monthly progress summary",
+        ],
+        priceId: "price_1T7dP6KGzJOFnjXyrAE0ZL0E",
+    },
+    {
+        name: "Large Classroom",
+        price: "$19.99",
+        duration: "/month",
+        features: [
+            "Up to 100 students",
+            "Weekly performance insights",
+            "Monthly progress summary",
+        ],
+        priceId: "price_1T7dPIKGzJOFnjXyfI8vdrc8",
+    },
+];
 
 
 
@@ -342,7 +344,8 @@ const SubscriptionPlans = () => {
 
                     <div className="text-center mb-3">
                         <div className="alert alert-warning fw-semibold">
-                            🚀 Hurry Up! First 100 subscribers get <strong>80% OFF</strong> on Comics Plans.
+                            {/* 🚀 Hurry Up! First 100 subscribers get <strong>80% OFF</strong> on Comics Plans. */}
+                            Use code "FIRSTFREE" to get <strong>100% off</strong> the Starter Pack for your first month.
                         </div>
 
                         <div> <span className="text-muted"> Want more discounts? </span> <button type="button" className="btn btn-link p-0 ms-2 fw-semibold text-decoration-none" onClick={() => navigate("/coupon-offers")} > View Active Offers <i className="bi bi-arrow-right ms-1"></i> </button> </div>
