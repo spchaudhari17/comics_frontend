@@ -19,10 +19,12 @@ import dataTableCustomStyles from "../../assets/styles/dataTableCustomStyles";
 import { Loader } from "../../lib/loader";
 
 import { NoDataComponent } from "../../components/NoDataComponent";
+import { useNavigate } from "react-router-dom";
 
 
 
 const CouponPage = () => {
+    const navigate = useNavigate();
 
     const [coupons, setCoupons] = useState([]);
 
@@ -416,11 +418,22 @@ const CouponPage = () => {
                                     Coupons
                                 </div>
 
-                                <Button
-                                    onClick={() => setShowModal(true)}
-                                >
-                                    Create Coupon
-                                </Button>
+                                <div className="d-flex gap-2">
+
+                                    <Button
+                                        onClick={() => setShowModal(true)}
+                                    >
+                                        Create Coupon
+                                    </Button>
+
+                                    <Button
+                                        variant="warning"
+                                        onClick={() => navigate("/coupon-headline")}
+                                    >
+                                        Coupon Headlines
+                                    </Button>
+
+                                </div>
 
                             </div>
 

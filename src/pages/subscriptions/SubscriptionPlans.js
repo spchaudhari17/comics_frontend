@@ -204,6 +204,7 @@ const SubscriptionPlans = () => {
     const [selectedPlanType, setSelectedPlanType] = useState(null);
     const [upgradeLoading, setUpgradeLoading] = useState(false);
     const [upgradeMode, setUpgradeMode] = useState(null);
+    const [activeBanner, setActiveBanner] = useState(null);
 
     const getPriceAmount = (priceId) => {
         const allPlans = [...plans, ...dashboardPlans];
@@ -211,6 +212,21 @@ const SubscriptionPlans = () => {
         return found ? parseFloat(found.price.replace("$", "")) : 0;
     };
 
+    const fetchActiveBanner = async () => {
+
+        const { data } = await API.get("/coupon-banner/active");
+
+        if (data.success) {
+
+            setActiveBanner(data.data);
+        }
+    };
+
+    useEffect(() => {
+
+        fetchActiveBanner();
+
+    }, []);
 
     useEffect(() => {
         if (isLoggedIn()) {
@@ -343,10 +359,17 @@ const SubscriptionPlans = () => {
                     )}
 
                     <div className="text-center mb-3">
-                        <div className="alert alert-warning fw-semibold">
-                            {/* 🚀 Hurry Up! First 100 subscribers get <strong>80% OFF</strong> on Comics Plans. */}
+                        {/* <div className="alert alert-warning fw-semibold">
                             Use code "FIRSTFREE" to get <strong>100% off</strong> the Starter Pack for your first month.
-                        </div>
+                        </div> */}
+
+                        {
+                            activeBanner?.headline && (
+                                <div className="alert alert-warning fw-semibold">
+                                    {activeBanner.headline}
+                                </div>
+                            )
+                        }
 
                         <div> <span className="text-muted"> Want more discounts? </span> <button type="button" className="btn btn-link p-0 ms-2 fw-semibold text-decoration-none" onClick={() => navigate("/coupon-offers")} > View Active Offers <i className="bi bi-arrow-right ms-1"></i> </button> </div>
                     </div>

@@ -60,6 +60,7 @@ import PurchasedBundleDetails from "./pages/MyAccount/PurchasedBundleDetails";
 import ComicReader from "./pages/MyAccount/ComicReader";
 import CouponPage from "./pages/coupon/Coupon";
 import Offers from "./pages/coupon/Offers";
+import CouponHeadlinePage from "./pages/coupon/CouponHeadline";
 
 
 function App() {
@@ -134,6 +135,7 @@ function App() {
             <Route path="super-admin" element={<ProtectedRoute> <SuperAdmin />  </ProtectedRoute>} />
 
             <Route path="Coupon" element={<ProtectedRoute> <CouponPage />  </ProtectedRoute>} />
+            <Route path="coupon-headline" element={<ProtectedRoute> <CouponHeadlinePage />  </ProtectedRoute>} />
 
             {/* <Route path="allUsers" element={<AllUsers />} /> */}
             <Route path="allUsers" element={<ProtectedRoute><AllUsers /></ProtectedRoute>} />
