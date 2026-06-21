@@ -117,12 +117,12 @@ const MarketPlaceDetails = () => {
                     {/* Buttons */}
                     <div className="d-flex gap-3 mb-4">
                         <Button variant="success" onClick={handleAddToCart}>
-                            Add To Card
+                            Add To Cart
                         </Button>
 
-                        <Button variant="outline-secondary">
+                        {/* <Button variant="outline-secondary">
                             Add to Wishlist
-                        </Button>
+                        </Button> */}
                     </div>
 
                     {/* Description */}
