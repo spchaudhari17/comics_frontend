@@ -374,6 +374,42 @@ const SubscriptionPlans = () => {
                         <div> <span className="text-muted"> Want more discounts? </span> <button type="button" className="btn btn-link p-0 ms-2 fw-semibold text-decoration-none" onClick={() => navigate("/coupon-offers")} > View Active Offers <i className="bi bi-arrow-right ms-1"></i> </button> </div>
                     </div>
 
+                    <div className="alert alert-success border-0 shadow-sm mb-4">
+                        <div className="text-center">
+                            <h5 className="fw-bold mb-2">
+                                🎉 Founding Teacher Program
+                            </h5>
+
+                            <p className="mb-1">
+                                Earn <strong>35% lifetime discount</strong>.
+                            </p>
+
+                            <p className="mb-3">
+                                Limited to the first <strong>1,000 eligible teachers</strong>.
+                            </p>
+
+                            <div className="d-flex justify-content-center gap-2 flex-wrap">
+                                <a
+                                    href="https://r2comics.s3.eu-north-1.amazonaws.com/subscription+rules/Founding+Teacher+Program+details.pdf"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-outline-success btn-sm"
+                                >
+                                    Program Details
+                                </a>
+
+                                <a
+                                    href="https://r2comics.s3.eu-north-1.amazonaws.com/subscription+rules/Founding+teacher+infographic.pdf"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-success btn-sm"
+                                >
+                                    View Infographic
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <div className="text-center mb-5">
                         <div className="section-heading mb-2">
@@ -540,6 +576,7 @@ const SubscriptionPlans = () => {
                     </Row>
                 </Container>
             </section>
+
 
             {/* ===== Subscription Rules Link ===== */}
             <section className="py-4 bg-light">

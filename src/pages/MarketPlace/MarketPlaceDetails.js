@@ -2,12 +2,16 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import API from "../../API";
 import { Button } from "react-bootstrap";
+import { toast } from "react-toastify";
 
 const MarketPlaceDetails = () => {
     const { id } = useParams();
 
     const [bundle, setBundle] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    const [hoverRating, setHoverRating] = useState(0);
+    const [selectedRating, setSelectedRating] = useState(0);
 
     const fetchBundle = async () => {
         try {
@@ -24,6 +28,43 @@ const MarketPlaceDetails = () => {
     useEffect(() => {
         fetchBundle();
     }, []);
+
+    const submitRating = async (rating) => {
+        try {
+
+            setSelectedRating(rating);
+
+            const res = await API.post("/user/bundle/rate", {
+                bundleId: bundle._id,
+                rating
+            });
+
+            if (res.data.success) {
+                toast.success(`Thanks for your ${rating}-star rating! 🎉`);
+                fetchBundle();
+            }
+
+        } catch (err) {
+            toast.error("Failed to submit rating");
+        }
+    };
+
+    const renderStars = (rating = 0) => {
+        return [...Array(5)].map((_, index) => (
+            <span
+                key={index}
+                style={{
+                    color: index < Math.round(rating)
+                        ? "#ffc107"
+                        : "#d6d6d6",
+                    fontSize: "24px",
+                    marginRight: "2px"
+                }}
+            >
+                ★
+            </span>
+        ));
+    };
 
     const handlePurchase = async () => {
         try {
@@ -104,15 +145,14 @@ const MarketPlaceDetails = () => {
                         By {bundle.teacherId?.firstname} {bundle.teacherId?.lastname}
                     </div>
 
-                    {/* Rating (static for now) */}
-                    <div className="mb-3 text-warning">
-                        ⭐⭐⭐⭐⭐ <span className="text-dark">(4.8)</span>
-                    </div>
+
 
                     {/* Price */}
                     <div className="fs-3 fw-bold text-success mb-3">
-                        ₹{bundle.price}
+                        ${bundle.price}
                     </div>
+
+
 
                     {/* Buttons */}
                     <div className="d-flex gap-3 mb-4">
@@ -141,6 +181,53 @@ const MarketPlaceDetails = () => {
                             <li>Instant access after purchase</li>
                             <li>Downloadable content</li>
                         </ul>
+                    </div>
+
+                    {/* Rating*/}
+
+                    {/* User Rating */}
+                    <div
+                        className="p-3 rounded-3 mb-4"
+                        style={{
+                            background: "#FFF8E1",
+                            border: "1px solid #FFE082"
+                        }}
+                    >
+                        <div className="d-flex align-items-center mb-2">
+                            {renderStars(bundle.averageRating)}
+
+                            <span className="ms-2 fw-bold">
+                                {bundle.averageRating?.toFixed(1) || "0.0"}
+                            </span>
+
+                            <span className="ms-2 text-muted">
+                                ({bundle.totalRatings || 0} ratings)
+                            </span>
+                        </div>
+
+                        <small className="text-muted d-block mb-2">
+                            Rate this bundle
+                        </small>
+
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <span
+                                key={star}
+                                onMouseEnter={() => setHoverRating(star)}
+                                onMouseLeave={() => setHoverRating(0)}
+                                onClick={() => {
+                                    setSelectedRating(star);
+                                    submitRating(star);
+                                }}
+                                style={{
+                                    cursor: "pointer",
+                                    fontSize: "32px"
+                                }}
+                            >
+                                {star <= (hoverRating || selectedRating)
+                                    ? "★"
+                                    : "☆"}
+                            </span>
+                        ))}
                     </div>
 
                 </div>

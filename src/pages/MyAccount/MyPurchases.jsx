@@ -78,7 +78,7 @@ const MyPurchases = () => {
 
                                         {/* Price */}
                                         <div className="fw-semibold text-success mb-3">
-                                            ₹{bundle?.price}
+                                            ${bundle?.price}
                                         </div>
 
                                         {/* Action */}

@@ -326,7 +326,7 @@ const MarketPlace = () => {
 
                                             <div className="info mb-3">
                                                 <span className="fw-semibold text-success">Price:</span>{" "}
-                                                ₹{bundle.price}
+                                                ${bundle.price}
                                             </div>
 
                                             <div className="d-flex gap-2 mt-auto">

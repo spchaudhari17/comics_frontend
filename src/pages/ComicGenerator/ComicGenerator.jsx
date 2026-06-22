@@ -7,6 +7,8 @@ import API from "../../API/index";
 import { useDispatch } from "react-redux";
 import { setComicStatus } from '../../redux/actions/comicActions';
 import { useLocation } from "react-router-dom";
+import forComics from "../../assets/images/forComics.jpeg";
+import forImage from "../../assets/images/forImage.jpeg";
 
 const Stepper = ({ currentStep }) => {
   const steps = [
@@ -81,6 +83,7 @@ export const ComicGenerator = () => {
   const [comicImages, setComicImages] = useState([]);
   const [pdfUrl, setPdfUrl] = useState("");
   const [concept, setConcept] = useState("");
+  const [showTextInImage, setShowTextInImage] = useState(false);
 
   // Content generation states
   const [quizData, setQuizData] = useState({});
@@ -105,6 +108,7 @@ export const ComicGenerator = () => {
   const [parts, setParts] = useState([]);
   const [completedParts, setCompletedParts] = useState([]);
   const [currentPart, setCurrentPart] = useState(null);
+  const [showComicTypeModal, setShowComicTypeModal] = useState(false);
 
   // ui state
   const [loadingPrompt, setLoadingPrompt] = useState(false);
@@ -355,7 +359,8 @@ export const ComicGenerator = () => {
         themeId: themes.find(t => t.name === themeType)?._id,
         styleId: styles.find(s => s.name === styleType)?._id,
         grade: classGrade,
-        country: selectedCountry?.value
+        country: selectedCountry?.value,
+        showTextInImage,
       });
 
       if (data.alreadyExists) {
@@ -898,6 +903,7 @@ export const ComicGenerator = () => {
                       />
                     </Form.Group>
                   </Col>
+
                   <Col sm={6} md={4}>
                     <Form.Group>
                       <Form.Label>Concept</Form.Label>
@@ -909,6 +915,45 @@ export const ComicGenerator = () => {
                       />
                     </Form.Group>
                   </Col>
+
+                  <Col sm={6} md={4}>
+                    <Form.Group>
+                      <Form.Label className="d-flex align-items-center gap-2">
+                        Comic Image Type
+
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip>
+                              Select type and click info icon to preview
+                            </Tooltip>
+                          }
+                        >
+                          <i
+                            className="bi bi-info-circle text-primary"
+                            role="button"
+                            onClick={() => setShowComicTypeModal(true)}
+                          />
+                        </OverlayTrigger>
+                      </Form.Label>
+
+                      <Form.Select
+                        value={showTextInImage ? "text" : "image"}
+                        onChange={(e) =>
+                          setShowTextInImage(e.target.value === "text")
+                        }
+                      >
+                        <option value="text">
+                          Comics With Text
+                        </option>
+
+                        <option value="image">
+                          Comics Without Text
+                        </option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+
                   <Col xs={12}>
                     <Form.Group>
                       <Form.Label>Write Story</Form.Label>
@@ -1618,6 +1663,46 @@ export const ComicGenerator = () => {
               </div>
             </>
           )}
+        </Modal.Body>
+      </Modal>
+
+
+
+      <Modal
+        show={showComicTypeModal}
+        onHide={() => setShowComicTypeModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {showTextInImage
+              ? "Comics With Text"
+              : "Comics Without Text"}
+          </Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body className="text-center">
+
+          <img
+            src={showTextInImage ? forComics : forImage}
+            alt="preview"
+            className="img-fluid rounded"
+          />
+
+          <div className="mt-2">
+            {showTextInImage ? (
+              <p>
+                Images will contain captions, labels, speech bubbles
+                and educational text.
+              </p>
+            ) : (
+              <p>
+                Images will be generated without any text,
+                captions or speech bubbles.
+              </p>
+            )}
+          </div>
+
         </Modal.Body>
       </Modal>
     </div>

@@ -83,7 +83,7 @@ const MymarketList = () => {
         },
         {
             name: "Price",
-            selector: (row) => `₹${row.price}`,
+            selector: (row) => `$${row.price}`,
             sortable: true,
             minWidth: "120px",
         },

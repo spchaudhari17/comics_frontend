@@ -134,7 +134,7 @@ const AddToCart = () => {
                                         </div>
 
                                         <div className="text-success fw-semibold mt-1">
-                                            ₹{bundle.price}
+                                            ${bundle.price}
                                         </div>
 
                                     </div>
@@ -172,7 +172,7 @@ const AddToCart = () => {
 
                             <div className="d-flex justify-content-between mb-3">
                                 <span>Total</span>
-                                <span className="fw-bold">₹{totalPrice}</span>
+                                <span className="fw-bold">${totalPrice}</span>
                             </div>
 
                             <Button
