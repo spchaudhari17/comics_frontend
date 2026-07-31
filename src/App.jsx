@@ -61,6 +61,7 @@ import ComicReader from "./pages/MyAccount/ComicReader";
 import CouponPage from "./pages/coupon/Coupon";
 import Offers from "./pages/coupon/Offers";
 import CouponHeadlinePage from "./pages/coupon/CouponHeadline";
+import TeacherDashboard from "./pages/MyAccount/TeacherDashboard";
 
 
 function App() {
@@ -117,7 +118,7 @@ function App() {
 
             <Route path="/subscriptions-plan" element={<SubscriptionPlans />} />
             <Route path="/success" element={<SubscriptionSuccess />} />
-            <Route path="/success/cart" element={<CartSuccess />} />
+            <Route path="/payment-success" element={<CartSuccess />} />
             <Route path="/cancel" element={<CancelPage />} />
             <Route path="/my-account" element={<MyAccount />} />
             <Route path="/subscription-rules" element={<SubscriptionRules />} />
@@ -128,6 +129,7 @@ function App() {
             <Route path="/comic-reader/:comicId" element={<ComicReader />} />
             <Route path="/mymarketList" element={<MymarketList />} />
             <Route path="/cart" element={<AddToCart />} />
+            <Route path="/teacherDashboard" element={<TeacherDashboard />} />
 
             {/* protected routes  */}
 

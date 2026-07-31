@@ -10,31 +10,6 @@ const MycardsDetails = () => {
     const [updateLoading, setUpdateLoading] = useState(false);
     const [bankLoading, setBankLoading] = useState(false);
 
-    // 🔥 Fetch BOTH data
-    // const fetchData = async () => {
-    //     try {
-    //         const [cardRes, payoutRes] = await Promise.all([
-    //             API.get("/subscription/payment-method"),
-    //             API.get("/teacher/payout-status")
-    //         ]);
-
-    //         // card
-    //         if (cardRes.data.hasCard) {
-    //             setCard(cardRes.data);
-    //         } else {
-    //             setCard(null);
-    //         }
-
-    //         // payout
-    //         setPayout(payoutRes.data);
-
-    //     } catch (err) {
-    //         console.log(err);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
     const fetchData = async () => {
         try {
             // 🔥 CARD API
