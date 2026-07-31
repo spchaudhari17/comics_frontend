@@ -253,10 +253,15 @@ const SubscriptionPlans = () => {
             return;
         }
 
+        const referral = window.Rewardful?.referral || null;
+
+        console.log("Rewardful Referral =>", referral);
+
         if (!currentSub) {
             const res = await API.post("/user/create-checkout-session", {
                 priceId,
                 planType,
+                referral,
             });
             window.location.href = res.data.url;
             return;

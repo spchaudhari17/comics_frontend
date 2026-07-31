@@ -56,6 +56,25 @@ const ComicReader = () => {
                         style={{ maxHeight: "80vh" }}
                     />
 
+                    {/* Captions */}
+                    <div className="mt-4">
+
+                        <h6 className="fw-bold text-start">
+                            Page Captions
+                        </h6>
+
+                        {data?.pages?.[currentPage]?.panels?.map((panel, index) => (
+                            <div
+                                key={index}
+                                className="alert alert-light border text-start"
+                            >
+                                <strong>Panel {index + 1}:</strong>{" "}
+                                {panel.caption}
+                            </div>
+                        ))}
+
+                    </div>
+
                     <div className="d-flex justify-content-center gap-3 mt-3">
                         <Button disabled={currentPage === 0}
                             onClick={() => setCurrentPage(p => p - 1)}>Prev</Button>
@@ -92,18 +111,127 @@ const ComicReader = () => {
             {/* 🧠 QUIZ */}
             {activeTab === "quiz" && (
                 <div className="mt-4">
-                    {data?.quiz?.map((q, i) => (
-                        <div key={i} className="mb-3">
-                            <strong>{q.question}</strong>
+
+                    {data?.quiz?.[0]?.questions?.map((question, index) => (
+                        <div
+                            key={question._id}
+                            className="card mb-3 shadow-sm"
+                        >
+                            <div className="card-body">
+
+                                <h6 className="fw-bold mb-3">
+                                    Q{index + 1}. {question.question}
+                                </h6>
+
+                                {question.options?.map((option, optIndex) => (
+                                    <div
+                                        key={optIndex}
+                                        className={`border rounded p-2 mb-2 
+                                            }`}
+                                    >
+                                        {option}
+                                    </div>
+                                ))}
+
+                                <div className="alert alert-success mt-3">
+                                    <strong>Correct Answer:</strong> {question.correctAnswer}
+                                </div>
+
+                                {question.explanation && (
+                                    <div className="alert alert-info">
+                                        <strong>Explanation:</strong> {question.explanation}
+                                    </div>
+                                )}
+
+                                <div className="mb-3">
+                                    <span
+                                        className={`badge ${question.difficulty === "easy"
+                                            ? "bg-success"
+                                            : question.difficulty === "medium"
+                                                ? "bg-warning text-dark"
+                                                : question.difficulty === "hard"
+                                                    ? "bg-danger"
+                                                    : "bg-dark"
+                                            }`}
+                                    >
+                                        {question.difficulty?.toUpperCase()}
+                                    </span>
+                                </div>
+
+                            </div>
+
                         </div>
                     ))}
+
                 </div>
             )}
 
             {/* 🔥 HARDCORE */}
             {activeTab === "hard" && (
-                <div className="mt-4 text-danger">
-                    Hardcore Quiz Coming Soon 🚀
+                <div className="mt-4">
+
+                    {data?.hardcoreQuiz?.[0]?.questions?.map((question, index) => (
+                        <div
+                            key={question._id}
+                            className="card mb-3 border-danger shadow-sm"
+                        >
+                            <div className="card-body">
+
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+
+                                    <h6 className="fw-bold mb-0 text-danger">
+                                        Q{index + 1}. {question.question}
+                                    </h6>
+
+                                    <span
+                                        className={`badge ${question.difficulty === "easy"
+                                            ? "bg-success"
+                                            : question.difficulty === "medium"
+                                                ? "bg-warning text-dark"
+                                                : question.difficulty === "hard"
+                                                    ? "bg-danger"
+                                                    : "bg-dark"
+                                            }`}
+                                    >
+                                        {question.difficulty?.toUpperCase()}
+                                    </span>
+
+                                </div>
+
+                                {question.options?.map((option, optIndex) => (
+                                    <div
+                                        key={optIndex}
+                                        className={`border rounded p-2 mb-2 ${option === question.correctAnswer
+                                            ? "border-success bg-success-subtle"
+                                            : ""
+                                            }`}
+                                    >
+                                        {String.fromCharCode(65 + optIndex)}. {option}
+                                    </div>
+                                ))}
+
+                                {question.hint && (
+                                    <div className="alert alert-warning mt-3">
+                                        <strong>💡 Hint:</strong> {question.hint}
+                                    </div>
+                                )}
+
+                                <div className="alert alert-success">
+                                    <strong>✅ Correct Answer:</strong>{" "}
+                                    {question.correctAnswer}
+                                </div>
+
+                                {question.explanation && (
+                                    <div className="alert alert-info">
+                                        <strong>📖 Explanation:</strong>{" "}
+                                        {question.explanation}
+                                    </div>
+                                )}
+
+                            </div>
+                        </div>
+                    ))}
+
                 </div>
             )}
 
