@@ -58,20 +58,28 @@ const MycardsDetails = () => {
     };
 
     // 🔥 Connect Bank (Stripe Connect Flow)
+    // MycardsDetails.js - Update handleConnectBank
     const handleConnectBank = async () => {
         try {
             setBankLoading(true);
 
-            // 1. create account (if not exists)
-            await API.post("/teacher/create-stripe-account");
+            // Agar account already connected hai
+            if (payout?.isActive) {
+                const res = await API.post("/teacher/stripe-dashboard");
 
-            // 2. onboarding link
-            const res = await API.post("/teacher/onboard");
+                window.location.href = res.data.url;
+                return;
+            }
 
-            window.location.href = res.data.url;
+            // Naya account ya onboarding
+            const res = await API.post("/teacher/create-stripe-account");
+
+            if (res.data.onboardingUrl) {
+                window.location.href = res.data.onboardingUrl;
+            }
 
         } catch (err) {
-            alert("Failed to connect bank");
+            alert(err.response?.data?.message || "Failed");
         } finally {
             setBankLoading(false);
         }
@@ -169,10 +177,12 @@ const MycardsDetails = () => {
                         <Spinner size="sm" className="me-2" />
                         Redirecting...
                     </>
-                ) : payout?.bank ? (
-                    "Update Bank Details"
-                ) : (
+                ) : !payout?.connected ? (
                     "Connect Bank Account"
+                ) : payout?.isActive ? (
+                    "Manage Stripe Account"
+                ) : (
+                    "Complete Verification"
                 )}
             </Button>
 
