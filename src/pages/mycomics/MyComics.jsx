@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Button, Badge, Card, Row, Col, Form, Modal, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
@@ -17,6 +17,9 @@ const MyComics = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
+
+  // ✅ Filter by Concept
+  const [selectedConceptFilter, setSelectedConceptFilter] = useState("");
 
   const [selectedComics, setSelectedComics] = useState([]);
   const [showBundleModal, setShowBundleModal] = useState(false);
@@ -60,6 +63,27 @@ const MyComics = () => {
     fetchComics();
   }, []);
 
+  // ✅ Get unique concepts from approved comics
+  const availableConcepts = useMemo(() => {
+    const concepts = new Set();
+    comics.forEach(comic => {
+      if (comic.status === "approved") {
+        const conceptName = comic.conceptId?.name || comic.concept || "N/A";
+        concepts.add(conceptName);
+      }
+    });
+    return Array.from(concepts);
+  }, [comics]);
+
+  // ✅ Filter comics by selected concept
+  const filteredByConcept = useMemo(() => {
+    if (!selectedConceptFilter) return comics;
+    return comics.filter(comic => {
+      const conceptName = comic.conceptId?.name || comic.concept || "N/A";
+      return conceptName === selectedConceptFilter;
+    });
+  }, [comics, selectedConceptFilter]);
+
   // PLAN FLAGS
   const planType = subscription?.planType || "FREE";
   const isFreeUser = planType === "FREE";
@@ -68,8 +92,8 @@ const MyComics = () => {
   const isUnlimitedUser = planType === "unlimited";
   const totalComicsCreated = comics.length;
 
-  // Get approved comics count
-  const approvedComics = comics.filter(c => c.status === "approved");
+  // Get approved comics count from filtered list
+  const approvedComics = filteredByConcept.filter(c => c.status === "approved");
   const approvedCount = approvedComics.length;
 
   const handleResume = (comic) => {
@@ -130,13 +154,27 @@ const MyComics = () => {
         return;
       }
 
+      // ✅ Check if all selected comics have same concept
+      const selectedComicsData = comics.filter(c => selectedComics.includes(c._id));
+      const concepts = new Set();
+      selectedComicsData.forEach(comic => {
+        const conceptName = comic.conceptId?.name || comic.concept || "N/A";
+        concepts.add(conceptName);
+      });
+
+      if (concepts.size > 1) {
+        alert("⚠️ All selected comics must belong to the same concept!");
+        return;
+      }
+
       setBundleCreating(true);
 
       const payload = {
         title: bundleData.title,
         description: bundleData.description,
         price: bundleData.price,
-        comics: selectedComics
+        comics: selectedComics,
+        concept: Array.from(concepts)[0] // Send concept name
       };
 
       const { data } = await API.post("/user/createBundle", payload);
@@ -145,6 +183,7 @@ const MyComics = () => {
         setShowSuccessAlert(true);
         setShowBundleModal(false);
         setSelectedComics([]);
+        setSelectedConceptFilter("");
         setBundleData({
           title: "",
           description: "",
@@ -167,20 +206,44 @@ const MyComics = () => {
   };
 
   // Filter comics based on search input
-  const filteredComics = comics.filter((comic) => {
+  const filteredComics = filteredByConcept.filter((comic) => {
     const searchTerm = search.toLowerCase();
     return (
       comic.title?.toLowerCase().includes(searchTerm) ||
       comic.subject?.toLowerCase().includes(searchTerm) ||
       comic.status?.toLowerCase().includes(searchTerm) ||
       comic.comicStatus?.toLowerCase().includes(searchTerm) ||
-      (comic.seriesId && `part ${comic.partNumber}`.includes(searchTerm))
+      (comic.seriesId && `part ${comic.partNumber}`.includes(searchTerm)) ||
+      (comic.conceptId?.name?.toLowerCase().includes(searchTerm)) ||
+      (comic.concept?.toLowerCase().includes(searchTerm))
     );
   });
 
   // Check if all approved comics are selected
   const allApprovedSelected = approvedComics.length > 0 &&
     approvedComics.every(c => selectedComics.includes(c._id));
+
+  // ✅ Get selected comics concept info
+  const selectedConcept = useMemo(() => {
+    if (selectedComics.length === 0) return null;
+    const firstSelected = comics.find(c => c._id === selectedComics[0]);
+    if (!firstSelected) return null;
+    return firstSelected.conceptId?.name || firstSelected.concept || "N/A";
+  }, [selectedComics, comics]);
+
+  // ✅ Check if all selected comics have same concept
+  const allSameConcept = useMemo(() => {
+    if (selectedComics.length <= 1) return true;
+    const concepts = new Set();
+    selectedComics.forEach(id => {
+      const comic = comics.find(c => c._id === id);
+      if (comic) {
+        const conceptName = comic.conceptId?.name || comic.concept || "N/A";
+        concepts.add(conceptName);
+      }
+    });
+    return concepts.size <= 1;
+  }, [selectedComics, comics]);
 
   const columns = [
     {
@@ -215,6 +278,12 @@ const MyComics = () => {
     {
       name: "Subject",
       selector: row => row.subject,
+      sortable: true,
+      minWidth: "150px",
+    },
+    {
+      name: "Concept",
+      selector: row => row.conceptId?.name || row.concept || "N/A",
       sortable: true,
       minWidth: "150px",
     },
@@ -309,7 +378,7 @@ const MyComics = () => {
               <Col md={3}>
                 <div className="bg-warning bg-opacity-25 rounded-4 border-bottom border-4 border-warning p-3 text-center">
                   <div className="fs-3 fw-bold text-warning">
-                    {comics.filter((c) => c.status === "pending").length}
+                    {filteredByConcept.filter((c) => c.status === "pending").length}
                   </div>
                   <div className="fw-semibold text-muted">Pending</div>
                 </div>
@@ -325,29 +394,59 @@ const MyComics = () => {
               <Col md={3}>
                 <div className="bg-danger bg-opacity-25 rounded-4 border-bottom border-4 border-danger p-3 text-center">
                   <div className="fs-3 fw-bold text-danger">
-                    {comics.filter((c) => c.status === "rejected").length}
+                    {filteredByConcept.filter((c) => c.status === "rejected").length}
                   </div>
                   <div className="fw-semibold text-muted">Rejected</div>
                 </div>
               </Col>
               <Col md={3}>
                 <div className="bg-info bg-opacity-25 rounded-4 border-bottom border-4 border-info p-3 text-center">
-                  <div className="fs-3 fw-bold text-info">{comics.length}</div>
+                  <div className="fs-3 fw-bold text-info">{filteredByConcept.length}</div>
                   <div className="fw-semibold text-muted">Total</div>
                 </div>
               </Col>
             </Row>
 
-            {/* Bundle Creation Guide - Shows when approved comics exist */}
+            {/* ✅ Concept Filter */}
+            {availableConcepts.length > 0 && (
+              <div className="mb-3">
+                <Form.Group>
+                  <Form.Label className="fw-semibold">
+                    <i className="bi bi-funnel me-1"></i> Filter by Concept
+                  </Form.Label>
+                  <div className="d-flex gap-2 flex-wrap">
+                    <Button
+                      variant={selectedConceptFilter === "" ? "primary" : "outline-secondary"}
+                      size="sm"
+                      onClick={() => setSelectedConceptFilter("")}
+                    >
+                      All Concepts
+                    </Button>
+                    {availableConcepts.map(concept => (
+                      <Button
+                        key={concept}
+                        variant={selectedConceptFilter === concept ? "primary" : "outline-secondary"}
+                        size="sm"
+                        onClick={() => setSelectedConceptFilter(concept)}
+                      >
+                        {concept}
+                      </Button>
+                    ))}
+                  </div>
+                </Form.Group>
+              </div>
+            )}
+
+            {/* Bundle Creation Guide */}
             {approvedCount > 0 && (
               <Alert variant="info" className="mb-4 d-flex align-items-start">
                 <i className="bi bi-lightbulb-fill me-2 fs-4 mt-1"></i>
                 <div>
                   <strong>Create a Bundle:</strong>
                   <ul className="mb-0 mt-1 ps-3">
-                    <li>Select <strong>approved comics</strong> by ticking the checkboxes in the first column</li>
+                    <li>Select <strong>approved comics</strong> from the same <strong>concept</strong></li>
                     <li>Click the <strong>"Create Bundle"</strong> button (shows selected count)</li>
-                    <li>You can select multiple comics to create a collection</li>
+                    <li>All selected comics must belong to the same concept</li>
                   </ul>
                 </div>
               </Alert>
@@ -364,6 +463,12 @@ const MyComics = () => {
                       {approvedCount} Approved
                     </Badge>
                   )}
+                  {selectedConceptFilter && (
+                    <Badge bg="info" className="p-2">
+                      <i className="bi bi-tag me-1"></i>
+                      {selectedConceptFilter}
+                    </Badge>
+                  )}
                 </div>
 
                 <div className="d-flex gap-2 align-items-center flex-wrap">
@@ -378,12 +483,13 @@ const MyComics = () => {
                     />
                   </div>
 
-                  {/* Bundle Creation Button - Prominent */}
+                  {/* Bundle Creation Button */}
                   <Button
                     variant="primary"
                     className="px-4 position-relative"
-                    disabled={selectedComics.length === 0}
+                    disabled={selectedComics.length === 0 || !allSameConcept}
                     onClick={() => setShowBundleModal(true)}
+                    title={!allSameConcept && selectedComics.length > 1 ? "All selected comics must belong to the same concept" : ""}
                   >
                     <i className="bi bi-collection me-2"></i>
                     Create Bundle
@@ -398,12 +504,28 @@ const MyComics = () => {
 
               {/* Selection Info Bar */}
               {selectedComics.length > 0 && (
-                <div className="bg-primary bg-opacity-10 p-2 rounded-3 mb-3 d-flex justify-content-between align-items-center">
+                <div className={`p-2 rounded-3 mb-3 d-flex justify-content-between align-items-center ${allSameConcept ? 'bg-primary bg-opacity-10' : 'bg-danger bg-opacity-10'}`}>
                   <div>
-                    <i className="bi bi-check-square-fill text-primary me-2"></i>
+                    <i className={`bi ${allSameConcept ? 'bi-check-square-fill text-primary' : 'bi-exclamation-triangle-fill text-danger'} me-2`}></i>
                     <strong>{selectedComics.length}</strong> comic{selectedComics.length > 1 ? 's' : ''} selected
                     {selectedComics.length > 1 && (
-                      <span className="text-muted ms-2">(Ready for bundle)</span>
+                      <>
+                        {allSameConcept ? (
+                          <span className="text-success ms-2">
+                            <i className="bi bi-check-circle me-1"></i>
+                            Same concept: <strong>{selectedConcept}</strong>
+                          </span>
+                        ) : (
+                          <span className="text-danger ms-2">
+                            ⚠️ All comics must belong to the same concept!
+                          </span>
+                        )}
+                      </>
+                    )}
+                    {selectedComics.length === 1 && (
+                      <span className="text-muted ms-2">
+                        Concept: <strong>{selectedConcept}</strong>
+                      </span>
                     )}
                   </div>
                   <Button
@@ -417,10 +539,14 @@ const MyComics = () => {
               )}
 
               {/* No approved comics message */}
-              {approvedCount === 0 && comics.length > 0 && (
+              {approvedCount === 0 && filteredByConcept.length > 0 && (
                 <Alert variant="warning" className="mb-3">
                   <i className="bi bi-exclamation-triangle me-2"></i>
-                  You don't have any approved comics yet. Only approved comics can be added to bundles.
+                  {selectedConceptFilter ? (
+                    <>No approved comics found for concept: <strong>{selectedConceptFilter}</strong></>
+                  ) : (
+                    <>You don't have any approved comics yet. Only approved comics can be added to bundles.</>
+                  )}
                 </Alert>
               )}
 
@@ -454,6 +580,11 @@ const MyComics = () => {
                     <div>Create Bundle</div>
                     <small className="text-muted fs-6 fw-normal">
                       {selectedComics.length} comic{selectedComics.length > 1 ? 's' : ''} selected
+                      {selectedConcept && (
+                        <span className="ms-2 text-success">
+                          • Concept: <strong>{selectedConcept}</strong>
+                        </span>
+                      )}
                     </small>
                   </div>
                 </Modal.Title>
@@ -479,10 +610,13 @@ const MyComics = () => {
                       <Badge bg="secondary">+{selectedComics.length - 5} more</Badge>
                     )}
                   </div>
-                  <div className="mt-2 text-muted small">
-                    <i className="bi bi-info-circle me-1"></i>
-                    Bundle will include all selected comics
-                  </div>
+                  {/* ✅ Show Concept */}
+                  {selectedConcept && (
+                    <div className="mt-2 text-success">
+                      <i className="bi bi-tag me-1"></i>
+                      Concept: <strong>{selectedConcept}</strong>
+                    </div>
+                  )}
                 </div>
 
                 <Form>
@@ -492,7 +626,7 @@ const MyComics = () => {
                     </Form.Label>
                     <Form.Control
                       type="text"
-                      placeholder="e.g., Adventure Collection Vol. 1"
+                      placeholder={`e.g., ${selectedConcept} Collection Vol. 1`}
                       value={bundleData.title}
                       onChange={(e) =>
                         setBundleData({ ...bundleData, title: e.target.value })
@@ -506,7 +640,7 @@ const MyComics = () => {
                     <Form.Control
                       as="textarea"
                       rows={3}
-                      placeholder="Describe what makes this bundle special..."
+                      placeholder={`A collection of comics exploring ${selectedConcept}...`}
                       value={bundleData.description}
                       onChange={(e) =>
                         setBundleData({ ...bundleData, description: e.target.value })
@@ -531,7 +665,7 @@ const MyComics = () => {
                       step="0.01"
                     />
                     <Form.Text className="text-muted">
-                      Set a competitive price for your comic bundle
+                      Set a competitive price for your {selectedConcept} comic bundle
                     </Form.Text>
                   </Form.Group>
                 </Form>
@@ -571,7 +705,7 @@ const MyComics = () => {
         )}
       </div>
 
-      {/* Custom CSS - Add to your styles */}
+      {/* Custom CSS */}
       <style jsx>{`
         .my-comics-page .main-heading {
           font-size: 1.5rem;

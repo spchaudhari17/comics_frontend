@@ -76,7 +76,9 @@ const AddToCart = () => {
                 window.location.href = res.data.url; // 🔥 redirect to Stripe
             }
         } catch (err) {
-            alert("Checkout failed");
+            console.log("Checkout Error:", err.response?.data);
+            console.log("Status:", err.response?.status);
+            alert(err.response?.data?.message || "Checkout failed");
         }
     };
 
