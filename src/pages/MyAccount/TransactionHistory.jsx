@@ -74,6 +74,7 @@ const TransactionHistory = () => {
                                 <th>Status</th>
                                 <th>Transaction ID</th>
                                 <th>Date</th>
+                                <th>Receipt</th>
                             </tr>
                         </thead>
 
@@ -108,6 +109,21 @@ const TransactionHistory = () => {
 
                                     <td>
                                         {new Date(txn.createdAt).toLocaleDateString()}
+                                    </td>
+
+                                    <td>
+                                        {txn.receiptUrl ? (
+                                            <a
+                                                href={txn.receiptUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn btn-sm btn-outline-primary"
+                                            >
+                                                Download
+                                            </a>
+                                        ) : (
+                                            "-"
+                                        )}
                                     </td>
                                 </tr>
                             ))}

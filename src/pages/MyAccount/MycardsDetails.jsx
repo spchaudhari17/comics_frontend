@@ -103,6 +103,11 @@ const MycardsDetails = () => {
                 </Alert>
             )}
 
+            {/* <Alert variant="info" className="mt-3">
+                <strong>Note:</strong>
+                This card is used only for purchasing subscription
+            </Alert> */}
+
             {card && (
                 <div className="border rounded p-3 mb-3">
                     <div className="d-flex justify-content-between align-items-center">
@@ -143,9 +148,19 @@ const MycardsDetails = () => {
             <h5 className="fw-bold mb-3">Receive Payments (Teacher)</h5>
 
             {payout && !payout.bank && (
-                <Alert variant="warning">
-                    You have not connected a bank account yet.
-                </Alert>
+                <>
+                    <Alert variant="warning">
+                        You have not connected a bank account yet.
+                    </Alert>
+                    <Alert variant="warning" className="mt-3">
+                        <strong>Important:</strong>
+                        Connect your bank account to receive earnings from comic bundle sales.
+                        If your bank account is not connected or your Stripe account is not fully verified,
+                        payouts cannot be transferred to you.
+                    </Alert>
+                </>
+
+
             )}
 
             {payout?.connected && (
@@ -185,6 +200,10 @@ const MycardsDetails = () => {
                     "Complete Verification"
                 )}
             </Button>
+
+            <div className="mt-3 text-muted small">
+                💡 <strong>Card</strong> = pay for subscription &nbsp;·&nbsp; <strong>Bank</strong> = receive earnings
+            </div>
 
         </div>
     );
