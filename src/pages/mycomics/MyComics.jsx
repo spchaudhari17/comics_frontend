@@ -279,13 +279,15 @@ const MyComics = () => {
       name: "Subject",
       selector: row => row.subject,
       sortable: true,
-      minWidth: "150px",
+      minWidth: "200px",
+
+
     },
     {
       name: "Concept",
       selector: row => row.conceptId?.name || row.concept || "N/A",
       sortable: true,
-      minWidth: "150px",
+      minWidth: "200px",
     },
     {
       name: "Part",
@@ -320,6 +322,12 @@ const MyComics = () => {
           </Button>
         </div>
       ),
+      minWidth: "120px",
+    },
+    {
+      name: "Country",
+      selector: row => row.country || "N/A",
+      sortable: true,
       minWidth: "120px",
     },
     {
