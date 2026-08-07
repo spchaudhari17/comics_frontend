@@ -1,12 +1,11 @@
-// TeacherDashboard.js - Clean Version (No Invoice, No Bank Payouts)
-
 import React, { useEffect, useState } from "react";
 import API from "../../API";
 import { Badge, Button, Spinner, Container, Row, Col, Card, Table } from "react-bootstrap";
 import { format } from "date-fns";
-import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const TeacherDashboard = () => {
+    const navigate = useNavigate();
     // 🔥 State
     const [balance, setBalance] = useState(null);
     const [transfers, setTransfers] = useState([]);
@@ -102,6 +101,18 @@ const TeacherDashboard = () => {
 
     return (
         <Container fluid className="py-4">
+
+            <div className="mb-4">
+                <Button
+                    variant="outline-secondary"
+                    onClick={() => navigate(-1)}
+                    className="d-flex align-items-center gap-2"
+                >
+                    <i className="bi bi-arrow-left"></i>
+                    Back
+                </Button>
+            </div>
+
             {/* 🔥 Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>

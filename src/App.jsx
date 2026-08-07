@@ -127,7 +127,7 @@ function App() {
             <Route path="/marketPlaceDetails/:id" element={<MarketPlaceDetails />} />
             <Route path="/purchasedBundleDetails/:id" element={<PurchasedBundleDetails />} />
             <Route path="/comic-reader/:comicId" element={<ComicReader />} />
-            <Route path="/mymarketList" element={<MymarketList />} />
+            <Route path="/mybundleList" element={<MymarketList />} />
             <Route path="/cart" element={<AddToCart />} />
             <Route path="/teacherDashboard" element={<TeacherDashboard />} />
 

@@ -71,6 +71,18 @@ const PurchasedBundleDetails = () => {
     return (
         <div className="container py-4">
 
+            {/* 🔥 Back Button */}
+            <div className="mb-4">
+                <Button
+                    variant="outline-secondary"
+                    onClick={() => navigate(-1)}
+                    className="d-flex align-items-center gap-2"
+                >
+                    <i className="bi bi-arrow-left"></i>
+                    Back
+                </Button>
+            </div>
+
             {/* 🔥 Bundle Header - Label: Value Layout */}
             <div className="mb-4 p-4 bg-white rounded-4 border shadow-sm">
 

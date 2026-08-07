@@ -218,6 +218,17 @@ export const Header = () => {
                   </li>
                 )} */}
 
+
+
+                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
+                  <li className="nav-item">
+                    <Link to={'/institute-dashboard'} title="institute-dashboard" className="nav-link p-0">
+                      {/* <i className="bi bi-book-half"></i> */}
+                      <i className="bi bi-speedometer2"></i>
+                    </Link>
+                  </li>
+                )}
+
                 <li className="nav-item">
                   <Link to={'/cart'} title="cart" className="nav-link p-0">
                     <div className="position-relative">
@@ -236,15 +247,6 @@ export const Header = () => {
                     </div>
                   </Link>
                 </li>
-
-                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
-                  <li className="nav-item">
-                    <Link to={'/institute-dashboard'} title="institute-dashboard" className="nav-link p-0">
-                      {/* <i className="bi bi-book-half"></i> */}
-                      <i className="bi bi-speedometer2"></i>
-                    </Link>
-                  </li>
-                )}
 
                 {userInfo && (userInfo.userType === "admin") && (
                   <li className="nav-item">
@@ -301,7 +303,7 @@ export const Header = () => {
 
                       <Dropdown.Divider className="my-1" />
 
-                      <Dropdown.Item as={Link} to="/mymarketList" className="text-theme3">
+                      <Dropdown.Item as={Link} to="/mybundleList" className="text-theme3">
                         <i className="bi bi-key-fill me-2"></i> My Bundle List
                       </Dropdown.Item>
 

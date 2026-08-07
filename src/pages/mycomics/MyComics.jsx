@@ -194,6 +194,7 @@ const MyComics = () => {
         const { data: comicsData } = await API.get("/user/my-comics");
         setComics(comicsData.comics || []);
 
+        navigate("/mybundleList");
         // Hide success alert after 5 seconds
         setTimeout(() => setShowSuccessAlert(false), 5000);
       }
@@ -455,6 +456,11 @@ const MyComics = () => {
                     <li>Select <strong>approved comics</strong> from the same <strong>concept</strong></li>
                     <li>Click the <strong>"Create Bundle"</strong> button (shows selected count)</li>
                     <li>All selected comics must belong to the same concept</li>
+                    <li>
+                      Before publishing and selling bundles, go to <strong>Manage Cards</strong> and connect your
+                      <strong> Stripe bank account</strong>. If your bank account is not connected and verified,
+                      you will <strong>not receive payments</strong> when users purchase your bundles.
+                    </li>
                   </ul>
                 </div>
               </Alert>
@@ -659,7 +665,7 @@ const MyComics = () => {
 
                   <Form.Group className="mb-3">
                     <Form.Label className="fw-semibold">
-                      Price (₹) <span className="text-danger">*</span>
+                      Price ($) <span className="text-danger">*</span>
                     </Form.Label>
                     <Form.Control
                       type="number"
