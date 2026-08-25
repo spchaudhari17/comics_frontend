@@ -62,6 +62,7 @@ import CouponPage from "./pages/coupon/Coupon";
 import Offers from "./pages/coupon/Offers";
 import CouponHeadlinePage from "./pages/coupon/CouponHeadline";
 import TeacherDashboard from "./pages/MyAccount/TeacherDashboard";
+import FoundingTeacherSuccess from "./pages/subscriptions/FoundingTeacherSuccess";
 
 
 function App() {
@@ -119,6 +120,7 @@ function App() {
             <Route path="/subscriptions-plan" element={<SubscriptionPlans />} />
             <Route path="/success" element={<SubscriptionSuccess />} />
             <Route path="/payment-success" element={<CartSuccess />} />
+            <Route path="/founding-teacher-success" element={<FoundingTeacherSuccess />} />
             <Route path="/cancel" element={<CancelPage />} />
             <Route path="/my-account" element={<MyAccount />} />
             <Route path="/subscription-rules" element={<SubscriptionRules />} />

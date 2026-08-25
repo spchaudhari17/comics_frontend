@@ -62,3 +62,166 @@
 .subscription-plans-section .btn-custom:hover {
   opacity: 0.9;
 }
+
+
+/* Pricing Tab Navigation */
+.pricing-tab-navigation .nav-pills .nav-link {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.pricing-tab-navigation .nav-pills .nav-link.active {
+  background-color: #28a745;
+  color: white;
+}
+
+.pricing-tab-navigation .nav-pills .nav-link .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+}
+
+
+
+/* ---------- */
+
+
+/* Founding Teacher Hero Banner */
+.founding-hero-banner {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  box-shadow: 0 10px 40px rgba(40, 167, 69, 0.3);
+}
+
+/* Founding Plan Cards */
+.founding-plan-card {
+  border: 2px solid #28a745 !important;
+  background: linear-gradient(180deg, #f8fff9 0%, #ffffff 100%) !important;
+  box-shadow: 0 4px 20px rgba(40, 167, 69, 0.1);
+}
+
+.founding-badge {
+  background-color: #28a745 !important;
+  color: white !important;
+  padding: 0.4rem 0.8rem !important;
+  font-size: 0.8rem !important;
+}
+
+/* Benefits Cards */
+.benefit-card {
+  background: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.benefit-icon {
+  font-size: 2.5rem;
+}
+
+/* Refund Policy */
+.refund-toggle {
+  transition: background-color 0.3s ease;
+}
+
+.refund-toggle:hover {
+  background-color: #e9ecef !important;
+}
+
+.refund-content {
+  background-color: #f8f9fa !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .founding-hero-banner {
+    padding: 2rem !important;
+  }
+
+  .founding-hero-banner .display-5 {
+    font-size: 2rem;
+  }
+
+  .pricing-tab-navigation .nav-pills .nav-link {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem !important;
+  }
+}
+
+/* Plan Cards - Base */
+.plan-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.plan-badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #ffc107;
+  color: #000;
+}
+
+.plan-price .price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.plan-price .duration {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-left: 4px;
+}
+
+.plan-features li {
+  padding: 0.5rem 0;
+  color: #495057;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.plan-features li:last-child {
+  border-bottom: none;
+}
+
+.plan-features li i {
+  color: #28a745;
+}
+
+.btn-custom {
+  background-color: #28a745;
+  color: white;
+  font-weight: 600;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.btn-custom:hover {
+  background-color: #218838;
+  color: white;
+}
+
+.btn-custom:disabled {
+  background-color: #6c757d;
+  opacity: 0.65;
+}

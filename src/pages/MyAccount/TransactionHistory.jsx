@@ -8,6 +8,8 @@ const TransactionHistory = () => {
     const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
+    const [foundingTeacherPayment, setFoundingTeacherPayment] = useState(null);
+    const [isFoundingTeacher, setIsFoundingTeacher] = useState(false);
 
     // 🔥 Fetch Transactions
     const fetchTransactions = async () => {
@@ -23,8 +25,24 @@ const TransactionHistory = () => {
         }
     };
 
+    // 🔥 Fetch Founding Teacher Payment Details
+    const fetchFoundingTeacherPayment = async () => {
+        try {
+            const res = await API.get("/teacher/get-founding-teacher-payment-details");
+
+            if (res.data.success && res.data.data) {
+                setFoundingTeacherPayment(res.data.data);
+                setIsFoundingTeacher(true);
+            }
+        } catch (err) {
+            console.log("No Founding Teacher payment found:", err);
+            setIsFoundingTeacher(false);
+        }
+    };
+
     useEffect(() => {
         fetchTransactions();
+        fetchFoundingTeacherPayment();
     }, []);
 
     // 🔍 Search filter
@@ -40,6 +58,31 @@ const TransactionHistory = () => {
     }, [search, transactions]);
 
     if (loading) return <Loader />;
+
+    // Prepare all data
+    let allData = [...filteredData];
+
+    // Add Founding Teacher payment as a special row if exists
+    if (isFoundingTeacher && foundingTeacherPayment) {
+        const foundingRow = {
+            _id: "founding_teacher",
+            bundleId: { title: "⭐ Founding Teacher Fee" },
+            amount: foundingTeacherPayment.amount,
+            paymentStatus: "success",
+            paymentIntentId: foundingTeacherPayment.transactionId,
+            createdAt: foundingTeacherPayment.purchasedAt,
+            receiptUrl: foundingTeacherPayment.receiptUrl,
+            isFoundingTeacher: true,
+            currency: foundingTeacherPayment.currency,
+        };
+
+        // Option 1: Founding Teacher row top par (default)
+        allData.unshift(foundingRow);
+
+        // Option 2: Date ke hisaab se sort karein (comment karke rakha hai)
+        // allData.push(foundingRow);
+        // allData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
 
     return (
         <div>
@@ -58,7 +101,7 @@ const TransactionHistory = () => {
             </div>
 
             {/* 🔥 Table */}
-            {filteredData.length === 0 ? (
+            {allData.length === 0 ? (
                 <div className="text-center py-5">
                     <h6>No transactions found</h6>
                 </div>
@@ -79,14 +122,35 @@ const TransactionHistory = () => {
                         </thead>
 
                         <tbody>
-                            {filteredData.map((txn, index) => (
-                                <tr key={txn._id}>
-                                    <td>{index + 1}</td>
+                            {allData.map((txn, index) => (
+                                <tr
+                                    key={txn._id}
+                                    className={txn.isFoundingTeacher ? "table-success fw-semibold" : ""}
+                                >
+                                    <td>
+                                        {txn.isFoundingTeacher ? (
+                                            <Badge bg="success">⭐</Badge>
+                                        ) : (
+                                            index + 1
+                                        )}
+                                    </td>
 
-                                    <td>{txn.bundleId?.title || "N/A"}</td>
+                                    <td>
+                                        {txn.bundleId?.title || "N/A"}
+                                        {txn.isFoundingTeacher && (
+                                            <Badge bg="warning" text="dark" className="ms-2">
+                                                One-Time
+                                            </Badge>
+                                        )}
+                                    </td>
 
                                     <td className="fw-semibold text-success">
                                         ${txn.amount}
+                                        {txn.currency && (
+                                            <small className="text-muted ms-1">
+                                                {txn.currency.toUpperCase()}
+                                            </small>
+                                        )}
                                     </td>
 
                                     <td>
@@ -103,7 +167,13 @@ const TransactionHistory = () => {
 
                                     <td>
                                         <small className="text-muted">
-                                            {txn.paymentIntentId || "-"}
+                                            {txn.paymentIntentId ? (
+                                                txn.paymentIntentId.length > 25 ?
+                                                    `${txn.paymentIntentId.slice(0, 25)}...` :
+                                                    txn.paymentIntentId
+                                            ) : (
+                                                "-"
+                                            )}
                                         </small>
                                     </td>
 
