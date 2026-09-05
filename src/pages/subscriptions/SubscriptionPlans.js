@@ -21,7 +21,7 @@ const standardPlans = [
             "Monthly consolidated progress report",
             "Full commercial rights to your generated comics",
         ],
-        priceId: "price_1Tg6gMKGzJOFnjXy2PgwwAMo",
+        priceId: "price_1T6wmqKGzJOFnjXyBIZOJshc",
     },
     {
         name: "Growth",
@@ -37,7 +37,7 @@ const standardPlans = [
             "Commercial rights included",
             "Spotlight up to 2 bundles in the marketplace"
         ],
-        priceId: "price_1Tg6gaKGzJOFnjXyHeKvQNek",
+        priceId: "price_1T6wnaKGzJOFnjXyp4bSkk8m",
     },
     {
         name: "Pro",
@@ -53,7 +53,7 @@ const standardPlans = [
             "Commercial rights included",
             "Spotlight up to 8 bundles in the marketplace"
         ],
-        priceId: "price_1Tg6gmKGzJOFnjXyPWJj1paZ",
+        priceId: "price_1UBx9sKGzJOFnjXyOLqBc8wB",
     },
 ];
 
@@ -231,8 +231,11 @@ const SubscriptionPlans = () => {
         }
 
         // Check if user is trying to select Founding Teacher plan without being one
-        if (planType === "founding" && !isFoundingTeacher) {
-            alert("You must become a Founding Teacher first to access these plans.");
+        const isFoundingPlan = foundingTeacherPlans.includes(priceId);
+        if (isFoundingPlan && !isFoundingTeacher) {
+            alert(
+                "You must become a Founding Teacher first to access these plans."
+            );
             return;
         }
 
@@ -299,10 +302,10 @@ const SubscriptionPlans = () => {
         }
 
         // Check if user already has active subscription
-        if (currentSub && currentSub.status === "active") {
-            alert("You currently have an active subscription. Please cancel it before becoming a Founding Teacher.");
-            return;
-        }
+        // if (currentSub && currentSub.status === "active") {
+        //     alert("You currently have an active subscription. Please cancel it before becoming a Founding Teacher.");
+        //     return;
+        // }
 
         // Check if already a founding teacher
         if (isFoundingTeacher) {
@@ -626,13 +629,6 @@ const SubscriptionPlans = () => {
                                             Join the exclusive Founding Teacher program and enjoy lifetime benefits!
                                         </p>
 
-                                        {/* Check if user has active subscription */}
-                                        {currentSub && currentSub.status === "active" && (
-                                            <Alert variant="warning" className="text-dark mb-3">
-                                                <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                                                You have an active subscription. Please cancel it before becoming a Founding Teacher.
-                                            </Alert>
-                                        )}
 
                                         {purchaseError && (
                                             <Alert variant="danger" className="text-dark mb-3">
@@ -649,7 +645,8 @@ const SubscriptionPlans = () => {
                                         <Button
                                             className="btn btn-light btn-lg px-5 py-3 fw-bold"
                                             onClick={handleFoundingTeacherPurchase}
-                                            disabled={purchaseLoading || (currentSub && currentSub.status === "active")}
+                                            // disabled={purchaseLoading || (currentSub && currentSub.status === "active")}
+                                            disabled={purchaseLoading || isFoundingTeacher}
                                         >
                                             {purchaseLoading ? (
                                                 <>
