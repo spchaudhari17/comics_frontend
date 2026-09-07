@@ -2,30 +2,24 @@ import React, { useEffect, useState } from "react";
 import { Button, Modal, Spinner, Alert } from "react-bootstrap";
 import API from "../../API";
 
-// const PRICE_PLAN_MAP = {
-//   // Bundle Plans
-//   price_1T7C1lKGzJOFnjXyBzb0fvZ6: "Starter", //4.99
-//   price_1T7C1xKGzJOFnjXyq4FXqK1x: "Growth", //7.99
-//   price_1T7C28KGzJOFnjXyfdAo2ToJ: "Pro", // 11.99
-
-//   // Dashboard Plans
-//   price_1T6wozKGzJOFnjXyD61eBJYK: "Small Classroom",
-//   price_1T6wpFKGzJOFnjXy1u6aLEx0: "Medium Classroom",
-//   price_1T6wpSKGzJOFnjXyPps9FMUG: "Large Classroom",
-// };
-
 // live 
-const PRICE_PLAN_MAP = {
-  // Bundle Plans
-  price_1T7dNbKGzJOFnjXyfFxrlv7m: "Starter", //4.99
-  price_1T7dO3KGzJOFnjXy2lPD3Ldz: "Growth", //7.99
-  price_1T7dODKGzJOFnjXywACAu03j: "Pro", // 11.99
+export const PRICE_PLAN_MAP = {
+  // Bundle Plans (Standard)
+  price_1UCNs7KGzJOFnjXy1VvfcTIo: "Starter",
+  price_1UCNtSKGzJOFnjXyXh8r2n6k: "Growth",
+  price_1UCNtuKGzJOFnjXyTQGjAkIp: "Pro",
+
+  // Bundle Plans (Founding Teacher)
+  price_1Tg6gMKGzJOFnjXy2PgwwAMo: "Starter",
+  price_1Tg6gaKGzJOFnjXyHeKvQNek: "Growth",
+  price_1Tg6gmKGzJOFnjXyPWJj1paZ: "Pro",
 
   // Dashboard Plans
   price_1T7dOiKGzJOFnjXyWL0P3An7: "Small Classroom",
   price_1T7dP6KGzJOFnjXyrAE0ZL0E: "Medium Classroom",
   price_1T7dPIKGzJOFnjXyfI8vdrc8: "Large Classroom",
 };
+
 
 const MySubscription = () => {
   const [subscription, setSubscription] = useState(null);
