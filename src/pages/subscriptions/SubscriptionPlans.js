@@ -11,7 +11,9 @@ const standardPlans = [
         name: "Starter",
         price: "$24.99",
         duration: "/month",
-        badge: null,
+        badge: "🎁 30 Days FREE Trial",
+        trialDays: 30,
+        trialText: "No charge for the first 30 days. Then $24.99/month.",
         features: [
             "Up to 5 new AI comics each week (20 per month)",
             "Fully editable stories with rich custom visuals",
@@ -21,7 +23,9 @@ const standardPlans = [
             "Monthly consolidated progress report",
             "Full commercial rights to your generated comics",
         ],
-        priceId: "price_1UCNs7KGzJOFnjXy1VvfcTIo",
+        // priceId: "price_1UCNs7KGzJOFnjXy1VvfcTIo",
+        priceId: "price_1T6wmqKGzJOFnjXyBIZOJshc",
+
     },
     {
         name: "Growth",
@@ -363,6 +367,26 @@ const SubscriptionPlans = () => {
                                         )}
                                     </div>
                                     <span className="duration">{plan.duration}</span>
+
+                                    {plan.trialText && (
+                                        <div
+                                            className="mt-3 p-2 rounded-3"
+                                            style={{
+                                                background: '#e8f5e9',
+                                                border: '1px dashed #28a745',
+                                                fontSize: '0.85rem',
+                                                color: '#1b5e20',
+                                                fontWeight: 500,
+                                                lineHeight: 1.4
+                                            }}
+                                        >
+                                            <div className="fw-bold mb-1" style={{ fontSize: '0.95rem' }}>
+                                                🎁 30 Days FREE Trial
+                                            </div>
+                                            <div>{plan.trialText}</div>
+                                        </div>
+                                    )}
+
                                 </div>
                             </div>
 
@@ -416,7 +440,12 @@ const SubscriptionPlans = () => {
                                         onClick={() => handleSelectPlan(plan.priceId, isFounding ? "bundle" : "bundle")}
                                         disabled={!canSelectPlan}
                                     >
-                                        {currentSub ? "Change Plan" : "Select Plan"}
+                                        {/* {currentSub ? "Change Plan" : "Select Plan"} */}
+                                        {currentSub
+                                            ? "Change Plan"
+                                            : plan.trialDays
+                                                ? `Start ${plan.trialDays}-Day FREE Trial`
+                                                : "Select Plan"}
                                     </Button>
                                 </div>
                             )}
@@ -486,30 +515,6 @@ const SubscriptionPlans = () => {
                             </button>
                         </div>
                     </div>
-
-                    {/* ===== TAB NAVIGATION ===== */}
-                    {/* <div className="pricing-tab-navigation mb-5">
-                        <Nav variant="pills" className="justify-content-center" activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
-                            <Nav.Item>
-                                <Nav.Link eventKey="standard" className="px-4 py-2">
-                                    Standard Plans
-                                </Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link eventKey="founding" className="px-4 py-2 position-relative">
-                                    Founding Teacher Plan
-                                    <Badge className="ms-2" bg="warning" text="dark">
-                                        ⭐ Lifetime Perks
-                                    </Badge>
-                                    {isFoundingTeacher && (
-                                        <Badge className="ms-2" bg="success">
-                                            ✓ Unlocked
-                                        </Badge>
-                                    )}
-                                </Nav.Link>
-                            </Nav.Item>
-                        </Nav>
-                    </div> */}
 
                     {/* ===== TAB NAVIGATION ===== */}
                     <div className="pricing-tab-navigation mb-5">

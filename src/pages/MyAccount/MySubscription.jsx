@@ -1,25 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Button, Modal, Spinner, Alert } from "react-bootstrap";
+import { Button, Modal, Spinner, Alert, ProgressBar } from "react-bootstrap";
 import API from "../../API";
 
-// live 
 export const PRICE_PLAN_MAP = {
-  // Bundle Plans (Standard)
   price_1UCNs7KGzJOFnjXy1VvfcTIo: "Starter",
   price_1UCNtSKGzJOFnjXyXh8r2n6k: "Growth",
   price_1UCNtuKGzJOFnjXyTQGjAkIp: "Pro",
-
-  // Bundle Plans (Founding Teacher)
   price_1Tg6gMKGzJOFnjXy2PgwwAMo: "Starter",
   price_1Tg6gaKGzJOFnjXyHeKvQNek: "Growth",
   price_1Tg6gmKGzJOFnjXyPWJj1paZ: "Pro",
-
-  // Dashboard Plans
   price_1T7dOiKGzJOFnjXyWL0P3An7: "Small Classroom",
   price_1T7dP6KGzJOFnjXyrAE0ZL0E: "Medium Classroom",
   price_1T7dPIKGzJOFnjXyfI8vdrc8: "Large Classroom",
 };
-
 
 const MySubscription = () => {
   const [subscription, setSubscription] = useState(null);
@@ -27,18 +20,11 @@ const MySubscription = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
 
-
-
   const fetchSubscription = async () => {
     try {
       setLoading(true);
       const res = await API.get("/subscription/me");
-
-      if (res.data.hasSubscription) {
-        setSubscription(res.data);
-      } else {
-        setSubscription(null);
-      }
+      setSubscription(res.data.hasSubscription ? res.data : null);
     } catch {
       setSubscription(null);
     } finally {
@@ -50,36 +36,25 @@ const MySubscription = () => {
     fetchSubscription();
   }, []);
 
-  // const planName = PRICE_PLAN_MAP[subscription.priceId] || "Unknown Plan";
-  const planName = subscription?.priceId ? PRICE_PLAN_MAP[subscription.priceId] || "Unknown Plan" : "";
+  const planName = subscription?.priceId
+    ? PRICE_PLAN_MAP[subscription.priceId] || "Unknown Plan"
+    : "";
 
   const handleCancelSubscription = async () => {
     try {
       setCancelLoading(true);
-
       await API.post("/subscription/cancel");
-
       setShowCancelModal(false);
 
-      // 🔥 Poll until status becomes "to_cancel"
       let attempts = 0;
-
       const interval = setInterval(async () => {
         const res = await API.get("/subscription/me");
-
         if (res.data.status === "to_cancel") {
           setSubscription(res.data);
           clearInterval(interval);
         }
-
-        attempts++;
-
-        if (attempts > 10) {
-          clearInterval(interval);
-        }
-
+        if (++attempts > 10) clearInterval(interval);
       }, 1000);
-
     } catch (err) {
       alert(err.response?.data?.message || "Failed to cancel subscription");
     } finally {
@@ -87,161 +62,280 @@ const MySubscription = () => {
     }
   };
 
-
-  if (loading) return <p>Loading subscription...</p>;
-
-  if (!subscription) {
+  if (loading) {
     return (
-      <div>
-        <h5 className="fw-bold mb-3">Current Plan</h5>
-        <Alert variant="secondary">
-          You do not have an active subscription.
-        </Alert>
+      <div className="d-flex justify-content-center align-items-center py-5">
+        <Spinner animation="border" variant="primary" />
+        <span className="ms-3 text-muted">Loading subscription...</span>
       </div>
     );
   }
 
-  // 🔥 Safe date formatting
+  if (!subscription) {
+    return (
+      <div className="card border-0 shadow-sm">
+        <div className="card-body text-center py-5">
+          <div
+            className="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-light"
+            style={{ width: 64, height: 64 }}
+          >
+            <span style={{ fontSize: 28 }}>📦</span>
+          </div>
+          <h5 className="fw-bold mb-2">No Active Subscription</h5>
+          <p className="text-muted mb-3">
+            You don't have an active subscription right now.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const formattedStart = subscription.startDate
-    ? new Date(subscription.startDate).toLocaleDateString()
+    ? new Date(subscription.startDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
     : "-";
 
   const formattedEnd = subscription.endDate
-    ? new Date(subscription.endDate).toLocaleDateString()
+    ? new Date(subscription.endDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
     : "-";
 
   const formattedPendingDate = subscription.pendingApplyDate
-    ? new Date(subscription.pendingApplyDate).toLocaleDateString()
+    ? new Date(subscription.pendingApplyDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
     : null;
+
+  // Compute usage %
+  const usagePercent =
+    subscription.comicsPerWeek > 0
+      ? Math.round(
+        (subscription.usedThisWeek / subscription.comicsPerWeek) * 100
+      )
+      : 0;
+
+  const getStatusBadge = () => {
+    const map = {
+      active: { bg: "success", label: "Active", icon: "●" },
+      trialing: { bg: "info", label: "Free Trial", icon: "◐", textDark: true },
+      to_cancel: { bg: "warning", label: "Cancelling", icon: "◔", textDark: true },
+      cancelled: { bg: "secondary", label: "Cancelled", icon: "○" },
+    };
+    const s = map[subscription.status] || map.cancelled;
+    return (
+      <span
+        className={`badge bg-${s.bg} ${s.textDark ? "text-dark" : ""} px-3 py-2`}
+        style={{ fontSize: "0.8rem", fontWeight: 600, letterSpacing: "0.3px" }}
+      >
+        <span className="me-1">{s.icon}</span>
+        {s.label}
+      </span>
+    );
+  };
+
+  const StatCard = ({ icon, label, value, subValue, accent = "primary" }) => (
+    <div className="col-6 col-md-4 col-lg-3 mb-3">
+      <div className="card border-0 h-100 shadow-sm stat-card">
+        <div className="card-body p-3">
+          <div className="d-flex align-items-center mb-2">
+            <div
+              className={`d-flex align-items-center justify-content-center rounded-3 bg-${accent} bg-opacity-10 me-2`}
+              style={{ width: 32, height: 32 }}
+            >
+              <span style={{ fontSize: 16 }}>{icon}</span>
+            </div>
+            <small className="text-muted fw-semibold text-uppercase" style={{ fontSize: "0.7rem", letterSpacing: "0.5px" }}>
+              {label}
+            </small>
+          </div>
+          <div className="fw-bold" style={{ fontSize: "1.1rem", color: "#1a1a2e" }}>
+            {value}
+          </div>
+          {subValue && <small className="text-muted">{subValue}</small>}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div>
-      <h5 className="fw-bold mb-3">Current Plan</h5>
+      <style>{`
+        .stat-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.08) !important; }
+        .hero-card {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: #fff;
+        }
+        .hero-card.trialing {
+          background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+        .hero-card.to_cancel {
+          background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+        }
+        .hero-card.cancelled {
+          background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        }
+      `}</style>
 
-      {/* ===== CANCELLED STATE ===== */}
+      {/* ===== HERO CARD ===== */}
+      <div className={`card border-0 shadow-sm hero-card ${subscription.status} mb-4`}>
+        <div className="card-body p-4">
+          <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+              <small className="text-white-100 text-uppercase fw-semibold" style={{ letterSpacing: "1px", fontSize: "0.7rem" }}>
+                Current Plan
+              </small>
+              <h3 className="fw-bold mb-1 mt-1">{planName}</h3>
+              <div className="text-white-100 small">
+                {subscription.status === "trialing"
+                  ? `Trial ends on ${formattedEnd}`
+                  : subscription.status === "to_cancel"
+                    ? `Active until ${formattedEnd}`
+                    : subscription.status === "cancelled"
+                      ? "Subscription ended"
+                      : `Renews on ${formattedEnd}`}
+              </div>
+            </div>
+            <div>{getStatusBadge()}</div>
+          </div>
+
+          {/* Usage bar in hero */}
+          {subscription.comicsPerWeek > 0 && (
+            <div className="mt-4">
+              <div className="d-flex justify-content-between text-white-80 small mb-1">
+                <span>Weekly usage</span>
+                <span>
+                  {subscription.usedThisWeek} / {subscription.comicsPerWeek} comics
+                </span>
+              </div>
+              <ProgressBar
+                now={usagePercent}
+                variant={usagePercent >= 90 ? "danger" : usagePercent >= 70 ? "warning" : "light"}
+                style={{ height: 8, borderRadius: 4, background: "rgba(255,255,255,0.25)" }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ===== ALERTS ===== */}
       {subscription.status === "to_cancel" && (
-        <Alert variant="warning">
-          <strong>Cancellation Scheduled</strong>
-          <br />
-          You can continue using your plan until{" "}
-          <strong>{formattedEnd}</strong>.
+        <Alert variant="warning" className="border-0 shadow-sm d-flex align-items-start">
+          <span className="me-2" style={{ fontSize: 18 }}>⚠️</span>
+          <div>
+            <strong>Cancellation Scheduled</strong>
+            <div className="small">
+              You can continue using your plan until <strong>{formattedEnd}</strong>.
+            </div>
+          </div>
         </Alert>
       )}
 
       {subscription.status === "cancelled" && (
-        <Alert variant="secondary">
-          This subscription has ended.
+        <Alert variant="secondary" className="border-0 shadow-sm d-flex align-items-start">
+          <span className="me-2" style={{ fontSize: 18 }}>ℹ️</span>
+          <div>
+            <strong>Subscription Ended</strong>
+            <div className="small">This subscription is no longer active.</div>
+          </div>
         </Alert>
       )}
 
-      {/* ===== PENDING PLAN CHANGE ===== */}
       {subscription.hasPendingChange && (
-        <Alert variant="info">
-          <strong>Plan change scheduled</strong>
-          <br />
-          New plan activates on <strong>{formattedPendingDate}</strong>.
+        <Alert variant="info" className="border-0 shadow-sm d-flex align-items-start">
+          <span className="me-2" style={{ fontSize: 18 }}>🔄</span>
+          <div>
+            <strong>Plan Change Scheduled</strong>
+            <div className="small">
+              New plan activates on <strong>{formattedPendingDate}</strong>.
+            </div>
+          </div>
         </Alert>
       )}
 
-      {/* ===== SUBSCRIPTION INFO ===== */}
-      <div className="row mt-3">
-
-        <div className="col-md-4 mb-3">
-          <label className="fw-semibold">Plan</label>
-          <div className="text-muted fw-semibold">
-            {planName}
-          </div>
-        </div>
-
-        <div className="col-md-4 mb-3">
-          <label className="fw-semibold">Students Limit</label>
-          <div className="text-muted">{subscription.studentsLimit}</div>
-        </div>
-
-        <div className="col-md-4 mb-3">
-          <label className="fw-semibold">Comics / Week</label>
-          <div className="text-muted">{subscription.comicsPerWeek}</div>
-        </div>
-
-        <div className="col-md-4 mb-3">
-          <label className="fw-semibold">Used This Week</label>
-          <div className="text-muted">
-            {subscription.usedThisWeek} / {subscription.comicsPerWeek}
-          </div>
-        </div>
-
-        <div className="col-md-4 mb-3">
-          <label className="fw-semibold">Comics Left</label>
-          <div className="text-muted">{subscription.comicsLeft}</div>
-        </div>
-
-        <div className="col-md-4 mb-3">
-          <label className="fw-semibold">Start Date</label>
-          <div className="text-muted">{formattedStart}</div>
-        </div>
-
-        <div className="col-md-4 mb-3">
-          <label className="fw-semibold">Renewal Date</label>
-          <div className="text-muted">{formattedEnd}</div>
-        </div>
-
-        <div className="col-md-4 mb-3">
-          <label className="fw-semibold">Status</label>
-          <span
-            className={`badge ms-2 ${subscription.status === "active"
-              ? "bg-success"
-              : subscription.status === "to_cancel"
-                ? "bg-warning text-dark"
-                : "bg-secondary"
-              }`}
-          >
-            {subscription.status}
-          </span>
-        </div>
+      {/* ===== STATS GRID ===== */}
+      <h6 className="fw-bold mb-3 text-muted text-uppercase" style={{ fontSize: "0.75rem", letterSpacing: "1px" }}>
+        Plan Details
+      </h6>
+      <div className="row g-3">
+        <StatCard icon="👥" label="Students Limit" value={subscription.studentsLimit} accent="primary" />
+        <StatCard icon="🎨" label="Comics / Week" value={subscription.comicsPerWeek} accent="info" />
+        <StatCard
+          icon="📊"
+          label="Used This Week"
+          value={`${subscription.usedThisWeek} / ${subscription.comicsPerWeek}`}
+          subValue={`${usagePercent}% used`}
+          accent="warning"
+        />
+        <StatCard icon="✨" label="Comics Left" value={subscription.comicsLeft} accent="success" />
+        <StatCard icon="🚀" label="Start Date" value={formattedStart} accent="secondary" />
+        <StatCard
+          icon={subscription.status === "trialing" ? "⏳" : "🔁"}
+          label={subscription.status === "trialing" ? "Trial Ends" : "Renewal Date"}
+          value={formattedEnd}
+          accent="danger"
+        />
       </div>
 
+      {subscription.status === "trialing" && (
+        <small className="text-muted d-block mt-1">
+          💳 Your card will be charged <strong>$24.99/month</strong> after the trial ends.
+        </small>
+      )}
+
       {/* ===== CANCEL BUTTON ===== */}
-      {subscription.status === "active" && (
-        <div className="mt-3">
-          <Button
-            variant="danger"
-            onClick={() => setShowCancelModal(true)}
-          >
-            Cancel Subscription
-          </Button>
+      {["active", "trialing"].includes(subscription.status) && (
+        <div className="mt-4 pt-3 border-top">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <div className="fw-semibold">Cancel your subscription</div>
+              <small className="text-muted">
+                You'll keep access until the end of the billing period.
+              </small>
+            </div>
+            <Button variant="outline-danger" onClick={() => setShowCancelModal(true)}>
+              Cancel Subscription
+            </Button>
+          </div>
         </div>
       )}
 
       {/* ===== CANCEL MODAL ===== */}
-      <Modal
-        show={showCancelModal}
-        onHide={() => setShowCancelModal(false)}
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Cancel Subscription</Modal.Title>
+      <Modal show={showCancelModal} onHide={() => setShowCancelModal(false)} centered>
+        <Modal.Header closeButton className="border-0">
+          <Modal.Title className="fw-bold">Cancel Subscription?</Modal.Title>
         </Modal.Header>
-
-        <Modal.Body>
-          Are you sure?
-          <br />
-          Your subscription will remain active until{" "}
-          <strong>{formattedEnd}</strong>.
+        <Modal.Body className="pt-0">
+          {subscription.status === "trialing" ? (
+            <>
+              Your free trial will remain active until{" "}
+              <strong>{formattedEnd}</strong>.
+              <br />
+              <small className="text-muted">
+                You will not be charged after the trial ends.
+              </small>
+            </>
+          ) : (
+            <>
+              Your subscription will remain active until{" "}
+              <strong>{formattedEnd}</strong>. After that, you'll lose access to
+              your plan features.
+            </>
+          )}
         </Modal.Body>
-
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowCancelModal(false)}
-          >
+        <Modal.Footer className="border-0">
+          <Button variant="light" onClick={() => setShowCancelModal(false)}>
             Keep Subscription
           </Button>
-
-          <Button
-            variant="danger"
-            onClick={handleCancelSubscription}
-            disabled={cancelLoading}
-          >
+          <Button variant="danger" onClick={handleCancelSubscription} disabled={cancelLoading}>
             {cancelLoading ? (
               <>
                 <Spinner size="sm" className="me-2" />
