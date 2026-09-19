@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import BellIcon from "../assets/images/icons/bell.svg";
 import UserIcon from "../assets/images/icons/user.svg";
 import LogoutIcon from "../assets/images/icons/log-out.svg";
@@ -12,25 +12,31 @@ import API from "../API";
 export const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // const { userInfo } = useSelector((state) => state.userLogin);
+  const location = useLocation(); // 👈 current path ke liye
   const [cartCount, setCartCount] = useState(0);
 
   const userInfo = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
 
+  // Active check helper
+  const isActive = (path) => location.pathname === path;
 
+  // Active style (underline + color)
+  const activeStyle = (path) => ({
+    color: isActive(path) ? "#0d6efd" : "inherit",
+    fontWeight: isActive(path) ? "600" : "400",
+    borderBottom: isActive(path) ? "2px solid #0d6efd" : "2px solid transparent",
+    paddingBottom: "2px",
+    transition: "all 0.2s ease",
+  });
 
   const handleLogout = () => {
     dispatch(logoutUser());
-
-
-    // LocalStorage clear
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     localStorage.removeItem("currentSeries");
     localStorage.removeItem("persist:root");
-
     navigate("/login");
   };
 
@@ -42,6 +48,7 @@ export const Header = () => {
       console.log(err);
     }
   };
+
   useEffect(() => {
     if (userInfo) {
       fetchCartCount();
@@ -52,9 +59,12 @@ export const Header = () => {
     <div className="top-header sticky-top shadow-sm">
       <div className="announcement-bar bg-primary py-2">
         <div className="container-xl">
-          <div className="discription fs-12 text-white text-center">You're exploring the <span className="fw-semibold text-danger">Beta version</span>. Some features may be handled manually.</div>
+          <div className="discription fs-12 text-white text-center">
+            You're exploring the <span className="fw-semibold text-danger">Beta version</span>. Some features may be handled manually.
+          </div>
         </div>
       </div>
+
       <nav className="navbar navbar-light bg-white border-bottom navbar-expand-lg py-1" data-bs-theme="light" style={{ minHeight: "61px" }}>
         <div className="container-xl">
           {/* Logo */}
@@ -62,12 +72,11 @@ export const Header = () => {
             <img src={require("../assets/images/logo2.png")} alt="Logo" className="img-fluid" />
           </Link>
 
-          {/* Mobile toggle (targets offcanvas) */}
+          {/* Mobile toggle */}
           <button className="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasTopHeader" aria-controls="offcanvasTopHeader">
             <span className="navbar-toggler-icon"></span>
           </button>
 
-          {/* Offcanvas menu with overlay */}
           <div className="offcanvas bg-theme2 offcanvas-start border-0" tabIndex="-1" id="offcanvasTopHeader" aria-labelledby="offcanvasTopHeaderLabel">
             <div className="offcanvas-header bg-primary">
               <h5 className="offcanvas-title text-white">Menu</h5>
@@ -76,103 +85,50 @@ export const Header = () => {
 
             <div className="offcanvas-body">
               <ul className="navbar-nav menu-link-nav align-items-center justify-content-end flex-grow-1 gap-2">
-                {(
-                  <>
-                    {/* <li className="nav-item">
-                      <Link to={'/about'} title="about" className="nav-link p-0">About Us</Link>
-                    </li>
+                <>
+                  <li className="nav-item">
+                    <Link
+                      to={'/market-Place'}
+                      title="marketPlace"
+                      className="nav-link p-0"
+                      style={activeStyle('/market-Place')}
+                    >
+                      MarketPlace
+                    </Link>
+                  </li>
+
+                  {(!userInfo || userInfo.userType === "admin" || userInfo.userType === "user") && (
                     <li className="nav-item">
-                      <Link to={'/our-library'} title="our-library" className="nav-link p-0">Library</Link>
+                      <button
+                        className="nav-link p-0 btn btn-link text-decoration-none"
+                        style={activeStyle('/subscriptions-plan')}
+                        onClick={() => navigate("/subscriptions-plan")}
+                      >
+                        Pricing
+                      </button>
                     </li>
+                  )}
 
+                  {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                     <li className="nav-item">
-                      <Link to={'/for-teacher'} title="for-teacher" className="nav-link p-0">For Teachers</Link>
+                      <button
+                        className="nav-link p-0 btn btn-link text-decoration-none"
+                        title="create-comic"
+                        style={activeStyle('/create-comic')}
+                        onClick={() => navigate("/create-comic")}
+                      >
+                        Create Comics
+                      </button>
                     </li>
-                    <li className="nav-item">
-                      <Link to={'/for-student'} title="for-studen" className="nav-link p-0">For Students</Link>
-                    </li> */}
-                    {/* <li className="nav-item">
-                      <Link to={'/for-parent'} title="for-parent" className="nav-link p-0">For Parents</Link>
-                    </li> */}
-
-                    {/* <li className="nav-item">
-                      <Link to={'/contact'} title="contact" className="nav-link p-0">Contact</Link>
-                    </li> */}
-
-                    <li className="nav-item">
-                      <Link to={'/market-Place'} title="marketPlace" className="nav-link p-0">MarketPlace</Link>
-                    </li>
-
-                    {(!userInfo || userInfo.userType === "admin" || userInfo.userType === "user") && (
-                      <li className="nav-item">
-                        <button
-                          className="nav-link p-0 btn btn-link text-decoration-none"
-                          onClick={() => navigate("/subscriptions-plan")}
-                        >
-                          Subscription Plan
-                        </button>
-                      </li>
-                    )}
-
-                    {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
-                      <li className="nav-item">
-                        <button
-                          className="nav-link p-0 btn btn-link text-decoration-none"
-                          title="create-comic"
-                          onClick={() => navigate("/create-comic")}
-                        >
-                          Create Comics
-                        </button>
-                      </li>
-                    )}
-
-
-
-                  </>
-                )
-                }
-
-                {/* {
-                  (
-                    <>
-                      <li className="nav-item">
-                        {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
-                          <li className="nav-item">
-                            <button
-                              className="nav-link p-0 btn btn-link text-decoration-none"
-                              title="create-comic"
-                              onClick={() => navigate("/create-comic")}
-                            >
-                              Create Comics
-                            </button>
-                          </li>
-                        )}
-
-                        {(!userInfo || userInfo.userType === "admin" || userInfo.userType === "user") && (
-                          <li className="nav-item">
-                            <button
-                              className="nav-link p-0 btn btn-link text-decoration-none"
-                              onClick={() => navigate("/subscriptions-plan")}
-                            >
-                              Subscription Plan
-                            </button>
-                          </li>
-                        )}
-
-
-                      </li>
-
-                    </>
-                  )
-                } */}
-
+                  )}
+                </>
               </ul>
 
               <ul className="navbar-nav icons-nav align-items-center justify-content-end flex-grow-1 gap-3">
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
                   <li className="nav-item">
-                    <Link to={'/super-admin'} title="super-admin" className="nav-link p-0">
+                    <Link to={'/super-admin'} title="super-admin" className="nav-link p-0" style={activeStyle('/super-admin')}>
                       <i className="bi bi-grid-fill"></i>
                     </Link>
                   </li>
@@ -180,7 +136,7 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
                   <li className="nav-item">
-                    <Link to={'/allUsers'} title='allUsers' className="nav-link p-0">
+                    <Link to={'/allUsers'} title='allUsers' className="nav-link p-0" style={activeStyle('/allUsers')}>
                       <i className="bi bi-people-fill"></i>
                     </Link>
                   </li>
@@ -188,7 +144,7 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
                   <li className="nav-item">
-                    <Link to={'/contactList'} title="contactList" className="nav-link p-0">
+                    <Link to={'/contactList'} title="contactList" className="nav-link p-0" style={activeStyle('/contactList')}>
                       <i className="bi bi-envelope-fill"></i>
                     </Link>
                   </li>
@@ -196,7 +152,7 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin") && (
                   <li className="nav-item">
-                    <Link to={'/subjectlist'} title="subjectlist" className="nav-link p-0">
+                    <Link to={'/subjectlist'} title="subjectlist" className="nav-link p-0" style={activeStyle('/subjectlist')}>
                       <i className="bi bi-list-ul"></i>
                     </Link>
                   </li>
@@ -204,37 +160,24 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                   <li className="nav-item">
-                    <Link to={'/my-comics'} title="my-comics" className="nav-link p-0">
+                    <Link to={'/my-comics'} title="my-comics" className="nav-link p-0" style={activeStyle('/my-comics')}>
                       <i className="bi bi-book-half"></i>
                     </Link>
                   </li>
                 )}
 
-                {/* {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
-                  <li className="nav-item">
-                    <Link to={'/cart'} title="cart" className="nav-link p-0">
-                      <i className="bi bi-cart-fill"></i>
-                    </Link>
-                  </li>
-                )} */}
-
-
-
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                   <li className="nav-item">
-                    <Link to={'/institute-dashboard'} title="institute-dashboard" className="nav-link p-0">
-                      {/* <i className="bi bi-book-half"></i> */}
+                    <Link to={'/institute-dashboard'} title="institute-dashboard" className="nav-link p-0" style={activeStyle('/institute-dashboard')}>
                       <i className="bi bi-speedometer2"></i>
                     </Link>
                   </li>
                 )}
 
                 <li className="nav-item">
-                  <Link to={'/cart'} title="cart" className="nav-link p-0">
+                  <Link to={'/cart'} title="cart" className="nav-link p-0" style={activeStyle('/cart')}>
                     <div className="position-relative">
-
                       <i className="bi bi-cart-fill fs-5"></i>
-
                       {cartCount > 0 && (
                         <span
                           className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
@@ -243,22 +186,21 @@ export const Header = () => {
                           {cartCount}
                         </span>
                       )}
-
                     </div>
                   </Link>
                 </li>
 
                 {userInfo && (userInfo.userType === "admin") && (
                   <li className="nav-item">
-                    <Link to={'/adUnitManager'} title="ComicRevenueReport" className="nav-link p-0">
-                      <i class="bi bi-graph-up-arrow"></i>
+                    <Link to={'/adUnitManager'} title="ComicRevenueReport" className="nav-link p-0" style={activeStyle('/adUnitManager')}>
+                      <i className="bi bi-graph-up-arrow"></i>
                     </Link>
                   </li>
                 )}
 
                 {userInfo && (userInfo.userType === "admin") && (
                   <li className="nav-item">
-                    <Link to={'/coupon'} title="coupon" className="nav-link p-0">
+                    <Link to={'/coupon'} title="coupon" className="nav-link p-0" style={activeStyle('/coupon')}>
                       <i className="bi bi-ticket-perforated"></i>
                     </Link>
                   </li>
@@ -266,20 +208,17 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "parent") && (
                   <li className="nav-item">
-                    <Link to={'/parent/manage-children'} title='manage-children' className="nav-link p-0">
-                      {/* <i className="bi bi-book-half"></i> */}
+                    <Link to={'/parent/manage-children'} title='manage-children' className="nav-link p-0" style={activeStyle('/parent/manage-children')}>
                       <i className="bi bi-speedometer2"></i>
                     </Link>
                   </li>
                 )}
 
-                {/* <div className="divider vr d-none d-md-block me-2"></div> */}
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user" || userInfo.userType === "moderator" || userInfo.userType === "parent") ? (
                   <Dropdown align="end" className="account-menu">
                     <Dropdown.Toggle variant="white" className="bg-transparent border-0 p-0">
                       <div className="chip-wrapper">
                         <div className="chip-img bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center rounded-circle overflow-hidden">
-                          {/* <div className="user-shortname fs-16 fw-medium text-black text-opacity-75 text-uppercase">K</div> */}
                           <img className="w-100 h-100" src={require("../assets/images/avatar.png")} alt="User" />
                         </div>
                       </div>
@@ -311,11 +250,9 @@ export const Header = () => {
                         <i className="bi bi-key-fill me-2"></i> Change Password
                       </Dropdown.Item>
 
-
                       <Dropdown.Item onClick={handleLogout} className="text-theme3">
                         <img src={LogoutIcon} alt="Logout Icon" className="img-fluid" /> Log out
                       </Dropdown.Item>
-
                     </Dropdown.Menu>
                   </Dropdown>
                 ) : (

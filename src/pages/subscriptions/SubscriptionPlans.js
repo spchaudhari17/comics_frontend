@@ -23,8 +23,7 @@ const standardPlans = [
             "Monthly consolidated progress report",
             "Full commercial rights to your generated comics",
         ],
-        // priceId: "price_1UCNs7KGzJOFnjXy1VvfcTIo",
-        priceId: "price_1T6wmqKGzJOFnjXyBIZOJshc",
+        priceId: "price_1UCNs7KGzJOFnjXy1VvfcTIo",
 
     },
     {
@@ -498,7 +497,7 @@ const SubscriptionPlans = () => {
                         </Alert>
                     )}
 
-                    <div className="text-center mb-3">
+                    {/* <div className="text-center mb-3">
                         {activeBanner?.headline && (
                             <div className="alert alert-warning fw-semibold">
                                 {activeBanner.headline}
@@ -514,7 +513,7 @@ const SubscriptionPlans = () => {
                                 View Active Offers <i className="bi bi-arrow-right ms-1"></i>
                             </button>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* ===== TAB NAVIGATION ===== */}
                     <div className="pricing-tab-navigation mb-5">
