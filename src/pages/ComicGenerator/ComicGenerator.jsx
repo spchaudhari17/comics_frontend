@@ -83,7 +83,7 @@ export const ComicGenerator = () => {
   const [comicImages, setComicImages] = useState([]);
   const [pdfUrl, setPdfUrl] = useState("");
   const [concept, setConcept] = useState("");
-  const [showTextInImage, setShowTextInImage] = useState(false);
+  const [showTextInImage, setShowTextInImage] = useState(true);
 
   // Content generation states
   const [quizData, setQuizData] = useState({});
@@ -944,13 +944,14 @@ export const ComicGenerator = () => {
                         }
                       >
                         <option value="text">
-                          Comics With Text
+                          With Text & Dialogue
                         </option>
 
                         <option value="image">
-                          Comics Without Text
+                          No Text - Just Visual Story
                         </option>
                       </Form.Select>
+
                     </Form.Group>
                   </Col>
 
