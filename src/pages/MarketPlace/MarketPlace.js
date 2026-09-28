@@ -8,6 +8,7 @@ const MarketPlace = () => {
     const navigate = useNavigate();
 
     const user = JSON.parse(localStorage.getItem("user"));
+
     const [marketplaceStatus, setMarketplaceStatus] = useState({
         purchasedBundleIds: [],
         ownBundleIds: []
@@ -16,30 +17,76 @@ const MarketPlace = () => {
     const [bundles, setBundles] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    // Pagination
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        limit: 9,
+        totalItems: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPrevPage: false
+    });
+
+    // Filters
     const [search, setSearch] = useState("");
     const [subjectFilter, setSubjectFilter] = useState("");
     const [conceptFilter, setConceptFilter] = useState("");
     const [gradeFilter, setGradeFilter] = useState("");
     const [countryFilter, setCountryFilter] = useState("");
+    const [sort, setSort] = useState("latest");
 
-    const fetchMarketplace = async () => {
+    // Debounced search
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedSearch(search), 500);
+        return () => clearTimeout(t);
+    }, [search]);
+
+    // -----------------------------
+    // Fetch Marketplace (server-side)
+    // -----------------------------
+    const fetchMarketplace = async (page = 1) => {
         try {
             setLoading(true);
 
-            const res = await API.get("/user/getMarketplace");
+            const params = {
+                page,
+                limit: pagination.limit,
+                sort
+            };
+
+            if (debouncedSearch) params.search = debouncedSearch;
+            if (subjectFilter) params.subjectId = subjectFilter;
+            if (conceptFilter) params.conceptId = conceptFilter;
+            if (gradeFilter) params.grade = gradeFilter;
+            if (countryFilter) params.country = countryFilter;
+
+            const res = await API.get("/user/getMarketplace", { params });
 
             setBundles(res.data.data || []);
+            if (res.data.pagination) {
+                setPagination((prev) => ({
+                    ...prev,
+                    ...res.data.pagination
+                }));
+            }
         } catch (err) {
             console.error("Error fetching marketplace:", err);
+            toast.error("Failed to load marketplace ❌");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchMarketplace();
-    }, []);
+        fetchMarketplace(1);
+        // eslint-disable-next-line
+    }, [debouncedSearch, subjectFilter, conceptFilter, gradeFilter, countryFilter, sort]);
 
+    // -----------------------------
+    // Fetch user's marketplace status
+    // -----------------------------
     const fetchMarketplaceStatus = async () => {
         if (!user?._id) return;
 
@@ -58,6 +105,7 @@ const MarketPlace = () => {
 
     useEffect(() => {
         fetchMarketplaceStatus();
+        // eslint-disable-next-line
     }, []);
 
     const handleView = (bundle) => {
@@ -78,133 +126,64 @@ const MarketPlace = () => {
         }
     };
 
-    // Subject List
+    // -----------------------------
+    // Filter option lists (derived from current page bundles)
+    // NOTE: Since filtering is now server-side, these dropdowns will
+    // only show options from the current page. If you want global
+    // options, you'd need a separate "facets" API endpoint.
+    // -----------------------------
     const subjects = useMemo(() => {
         return [
             ...new Set(
                 bundles.flatMap((bundle) =>
-                    bundle.comics?.map(
-                        (comic) =>
-                            comic.subjectId?.name ||
-                            comic.subject ||
-                            "N/A"
-                    ) || []
+                    bundle.comics?.map((comic) => comic.subjectId?.name || comic.subject).filter(Boolean) || []
                 )
             )
         ].filter(Boolean);
     }, [bundles]);
 
-    // Concept List
     const concepts = useMemo(() => {
         return [
             ...new Set(
                 bundles.flatMap((bundle) =>
-                    bundle.comics?.map(
-                        (comic) =>
-                            comic.conceptId?.name ||
-                            comic.concept ||
-                            "N/A"
-                    ) || []
+                    bundle.comics?.map((comic) => comic.conceptId?.name || comic.concept).filter(Boolean) || []
                 )
             )
         ].filter(Boolean);
     }, [bundles]);
 
-    // Grade List
     const grades = useMemo(() => {
         return [
             ...new Set(
-                bundles.flatMap((bundle) =>
-                    bundle.comics?.map(
-                        (comic) =>
-                            comic.grade || "N/A"
-                    ) || []
-                )
+                bundles.flatMap((bundle) => bundle.comics?.map((c) => c.grade).filter(Boolean) || [])
             )
         ].filter(Boolean);
     }, [bundles]);
 
-    // Country List
     const countries = useMemo(() => {
         return [
             ...new Set(
-                bundles.flatMap((bundle) =>
-                    bundle.comics?.map(
-                        (comic) =>
-                            comic.country || "N/A"
-                    ) || []
-                )
+                bundles.flatMap((bundle) => bundle.comics?.map((c) => c.country).filter(Boolean) || [])
             )
         ].filter(Boolean);
     }, [bundles]);
 
-    // Filtered Bundles
-    const filteredBundles = useMemo(() => {
-        return bundles.filter((bundle) => {
-            const matchSearch =
-                !search ||
-                bundle.title?.toLowerCase().includes(search.toLowerCase()) ||
-                bundle.teacherId?.firstname
-                    ?.toLowerCase()
-                    .includes(search.toLowerCase()) ||
-                bundle.teacherId?.lastname
-                    ?.toLowerCase()
-                    .includes(search.toLowerCase()) ||
-                bundle.comics?.some((comic) =>
-                    comic.title?.toLowerCase().includes(search.toLowerCase()) ||
-                    comic.subjectId?.name?.toLowerCase().includes(search.toLowerCase()) ||
-                    comic.subject?.toLowerCase().includes(search.toLowerCase()) ||
-                    comic.conceptId?.name?.toLowerCase().includes(search.toLowerCase()) ||
-                    comic.concept?.toLowerCase().includes(search.toLowerCase()) ||
-                    comic.grade?.toLowerCase().includes(search.toLowerCase()) ||
-                    comic.country?.toLowerCase().includes(search.toLowerCase())
-                );
-
-            const matchSubject =
-                !subjectFilter ||
-                bundle.comics?.some(
-                    (comic) =>
-                        (comic.subjectId?.name ||
-                            comic.subject) === subjectFilter
-                );
-
-            const matchConcept =
-                !conceptFilter ||
-                bundle.comics?.some(
-                    (comic) =>
-                        (comic.conceptId?.name ||
-                            comic.concept) === conceptFilter
-                );
-
-            const matchGrade =
-                !gradeFilter ||
-                bundle.comics?.some(
-                    (comic) =>
-                        comic.grade === gradeFilter
-                );
-
-            const matchCountry =
-                !countryFilter ||
-                bundle.comics?.some(
-                    (comic) =>
-                        comic.country === countryFilter
-                );
-
-            return matchSearch && matchSubject && matchConcept && matchGrade && matchCountry;
-        });
-    }, [bundles, search, subjectFilter, conceptFilter, gradeFilter, countryFilter]);
+    const handleResetFilters = () => {
+        setSearch("");
+        setSubjectFilter("");
+        setConceptFilter("");
+        setGradeFilter("");
+        setCountryFilter("");
+        setSort("latest");
+    };
 
     return (
-        <div className="comoic-library-page pb-5">
-
+        <div className="comic-library-page pb-5">
             {/* Banner */}
             <section className="breadcrumb-banner-section py-5">
                 <div className="container-xl position-relative z-1">
                     <div className="page-header text-white text-uppercase text-center">
-                        <div className="section-heading text-white mb-2">
-                            🛒 Marketplace
-                        </div>
-
+                        <div className="section-heading text-white mb-2">🛒 Marketplace</div>
                         <ul className="list-unstyled d-flex justify-content-center gap-2 mb-0">
                             <li className="text-white">Home</li>
                             <li><span>/</span></li>
@@ -215,30 +194,27 @@ const MarketPlace = () => {
             </section>
 
             <div className="container-xl mt-5">
-
                 {/* Filters */}
-                <div className="row g-3 mb-4">
+                <div className="row g-3 mb-4 align-items-center">
                     <div className="col-md-3">
                         <input
                             type="text"
                             className="form-control"
-                            placeholder="Search..."
+                            placeholder="Search bundles, teachers, comics..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
 
-                    <div className="col-md-3">
+                    <div className="col-md-2">
                         <select
                             className="form-select"
                             value={subjectFilter}
                             onChange={(e) => setSubjectFilter(e.target.value)}
                         >
                             <option value="">All Subjects</option>
-                            {subjects.map((subject) => (
-                                <option key={subject} value={subject}>
-                                    {subject}
-                                </option>
+                            {subjects.map((s) => (
+                                <option key={s} value={s}>{s}</option>
                             ))}
                         </select>
                     </div>
@@ -250,10 +226,8 @@ const MarketPlace = () => {
                             onChange={(e) => setConceptFilter(e.target.value)}
                         >
                             <option value="">All Concepts</option>
-                            {concepts.map((concept) => (
-                                <option key={concept} value={concept}>
-                                    {concept}
-                                </option>
+                            {concepts.map((c) => (
+                                <option key={c} value={c}>{c}</option>
                             ))}
                         </select>
                     </div>
@@ -265,10 +239,8 @@ const MarketPlace = () => {
                             onChange={(e) => setGradeFilter(e.target.value)}
                         >
                             <option value="">All Grades</option>
-                            {grades.map((grade) => (
-                                <option key={grade} value={grade}>
-                                    {grade}
-                                </option>
+                            {grades.map((g) => (
+                                <option key={g} value={g}>{g}</option>
                             ))}
                         </select>
                     </div>
@@ -280,161 +252,183 @@ const MarketPlace = () => {
                             onChange={(e) => setCountryFilter(e.target.value)}
                         >
                             <option value="">All Countries</option>
-                            {countries.map((country) => (
-                                <option key={country} value={country}>
-                                    {country}
-                                </option>
+                            {countries.map((c) => (
+                                <option key={c} value={c}>{c}</option>
                             ))}
+                        </select>
+                    </div>
+
+                    <div className="col-md-1 d-flex gap-2">
+                        <select
+                            className="form-select"
+                            value={sort}
+                            onChange={(e) => setSort(e.target.value)}
+                        >
+                            <option value="latest">New</option>
+                            <option value="oldest">Old</option>
                         </select>
                     </div>
                 </div>
 
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div className="text-muted small">
+                        {pagination.totalItems > 0 && (
+                            <>Showing page {pagination.currentPage} of {pagination.totalPages} • {pagination.totalItems} bundles</>
+                        )}
+                    </div>
+                    <Button variant="outline-secondary" size="sm" onClick={handleResetFilters}>
+                        Reset Filters
+                    </Button>
+                </div>
+
                 {loading ? (
-                    <p className="text-center">Loading bundles...</p>
-                ) : filteredBundles.length === 0 ? (
-                    <p className="text-center">No bundles found.</p>
+                    <p className="text-center py-5">Loading bundles...</p>
+                ) : bundles.length === 0 ? (
+                    <p className="text-center py-5">No bundles found.</p>
                 ) : (
-                    <div className="row gy-5">
-                        {filteredBundles.map((bundle) => {
-                            const isPurchased = marketplaceStatus.purchasedBundleIds.includes(bundle._id);
-                            const isOwnBundle = marketplaceStatus.ownBundleIds.includes(bundle._id);
+                    <>
+                        <div className="row gy-5">
+                            {bundles.map((bundle) => {
+                                const isPurchased = marketplaceStatus.purchasedBundleIds.includes(bundle._id);
+                                const isOwnBundle = marketplaceStatus.ownBundleIds.includes(bundle._id);
 
-                            const subjectNames = [
-                                ...new Set(
-                                    bundle.comics?.map(
-                                        (comic) =>
-                                            comic.subjectId?.name ||
-                                            comic.subject
-                                    ) || []
-                                )
-                            ];
+                                const subjectNames = [
+                                    ...new Set(
+                                        bundle.comics?.map((c) => c.subjectId?.name || c.subject).filter(Boolean) || []
+                                    )
+                                ];
 
-                            const conceptNames = [
-                                ...new Set(
-                                    bundle.comics?.map(
-                                        (comic) =>
-                                            comic.conceptId?.name ||
-                                            comic.concept
-                                    ) || []
-                                )
-                            ];
+                                const conceptNames = [
+                                    ...new Set(
+                                        bundle.comics?.map((c) => c.conceptId?.name || c.concept).filter(Boolean) || []
+                                    )
+                                ];
 
-                            // Get unique grades and countries from comics
-                            const gradeNames = [
-                                ...new Set(
-                                    bundle.comics?.map(
-                                        (comic) => comic.grade
-                                    ) || []
-                                )
-                            ].filter(Boolean);
+                                const gradeNames = [
+                                    ...new Set(bundle.comics?.map((c) => c.grade).filter(Boolean) || [])
+                                ];
 
-                            const countryNames = [
-                                ...new Set(
-                                    bundle.comics?.map(
-                                        (comic) => comic.country
-                                    ) || []
-                                )
-                            ].filter(Boolean);
+                                const countryNames = [
+                                    ...new Set(bundle.comics?.map((c) => c.country).filter(Boolean) || [])
+                                ];
 
-                            return (
-                                <div key={bundle._id} className="col-lg-4 col-md-6">
-                                    <div className="bg-white h-100 border border-primary rounded-4 shadow-sm overflow-hidden">
+                                return (
+                                    <div key={bundle._id} className="col-lg-4 col-md-6">
+                                        <div className="bg-white h-100 border border-primary rounded-4 shadow-sm overflow-hidden d-flex flex-column">
+                                            <img
+                                                src={
+                                                    bundle.comics?.[0]?.thumbnail ||
+                                                    "https://via.placeholder.com/400x250?text=Bundle"
+                                                }
+                                                alt={bundle.title}
+                                                className="card-img-top"
+                                                style={{ height: "220px", objectFit: "cover" }}
+                                            />
 
-                                        <img
-                                            src={
-                                                bundle.comics?.[0]?.thumbnail ||
-                                                "https://via.placeholder.com/400x250?text=Bundle"
-                                            }
-                                            alt={bundle.title}
-                                            className="card-img-top"
-                                            style={{ height: "220px", objectFit: "cover" }}
-                                        />
-
-                                        <div className="card-body d-flex flex-column p-3">
-
-                                            <div className="fs-16 fw-bold text-theme4 text-capitalize mb-2">
-                                                {bundle.title}
-                                            </div>
-
-                                            {/* Teacher */}
-                                            <div className="info mb-1">
-                                                <span className="fw-semibold text-primary">Teacher:</span>{" "}
-                                                {bundle.teacherId?.firstname} {bundle.teacherId?.lastname}
-                                            </div>
-
-                                            <div className="info mb-1">
-                                                <span className="fw-semibold" style={{ color: "#6f42c1" }}>
-                                                    Subject:
-                                                </span>{" "}
-                                                {subjectNames.join(", ")}
-                                            </div>
-
-                                            <div className="info mb-1">
-                                                <span className="fw-semibold text-danger">Concept:</span>{" "}
-                                                {conceptNames.join(", ")}
-                                            </div>
-
-                                            {/* ✅ Grade */}
-                                            {gradeNames.length > 0 && (
-                                                <div className="info mb-1">
-                                                    <span className="fw-semibold text-warning">Grade:</span>{" "}
-                                                    {gradeNames.join(", ")}
+                                            <div className="card-body d-flex flex-column p-3">
+                                                <div className="fs-16 fw-bold text-theme4 text-capitalize mb-2">
+                                                    {bundle.title}
                                                 </div>
-                                            )}
 
-                                            {/* ✅ Country */}
-                                            {countryNames.length > 0 && (
                                                 <div className="info mb-1">
-                                                    <span className="fw-semibold text-success">Country:</span>{" "}
-                                                    {countryNames.join(", ")}
+                                                    <span className="fw-semibold text-primary">Teacher:</span>{" "}
+                                                    {bundle.teacherId?.firstname} {bundle.teacherId?.lastname}
                                                 </div>
-                                            )}
 
-                                            <div className="info mb-1">
-                                                <span className="fw-semibold text-info">Total Comics:</span>{" "}
-                                                {bundle.comics?.length}
-                                            </div>
-
-                                            <div className="info mb-3">
-                                                <span className="fw-semibold text-success">Price:</span>{" "}
-                                                ${bundle.price}
-                                            </div>
-
-                                            <div className="d-flex gap-2 mt-auto">
-                                                <Button
-                                                    variant="outline-primary"
-                                                    size="sm"
-                                                    onClick={() => handleView(bundle)}
-                                                >
-                                                    View
-                                                </Button>
-
-                                                {isOwnBundle ? (
-                                                    <Button variant="secondary" disabled>
-                                                        Your Bundle
-                                                    </Button>
-                                                ) : isPurchased ? (
-                                                    <Button variant="success" disabled>
-                                                        Purchased
-                                                    </Button>
-                                                ) : (
-                                                    <Button
-                                                        variant="success"
-                                                        size="sm"
-                                                        onClick={() => handleAddToCart(bundle._id)}
-                                                    >
-                                                        <i className="bi bi-cart-plus me-1"></i>
-                                                        Add To Cart
-                                                    </Button>
+                                                {subjectNames.length > 0 && (
+                                                    <div className="info mb-1">
+                                                        <span className="fw-semibold" style={{ color: "#6f42c1" }}>Subject:</span>{" "}
+                                                        {subjectNames.join(", ")}
+                                                    </div>
                                                 )}
-                                            </div>
 
+                                                {conceptNames.length > 0 && (
+                                                    <div className="info mb-1">
+                                                        <span className="fw-semibold text-danger">Concept:</span>{" "}
+                                                        {conceptNames.join(", ")}
+                                                    </div>
+                                                )}
+
+                                                {gradeNames.length > 0 && (
+                                                    <div className="info mb-1">
+                                                        <span className="fw-semibold text-warning">Grade:</span>{" "}
+                                                        {gradeNames.join(", ")}
+                                                    </div>
+                                                )}
+
+                                                {countryNames.length > 0 && (
+                                                    <div className="info mb-1">
+                                                        <span className="fw-semibold text-success">Country:</span>{" "}
+                                                        {countryNames.join(", ")}
+                                                    </div>
+                                                )}
+
+                                                <div className="info mb-1">
+                                                    <span className="fw-semibold text-info">Total Comics:</span>{" "}
+                                                    {bundle.comics?.length}
+                                                </div>
+
+                                                <div className="info mb-3">
+                                                    <span className="fw-semibold text-success">Price:</span>{" "}
+                                                    ${bundle.price}
+                                                </div>
+
+                                                <div className="d-flex gap-2 mt-auto">
+                                                    <Button
+                                                        variant="outline-primary"
+                                                        size="sm"
+                                                        onClick={() => handleView(bundle)}
+                                                    >
+                                                        View
+                                                    </Button>
+
+                                                    {isOwnBundle ? (
+                                                        <Button variant="secondary" disabled>Your Bundle</Button>
+                                                    ) : isPurchased ? (
+                                                        <Button variant="success" disabled>Purchased</Button>
+                                                    ) : (
+                                                        <Button
+                                                            variant="success"
+                                                            size="sm"
+                                                            onClick={() => handleAddToCart(bundle._id)}
+                                                        >
+                                                            <i className="bi bi-cart-plus me-1"></i>
+                                                            Add To Cart
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Pagination */}
+                        {pagination.totalPages > 1 && (
+                            <div className="d-flex justify-content-center align-items-center gap-3 mt-5">
+                                <Button
+                                    variant="outline-primary"
+                                    disabled={!pagination.hasPrevPage || loading}
+                                    onClick={() => fetchMarketplace(pagination.currentPage - 1)}
+                                >
+                                    ← Prev
+                                </Button>
+
+                                <span className="fw-semibold">
+                                    Page {pagination.currentPage} / {pagination.totalPages}
+                                </span>
+
+                                <Button
+                                    variant="outline-primary"
+                                    disabled={!pagination.hasNextPage || loading}
+                                    onClick={() => fetchMarketplace(pagination.currentPage + 1)}
+                                >
+                                    Next →
+                                </Button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>
