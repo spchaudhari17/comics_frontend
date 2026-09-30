@@ -8,6 +8,7 @@ import { Pagination, Autoplay } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/pagination";
+import { trackClick, trackClickWithUser } from '../utility/analytics';
 
 export const AboutUs = () => {
     const navigate = useNavigate();
@@ -124,7 +125,7 @@ export const AboutUs = () => {
                                     </p>
                                 </div>
                                 <div className="btn-wrapper mt-4 pt-3">
-                                    <Button variant='primary' className="btn-custom" onClick={() => navigate('/create-comic')}>Create Comic <i className="bi bi-arrow-right"></i></Button>
+                                    <Button variant='primary' className="btn-custom" onClick={() => { trackClickWithUser('create_comics_click', { location: 'about_us' }); navigate('/create-comic'); }}>Create Comic <i className="bi bi-arrow-right"></i></Button>
                                 </div>
                             </div>
                         </Col>
@@ -241,10 +242,10 @@ export const AboutUs = () => {
                                         <p>Combining entrepreneurial experience with a passion for data and design, he is building Kridemy to make learning more engaging, gamified, and accessible — one scroll at a time.</p>
                                     </div>
                                     <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
-                                            <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
-                                            <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
-                                            <Link to="https://www.instagram.com/" className="fs-16"><i className="bi bi-instagram"></i></Link>
-                                            <Link to="https://in.linkedin.com/" className="fs-16"><i className="bi bi-linkedin"></i></Link>
+                                            <Link to="https://www.facebook.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'facebook', location: 'about_us_team' })}><i className="bi bi-facebook"></i></Link>
+                                            <Link to="https://twitter.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'twitter', location: 'about_us_team' })}><i className="bi bi-twitter"></i></Link>
+                                            <Link to="https://www.instagram.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'instagram', location: 'about_us_team' })}><i className="bi bi-instagram"></i></Link>
+                                            <Link to="https://in.linkedin.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'linkedin', location: 'about_us_team' })}><i className="bi bi-linkedin"></i></Link>
                                         </div>
                                 </div>
                             </Col>
@@ -267,10 +268,10 @@ export const AboutUs = () => {
                                 <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Ajinkya Sham Vidhate</div>
                                 <div className="designation fs-12 text-muted text-capitalize mb-2">PMP® | MBA in Logistics & Supply Chain Management | M.S. in Supply Chain Analytics</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
-                                    <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
-                                    <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
-                                    <Link to="https://www.instagram.com/" className="fs-16"><i className="bi bi-instagram"></i></Link>
-                                    <Link to="https://in.linkedin.com/" className="fs-16"><i className="bi bi-linkedin"></i></Link>
+                                    <Link to="https://www.facebook.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'facebook', location: 'about_us_team' })}><i className="bi bi-facebook"></i></Link>
+                                    <Link to="https://twitter.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'twitter', location: 'about_us_team' })}><i className="bi bi-twitter"></i></Link>
+                                    <Link to="https://www.instagram.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'instagram', location: 'about_us_team' })}><i className="bi bi-instagram"></i></Link>
+                                    <Link to="https://in.linkedin.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'linkedin', location: 'about_us_team' })}><i className="bi bi-linkedin"></i></Link>
                                 </div>
                             </div>
                         </div>
@@ -288,10 +289,10 @@ export const AboutUs = () => {
                                 <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Mohammad Yunus</div>
                                 <div className="designation fs-12 text-muted text-capitalize mb-2">Tech Lead (Mobile app and Website development)</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
-                                    <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
-                                    <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
-                                    <Link to="https://www.instagram.com/" className="fs-16"><i className="bi bi-instagram"></i></Link>
-                                    <Link to="https://in.linkedin.com/" className="fs-16"><i className="bi bi-linkedin"></i></Link>
+                                    <Link to="https://www.facebook.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'facebook', location: 'about_us_team' })}><i className="bi bi-facebook"></i></Link>
+                                    <Link to="https://twitter.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'twitter', location: 'about_us_team' })}><i className="bi bi-twitter"></i></Link>
+                                    <Link to="https://www.instagram.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'instagram', location: 'about_us_team' })}><i className="bi bi-instagram"></i></Link>
+                                    <Link to="https://in.linkedin.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'linkedin', location: 'about_us_team' })}><i className="bi bi-linkedin"></i></Link>
                                 </div>
                             </div>
                         </div>
@@ -315,10 +316,10 @@ export const AboutUs = () => {
                                 <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Vasheem Ahmad</div>
                                 <div className="designation fs-12 text-muted text-capitalize mb-2">Senior Web Designer (Expert in Website Design | Mobile-First Layouts)</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
-                                    <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
-                                    <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
-                                    <Link to="https://www.instagram.com/" className="fs-16"><i className="bi bi-instagram"></i></Link>
-                                    <Link to="https://in.linkedin.com/" className="fs-16"><i className="bi bi-linkedin"></i></Link>
+                                    <Link to="https://www.facebook.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'facebook', location: 'about_us_team' })}><i className="bi bi-facebook"></i></Link>
+                                    <Link to="https://twitter.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'twitter', location: 'about_us_team' })}><i className="bi bi-twitter"></i></Link>
+                                    <Link to="https://www.instagram.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'instagram', location: 'about_us_team' })}><i className="bi bi-instagram"></i></Link>
+                                    <Link to="https://in.linkedin.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'linkedin', location: 'about_us_team' })}><i className="bi bi-linkedin"></i></Link>
                                 </div>
                             </div>
                         </div>
@@ -337,10 +338,10 @@ export const AboutUs = () => {
                                 <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Shubham Chaudhari</div>
                                 <div className="designation fs-12 text-muted text-capitalize mb-2">Senior Software Engineer (Designated role is Full Stack Developer)</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
-                                    <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
-                                    <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
-                                    <Link to="https://www.instagram.com/" className="fs-16"><i className="bi bi-instagram"></i></Link>
-                                    <Link to="https://in.linkedin.com/" className="fs-16"><i className="bi bi-linkedin"></i></Link>
+                                    <Link to="https://www.facebook.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'facebook', location: 'about_us_team' })}><i className="bi bi-facebook"></i></Link>
+                                    <Link to="https://twitter.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'twitter', location: 'about_us_team' })}><i className="bi bi-twitter"></i></Link>
+                                    <Link to="https://www.instagram.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'instagram', location: 'about_us_team' })}><i className="bi bi-instagram"></i></Link>
+                                    <Link to="https://in.linkedin.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'linkedin', location: 'about_us_team' })}><i className="bi bi-linkedin"></i></Link>
                                 </div>
                             </div>
                         </div>
@@ -359,10 +360,10 @@ export const AboutUs = () => {
                                 <div className="name fs-16 fw-semibold text-black text-capitalize mb-1">Charul Budania</div>
                                 <div className="designation fs-12 text-muted text-capitalize mb-2">Software Engineer (Flutter Developer)</div>
                                 <div className="social-wrapper d-flex align-items-center justify-content-center gap-3 mt-2">
-                                    <Link to="https://www.facebook.com/" className="fs-16"><i className="bi bi-facebook"></i></Link>
-                                    <Link to="https://twitter.com/" className="fs-16"><i className="bi bi-twitter"></i></Link>
-                                    <Link to="https://www.instagram.com/" className="fs-16"><i className="bi bi-instagram"></i></Link>
-                                    <Link to="https://in.linkedin.com/" className="fs-16"><i className="bi bi-linkedin"></i></Link>
+                                    <Link to="https://www.facebook.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'facebook', location: 'about_us_team' })}><i className="bi bi-facebook"></i></Link>
+                                    <Link to="https://twitter.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'twitter', location: 'about_us_team' })}><i className="bi bi-twitter"></i></Link>
+                                    <Link to="https://www.instagram.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'instagram', location: 'about_us_team' })}><i className="bi bi-instagram"></i></Link>
+                                    <Link to="https://in.linkedin.com/" className="fs-16" onClick={() => trackClick('social_link_click', { platform: 'linkedin', location: 'about_us_team' })}><i className="bi bi-linkedin"></i></Link>
                                 </div>
                             </div>
                         </div>

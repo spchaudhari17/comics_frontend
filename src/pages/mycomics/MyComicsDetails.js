@@ -13,6 +13,7 @@ import {
 } from "react-bootstrap";
 import API from "../../API";
 import { Loader } from "../../lib/loader";
+import { trackClick, useScrollDepth } from "../../utility/analytics";
 
 const MyComicDetails = () => {
   const { id } = useParams();
@@ -35,6 +36,13 @@ const MyComicDetails = () => {
     };
     fetchComicDetails();
   }, [id]);
+
+  // GA: how much users scroll on the comic details screen
+  useScrollDepth("comic_details_screen", {
+    enabled: !loading && Boolean(comicData),
+    resetKey: id,
+    params: { comic_id: id },
+  });
 
   if (loading) return <Loader />;
   if (error) return <Alert variant="danger">{error}</Alert>;
@@ -134,7 +142,14 @@ const MyComicDetails = () => {
                   <Button
                     key={part._id}
                     variant={part._id === comic._id ? "primary" : "outline-primary"}
-                    onClick={() => navigate(`/my-comics-details/${part._id}`)}
+                    onClick={() => {
+                      trackClick("comic_details_part_click", {
+                        comic_id: comic._id,
+                        target_comic_id: part._id,
+                        part_number: part.partNumber,
+                      });
+                      navigate(`/my-comics-details/${part._id}`);
+                    }}
                   >
                     Part {part.partNumber}
                   </Button>

@@ -4,6 +4,17 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import API from "../../API";
 import { toast } from "react-toastify";
+import { trackEvent } from "../../utility/analytics";
+
+// GA: send "checkout_done" only once per Stripe session (avoids duplicates on re-render / refresh)
+const trackCheckoutDone = (sessionId, status) => {
+    try {
+        const key = `ga_checkout_done_${sessionId}`;
+        if (sessionStorage.getItem(key)) return;
+        sessionStorage.setItem(key, "1");
+    } catch (e) { /* ignore storage errors */ }
+    trackEvent("checkout_done", { transaction_id: sessionId, payment_status: status });
+};
 
 const CartSuccess = () => {
     const navigate = useNavigate();
@@ -35,11 +46,13 @@ const CartSuccess = () => {
                 console.log("📦 API Response:", res.data);
 
                 if (res.data.status === "success") {
+                    trackCheckoutDone(sessionId, "success");
                     setStatus("success");
                     toast.success("Payment successful!");
                     setTimeout(() => navigate("/my-account"), 2000);
 
                 } else if (res.data.status === "pending") {
+                    trackCheckoutDone(sessionId, "pending");
                     setStatus("pending");
                     toast.info("Payment is being processed...");
                     setTimeout(() => navigate("/my-account"), 3000);

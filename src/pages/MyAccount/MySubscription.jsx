@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Spinner, Alert, ProgressBar } from "react-bootstrap";
 import API from "../../API";
+import { trackClick, trackEvent } from "../../utility/analytics";
 
 export const PRICE_PLAN_MAP = {
   price_1UCNs7KGzJOFnjXy1VvfcTIo: "Starter",
@@ -41,21 +42,36 @@ const MySubscription = () => {
     : "";
 
   const handleCancelSubscription = async () => {
+    trackClick("cancel_subscription_confirm_click", { plan_name: planName || "" });
     try {
       setCancelLoading(true);
       await API.post("/subscription/cancel");
       setShowCancelModal(false);
 
+      // GA: backend accepted the cancel request
+      trackEvent("cancel_subscription_backend_confirmed", {
+        plan_name: planName || "",
+      });
+
       let attempts = 0;
       const interval = setInterval(async () => {
         const res = await API.get("/subscription/me");
         if (res.data.status === "to_cancel") {
+          // GA: backend shows subscription as cancelling
+          trackEvent("cancel_subscription_status_updated", {
+            plan_name: planName || "",
+            subscription_status: "to_cancel",
+          });
           setSubscription(res.data);
           clearInterval(interval);
         }
         if (++attempts > 10) clearInterval(interval);
       }, 1000);
     } catch (err) {
+      trackEvent("cancel_subscription_failed", {
+        plan_name: planName || "",
+        error_status: err.response?.status || "",
+      });
       alert(err.response?.data?.message || "Failed to cancel subscription");
     } finally {
       setCancelLoading(false);
@@ -301,7 +317,10 @@ const MySubscription = () => {
                 You'll keep access until the end of the billing period.
               </small>
             </div>
-            <Button variant="outline-danger" onClick={() => setShowCancelModal(true)}>
+            <Button variant="outline-danger" onClick={() => {
+              trackClick("cancel_subscription_click", { plan_name: planName || "" });
+              setShowCancelModal(true);
+            }}>
               Cancel Subscription
             </Button>
           </div>

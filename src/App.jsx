@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import AnalyticsTracker from "./components/AnalyticsTracker";
 
 // AOS Animation NPM
 import AOS from "aos";
@@ -91,6 +92,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
+        <AnalyticsTracker />
         {/* When redirect to any page, page should load from top */}
         <ScrollToTop />
 

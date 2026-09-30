@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import API from "../../API";
 import { Badge, Form } from "react-bootstrap";
 import { Loader } from "../../lib/loader";
+import { trackClick } from "../../utility/analytics";
 
 const TransactionHistory = () => {
     const [transactions, setTransactions] = useState([]);
@@ -188,6 +189,7 @@ const TransactionHistory = () => {
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="btn btn-sm btn-outline-primary"
+                                                onClick={() => trackClick("transaction_download_click", { transaction_type: txn.type || "" })}
                                             >
                                                 Download
                                             </a>

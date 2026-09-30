@@ -7,9 +7,17 @@ import MycardsDetails from "./MycardsDetails";
 import MyPurchases from "./MyPurchases";
 import TransactionHistory from "./TransactionHistory";
 import MySales from "./MySales";
+import { trackClick } from "../../utility/analytics";
 
 const MyAccount = () => {
   const [activeTab, setActiveTab] = useState("subscription");
+
+  // GA: my profile tab buttons
+  const openTab = (tab) => {
+    trackClick("my_profile_tab_click", { tab_name: tab });
+    trackClick(`my_profile_${tab}_click`);
+    setActiveTab(tab);
+  };
 
   return (
     <div className="container my-5">
@@ -23,7 +31,7 @@ const MyAccount = () => {
           <li className="nav-item">
             <button
               className={`nav-link ${activeTab === "subscription" ? "active" : ""}`}
-              onClick={() => setActiveTab("subscription")}
+              onClick={() => openTab("subscription")}
             >
               My Subscription
             </button>
@@ -32,7 +40,7 @@ const MyAccount = () => {
           <li className="nav-item">
             <button
               className={`nav-link ${activeTab === "history" ? "active" : ""}`}
-              onClick={() => setActiveTab("history")}
+              onClick={() => openTab("history")}
             >
               Subscription History
             </button>
@@ -41,7 +49,7 @@ const MyAccount = () => {
           <li className="nav-item">
             <button
               className={`nav-link ${activeTab === "invoices" ? "active" : ""}`}
-              onClick={() => setActiveTab("invoices")}
+              onClick={() => openTab("invoices")}
             >
               Invoices
             </button>
@@ -50,7 +58,7 @@ const MyAccount = () => {
           <li className="nav-item">
             <button
               className={`nav-link ${activeTab === "manage" ? "active" : ""}`}
-              onClick={() => setActiveTab("manage")}
+              onClick={() => openTab("manage")}
             >
               Manage Cards
             </button>
@@ -59,7 +67,7 @@ const MyAccount = () => {
           <li className="nav-item">
             <button
               className={`nav-link ${activeTab === "purchases" ? "active" : ""}`}
-              onClick={() => setActiveTab("purchases")}
+              onClick={() => openTab("purchases")}
             >
               My Purchases
             </button>
@@ -68,7 +76,7 @@ const MyAccount = () => {
           <li className="nav-item">
             <button
               className={`nav-link ${activeTab === "transactions" ? "active" : ""}`}
-              onClick={() => setActiveTab("transactions")}
+              onClick={() => openTab("transactions")}
             >
               Transactions
             </button>
@@ -77,7 +85,7 @@ const MyAccount = () => {
           <li className="nav-item">
             <button
               className={`nav-link ${activeTab === "sales" ? "active" : ""}`}
-              onClick={() => setActiveTab("sales")}
+              onClick={() => openTab("sales")}
             >
               My Sales
             </button>

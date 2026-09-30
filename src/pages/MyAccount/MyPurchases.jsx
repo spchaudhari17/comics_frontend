@@ -3,6 +3,7 @@ import API from "../../API";
 import { Button } from "react-bootstrap";
 import { Loader } from "../../lib/loader";
 import { useNavigate } from "react-router-dom";
+import { trackClick } from "../../utility/analytics";
 
 const MyPurchases = () => {
     const [purchases, setPurchases] = useState([]);
@@ -84,9 +85,10 @@ const MyPurchases = () => {
                                         {/* Action */}
                                         <Button
                                             variant="primary"
-                                            onClick={() =>
-                                                navigate(`/purchasedBundleDetails/${bundle._id}`)
-                                            }
+                                            onClick={() => {
+                                                trackClick("my_purchases_open_click", { bundle_id: bundle._id });
+                                                navigate(`/purchasedBundleDetails/${bundle._id}`);
+                                            }}
                                         >
                                             Open
                                         </Button>

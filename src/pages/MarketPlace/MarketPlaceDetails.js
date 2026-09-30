@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import API from "../../API";
 import { Button } from "react-bootstrap";
 import { toast } from "react-toastify";
+import { trackClick } from "../../utility/analytics";
 
 const MarketPlaceDetails = () => {
     const { id } = useParams();
@@ -87,6 +88,7 @@ const MarketPlaceDetails = () => {
     };
 
     const handleAddToCart = async () => {
+        trackClick("add_to_cart_click", { bundle_id: id, location: "marketplace_details" });
         try {
             const res = await API.post("/user/addToCart", { bundleId: id });
 

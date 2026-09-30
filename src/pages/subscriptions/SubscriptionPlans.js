@@ -4,6 +4,7 @@ import "./SubscriptionPlans.css";
 import API from "../../API";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "react-bootstrap";
+import { trackClickWithUser } from "../../utility/analytics";
 
 // Standard Plans (Original)
 const standardPlans = [
@@ -227,7 +228,15 @@ const SubscriptionPlans = () => {
         return Boolean(user && token);
     };
 
-    const handleSelectPlan = async (priceId, planType) => {
+    const handleSelectPlan = async (priceId, planType, planName = "") => {
+        trackClickWithUser("subscribe_click", {
+            plan_name: planName,
+            price_id: priceId,
+            plan_type: planType,
+            action: currentSub ? "change_plan" : "subscribe",
+            has_current_subscription: Boolean(currentSub),
+        });
+
         if (!isLoggedIn()) {
             navigate("/login");
             return;
@@ -274,6 +283,12 @@ const SubscriptionPlans = () => {
     };
 
     const handleUpgrade = async (mode) => {
+        trackClickWithUser("subscribe_change_confirm_click", {
+            price_id: selectedPriceId,
+            plan_type: selectedPlanType,
+            change_mode: mode,
+            change_direction: upgradeMode,
+        });
         try {
             setUpgradeLoading(true);
             if (mode === "immediate") {
@@ -299,6 +314,13 @@ const SubscriptionPlans = () => {
     };
 
     const handleFoundingTeacherPurchase = async () => {
+        trackClickWithUser("subscribe_click", {
+            plan_name: "Founding Teacher",
+            plan_type: "founding_teacher",
+            action: "subscribe",
+            has_current_subscription: Boolean(currentSub),
+        });
+
         if (!isLoggedIn()) {
             navigate("/login");
             return;
@@ -436,7 +458,7 @@ const SubscriptionPlans = () => {
                                 <div className="mt-auto">
                                     <Button
                                         className={`btn ${isFounding ? 'btn-success' : 'btn-custom'} w-100 py-2`}
-                                        onClick={() => handleSelectPlan(plan.priceId, isFounding ? "bundle" : "bundle")}
+                                        onClick={() => handleSelectPlan(plan.priceId, isFounding ? "bundle" : "bundle", plan.name)}
                                         disabled={!canSelectPlan}
                                     >
                                         {/* {currentSub ? "Change Plan" : "Select Plan"} */}
@@ -822,7 +844,7 @@ const SubscriptionPlans = () => {
                                         <div className="mt-auto">
                                             <Button
                                                 className="btn btn-custom w-100 py-2"
-                                                onClick={() => handleSelectPlan(plan.priceId, "dashboard")}
+                                                onClick={() => handleSelectPlan(plan.priceId, "dashboard", plan.name)}
                                             >
                                                 {currentSub ? "Change Plan" : "Select Plan"}
                                             </Button>

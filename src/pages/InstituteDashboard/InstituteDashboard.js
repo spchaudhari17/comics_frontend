@@ -8,6 +8,7 @@ import API from "../../API";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
+import { trackClick } from "../../utility/analytics";
 
 const InstituteDashboard = () => {
   const navigate = useNavigate();
@@ -109,6 +110,7 @@ const InstituteDashboard = () => {
 
   // Upload Excel
   const handleUpload = async () => {
+    trackClick("dashboard_import_submit_click", { class_filter: selectedClass });
     if (!file) return toast.warning("Please select an Excel file first.");
 
     setUploading(true);
@@ -145,6 +147,7 @@ const InstituteDashboard = () => {
 
   // Reset Password
   const handleResetPassword = async (studentId) => {
+    trackClick("dashboard_reset_password_click");
     if (!window.confirm("Reset this student's password?")) return;
 
     try {
@@ -166,6 +169,7 @@ const InstituteDashboard = () => {
   // Remove student(s) - UPDATED: using remove APIs
   const handleRemoveConfirm = async () => {
     if (!removeTarget) return;
+    trackClick("dashboard_remove_confirm_click", { remove_type: removeType, class_filter: selectedClass });
     setRemoving(true);
 
     try {
@@ -223,6 +227,7 @@ const InstituteDashboard = () => {
 
   // addSingleStudent
   const handleAddStudent = async () => {
+    trackClick("dashboard_add_student_submit_click");
     // Validate all fields
     const requiredFields = ['School', 'Year', 'Class', 'Section', 'RollNo'];
     const missingField = requiredFields.find(field => !newStudent[field]?.trim());
@@ -255,6 +260,7 @@ const InstituteDashboard = () => {
   };
 
   const handleAddStudentByUsername = async () => {
+    trackClick("dashboard_add_by_username_submit_click");
     if (!studentUsername.trim()) {
       return toast.warning("Please enter student username");
     }
@@ -300,6 +306,7 @@ const InstituteDashboard = () => {
 
   // Excel Download
   const handleDownloadExcel = () => {
+    trackClick("dashboard_download_click", { class_filter: selectedClass, total_students: students.length });
     if (!filteredStudents.length) return toast.warning("No students to download!");
 
     const exportData = filteredStudents.map((s, i) => ({
@@ -356,7 +363,10 @@ const InstituteDashboard = () => {
           <Button
             size="sm"
             variant="primary"
-            onClick={() => navigate(`/activity/${row._id}`)}
+            onClick={() => {
+              trackClick("dashboard_view_learning_activity_click");
+              navigate(`/activity/${row._id}`);
+            }}
             title="View learning activity"
           >
             <i className="bi bi-graph-up-arrow"></i>
@@ -375,6 +385,7 @@ const InstituteDashboard = () => {
             size="sm"
             variant="danger"
             onClick={() => {
+              trackClick("dashboard_remove_user_click");
               setRemoveTarget(row._id);
               setRemoveType('single');
               setShowRemoveModal(true);
@@ -492,7 +503,10 @@ const InstituteDashboard = () => {
 
                 <Button
                   variant="primary"
-                  onClick={() => setShowImportModal(true)}
+                  onClick={() => {
+                    trackClick("dashboard_import_click");
+                    setShowImportModal(true);
+                  }}
                   disabled={isStudentLimitReached}
                   title={isStudentLimitReached ? "Student limit reached" : "Import students from Excel"}
                 >
@@ -501,7 +515,10 @@ const InstituteDashboard = () => {
 
                 <Button
                   variant="dark"
-                  onClick={() => setShowAddModal(true)}
+                  onClick={() => {
+                    trackClick("dashboard_add_click");
+                    setShowAddModal(true);
+                  }}
                   disabled={isStudentLimitReached}
                   title={isStudentLimitReached ? "Student limit reached" : "Add new student"}
                 >
@@ -510,7 +527,10 @@ const InstituteDashboard = () => {
 
                 <Button
                   variant="info"
-                  onClick={() => setShowAddByUsernameModal(true)}
+                  onClick={() => {
+                    trackClick("dashboard_add_by_username_click");
+                    setShowAddByUsernameModal(true);
+                  }}
                   title="Add existing student by username"
                 >
                   <i className="bi bi-person-check"></i> Add by Username
@@ -523,6 +543,7 @@ const InstituteDashboard = () => {
                 <Button
                   variant="danger"
                   onClick={() => {
+                    trackClick("dashboard_remove_all_click", { class_filter: selectedClass, total_students: students.length });
                     setRemoveTarget("all");
                     setRemoveType('all');
                     setShowRemoveModal(true);

@@ -1,5 +1,6 @@
 // import React, { useEffect, useState } from "react";
 // import API from "../../API";
+import { trackClick } from "../../utility/analytics";
 
 // const Invoices = () => {
 //   const [invoices, setInvoices] = useState([]);
@@ -328,6 +329,7 @@ const Invoices = () => {
                             target="_blank"
                             rel="noreferrer"
                             className="btn btn-sm btn-outline-primary download-btn"
+                            onClick={() => trackClick("invoice_download_click", { invoice_status: inv.status || "", view: "table" })}
                           >
                             ⬇ Download
                           </a>
@@ -384,6 +386,7 @@ const Invoices = () => {
                         target="_blank"
                         rel="noreferrer"
                         className="btn btn-sm btn-outline-primary download-btn"
+                        onClick={() => trackClick("invoice_download_click", { invoice_status: inv.status || "", view: "card" })}
                       >
                         ⬇ Download
                       </a>

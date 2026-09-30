@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import API from "../../API";
 import { Loader } from "../../lib/loader";
 import { Button, Nav } from "react-bootstrap";
+import { trackClick, useScrollDepth } from "../../utility/analytics";
 
 const ComicReader = () => {
     const { comicId } = useParams();
@@ -30,6 +31,19 @@ const ComicReader = () => {
         fetchComic();
     }, [comicId]);
 
+    // GA: reader tab buttons (reader / faq / facts / quiz / hardcore)
+    const handleTabSelect = (tab) => {
+        trackClick("comic_reader_tab_click", { tab_name: tab === "hard" ? "hardcore" : tab, comic_id: comicId });
+        setActiveTab(tab);
+    };
+
+    // GA: scroll depth per reader tab (quiz screen etc.)
+    useScrollDepth(`comic_reader_${activeTab === "hard" ? "hardcore" : activeTab}`, {
+        enabled: !loading,
+        resetKey: `${comicId}_${activeTab}`,
+        params: { comic_id: comicId },
+    });
+
     if (loading) return <Loader />;
 
     return (
@@ -38,7 +52,7 @@ const ComicReader = () => {
             <h4 className="fw-bold mb-3">{data?.comic?.title}</h4>
 
             {/* 🔥 Tabs */}
-            <Nav variant="tabs" activeKey={activeTab} onSelect={setActiveTab}>
+            <Nav variant="tabs" activeKey={activeTab} onSelect={handleTabSelect}>
                 <Nav.Item><Nav.Link eventKey="reader">📖 Reader</Nav.Link></Nav.Item>
                 <Nav.Item><Nav.Link eventKey="faq">❓ FAQ</Nav.Link></Nav.Item>
                 <Nav.Item><Nav.Link eventKey="facts">💡 Facts</Nav.Link></Nav.Item>

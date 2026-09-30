@@ -2,6 +2,7 @@ import React from 'react';
 import "./Home.scss";
 import { Row, Col, Button } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
+import { trackClick, trackClickWithUser } from '../../utility/analytics';
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -23,14 +24,17 @@ export const Home = () => {
                 <div className="sub-title text-white text-opacity-75">AI-generated educational comics and quizzes for schools, teachers, <br /> and curious minds.</div>
                 <div className="btn-wrapper d-flex flex-column flex-sm-row flex-sm-wrap gap-2 gap-md-3 mt-4 pt-md-3">
                   <Button variant='primary' className="btn-custom"
-                    onClick={() => navigate(userInfo ? "/create-comic" : "/login")}>
+                    onClick={() => {
+                      trackClickWithUser("create_comics_click", { location: "home_hero" });
+                      navigate(userInfo ? "/create-comic" : "/login");
+                    }}>
                     <i class="bi bi-easel"></i> Make Comics from Concepts
                   </Button>
-                  <Button variant='warning' className="btn-custom" onClick={() => navigate("/our-library")}>
+                  <Button variant='warning' className="btn-custom" onClick={() => { trackClick("home_browse_library_click", { location: "home_hero" }); navigate("/our-library"); }}>
                     <i className="bi bi-folder2-open fs-18">
                     </i> Browse Our Library
                   </Button>
-                  <Button variant='success' className="btn-custom" onClick={() => window.open('https://play.google.com/store/apps/details?id=com.av.kridemy', '_blank')}>
+                  <Button variant='success' className="btn-custom" onClick={() => { trackClick('download_app_click', { store: 'google_play', location: 'home_hero' }); window.open('https://play.google.com/store/apps/details?id=com.av.kridemy', '_blank'); }}>
                     <i className="bi bi-google-play"></i> Download App
                   </Button>
                 </div>
@@ -304,7 +308,7 @@ export const Home = () => {
                   {/* <Link to={'https://appstoreconnect.apple.com/login'} target="_blank">
                     <img src={require('../../assets/images/app-store.png')} className="img-fluid" alt='App Store' />
                   </Link> */}
-                  <Link className="text-md-end" to={'https://play.google.com/store/apps/details?id=com.av.kridemy'} target="_blank">
+                  <Link className="text-md-end" to={'https://play.google.com/store/apps/details?id=com.av.kridemy'} target="_blank" onClick={() => trackClick('download_app_click', { store: 'google_play', location: 'home_bottom' })}>
                     <img src={require('../../assets/images/play-store.png')} className="img-fluid" alt='Google Play Store' />
                   </Link>
                 </div>

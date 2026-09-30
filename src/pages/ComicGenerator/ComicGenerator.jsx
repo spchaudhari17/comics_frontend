@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ComicGenerator.scss';
 import Select from "react-select";
@@ -9,6 +9,7 @@ import { setComicStatus } from '../../redux/actions/comicActions';
 import { useLocation } from "react-router-dom";
 import forComics from "../../assets/images/forComics.jpeg";
 import forImage from "../../assets/images/forImage.jpeg";
+import { trackClick, trackClickWithUser, trackEvent, useScrollDepth } from "../../utility/analytics";
 
 const Stepper = ({ currentStep }) => {
   const steps = [
@@ -172,6 +173,53 @@ export const ComicGenerator = () => {
 
   // Quiz and FAQ states
   const [selectedImage, setSelectedImage] = useState(null);
+
+  // ---------------- Google Analytics ----------------
+  // JSON script edit tracking (fires "json_script_edited" once per comic part)
+  const scriptEditedRef = useRef(false);
+  const originalPromptRef = useRef("");
+  const thumbnailsRef = useRef(null);
+
+  useEffect(() => {
+    scriptEditedRef.current = false;
+    originalPromptRef.current = "";
+  }, [comicId]);
+
+  const isComicScreen = step === 2 && comicImages?.length > 0;
+  const isQuizScreen = step === 4;
+
+  // Comic screen (preview) - page scroll + thumbnails list scroll
+  useScrollDepth("create_comic_comic_screen", {
+    enabled: isComicScreen,
+    resetKey: comicId,
+    params: { comic_id: comicId || "" },
+  });
+  useScrollDepth("create_comic_comic_thumbnails", {
+    containerRef: thumbnailsRef,
+    enabled: isComicScreen,
+    resetKey: comicId,
+    params: { comic_id: comicId || "" },
+  });
+
+  // Quiz screen (step 4) - page scroll
+  useScrollDepth("create_comic_quiz_screen", {
+    enabled: isQuizScreen,
+    resetKey: comicId,
+    params: { comic_id: comicId || "" },
+  });
+
+  const handleScriptChange = (value) => {
+    if (!scriptEditedRef.current) {
+      scriptEditedRef.current = true;
+      originalPromptRef.current = prompt;
+      trackEvent("json_script_edited", {
+        comic_id: comicId || "",
+        part_number: currentPart?.part || "",
+        page_path: window.location.pathname,
+      });
+    }
+    setPrompt(value);
+  };
 
   // Initialize data
   useEffect(() => {
@@ -345,6 +393,14 @@ export const ComicGenerator = () => {
   // STEP 1: Story → Prompt
   const handleConvertToPrompt = async (e) => {
     e.preventDefault();
+    trackClickWithUser("convert_to_prompt_click", {
+      subject: subjectsList.find(s => s._id === subject)?.name || subject,
+      grade: classGrade,
+      country: selectedCountry?.value || "",
+      theme: themeType,
+      style: styleType,
+      show_text_in_image: showTextInImage,
+    });
     setErrorMsg("");
     setLoadingPrompt(true);
 
@@ -387,6 +443,11 @@ export const ComicGenerator = () => {
 
   // Load part data - AAPKE PURANE CODE JAISA
   const loadPartData = async (part) => {
+    trackClick("generate_comic_part_click", {
+      comic_id: part.comicId,
+      part_number: part.part,
+      total_parts: parts.length,
+    });
     try {
       const { data } = await API.get(`/user/comics/${part.comicId}`);
 
@@ -556,6 +617,12 @@ export const ComicGenerator = () => {
   // ✅ IMPROVED: STEP 2: Prompt → Images with REALISTIC PROGRESS
   const handleGenerateComic = async (e) => {
     e.preventDefault();
+    trackClick("generate_my_comic_click", {
+      comic_id: comicId || "",
+      part_number: currentPart?.part || "",
+      script_edited: scriptEditedRef.current,
+      script_changed: scriptEditedRef.current && prompt !== originalPromptRef.current,
+    });
     setErrorMsg("");
     setLoadingImage(true);
     setIsGenerating(true);
@@ -672,6 +739,11 @@ export const ComicGenerator = () => {
 
   // STEP 3: Generate PDF
   const handleGeneratePDF = async () => {
+    trackClick("generate_comic_pdf_click", {
+      comic_id: comicId || "",
+      part_number: currentPart?.part || "",
+      total_images: comicImages?.length || 0,
+    });
     setErrorMsg("");
     setPublishing(true);
     try {
@@ -689,6 +761,11 @@ export const ComicGenerator = () => {
 
   // ✅ UPDATED: STEP 4: Final Publish with AUTO-REDIRECT to MyComics
   const handlePublish = () => {
+    trackClickWithUser("final_submit_click", {
+      comic_id: comicId || "",
+      part_number: currentPart?.part || "",
+      total_parts: parts.length,
+    });
     dispatch(setComicStatus(comicId, "published"));
 
     // mark current part as completed
@@ -1035,7 +1112,10 @@ export const ComicGenerator = () => {
                       </tbody>
                     </table>
                     <div className="d-flex gap-3 mt-3">
-                      <Button variant="primary" onClick={() => navigate("/my-comics")}>
+                      <Button variant="primary" onClick={() => {
+                        trackClick("go_to_my_comics_click", { location: "create_comic_existing_comic" });
+                        navigate("/my-comics");
+                      }}>
                         Go to My Comics
                       </Button>
                     </div>
@@ -1212,7 +1292,7 @@ export const ComicGenerator = () => {
                         as="textarea"
                         rows={10}
                         value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
+                        onChange={(e) => handleScriptChange(e.target.value)}
                         spellCheck={false}
                         style={{ fontFamily: "monospace" }}
                       />
@@ -1326,7 +1406,7 @@ export const ComicGenerator = () => {
                 ) : (
                   <>
                     <Row>
-                      <Col md={3} className="border-end pe-3" style={{ maxHeight: "500px", overflowY: "auto" }}>
+                      <Col md={3} className="border-end pe-3" style={{ maxHeight: "500px", overflowY: "auto" }} ref={thumbnailsRef}>
                         <div className="d-flex flex-column gap-2">
 
                           {comicImages.map((img, idx) => (
@@ -1606,7 +1686,10 @@ export const ComicGenerator = () => {
                   </Button>
 
 
-                  <Button variant="outline-primary" onClick={() => navigate("/my-comics")}>
+                  <Button variant="outline-primary" onClick={() => {
+                    trackClick("go_to_my_comics_click", { location: "create_comic_publish_step", comic_id: comicId || "" });
+                    navigate("/my-comics");
+                  }}>
                     Go to My Comics
                   </Button>
                 </div>

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"; // 🔥 Import navigate
 import API from "../../API";
 import { Badge, Button } from "react-bootstrap"; // 🔥 Import Button
 import { Loader } from "../../lib/loader";
+import { trackClick } from "../../utility/analytics";
 
 const MySales = () => {
     const [sales, setSales] = useState([]);
@@ -36,6 +37,7 @@ const MySales = () => {
 
     // 🔥 Redirect to TeacherDashboard
     const goToDashboard = () => {
+        trackClick("my_sales_go_to_dashboard_click", { total_sales: totalSales });
         navigate("/teacherDashboard");
     };
 

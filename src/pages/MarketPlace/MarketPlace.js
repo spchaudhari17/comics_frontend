@@ -3,6 +3,7 @@ import API from "../../API";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { trackClick } from "../../utility/analytics";
 
 const MarketPlace = () => {
     const navigate = useNavigate();
@@ -109,10 +110,12 @@ const MarketPlace = () => {
     }, []);
 
     const handleView = (bundle) => {
+        trackClick("marketplace_view_bundle_click", { bundle_id: bundle._id, price: bundle.price || 0 });
         navigate(`/marketPlaceDetails/${bundle._id}`);
     };
 
     const handleAddToCart = async (bundleId) => {
+        trackClick("add_to_cart_click", { bundle_id: bundleId, location: "marketplace_list" });
         try {
             const res = await API.post("/user/addToCart", { bundleId });
 

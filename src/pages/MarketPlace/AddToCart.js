@@ -3,6 +3,7 @@ import { Button } from "react-bootstrap";
 import API from "../../API";
 import { Loader } from "../../lib/loader";
 import { useNavigate } from "react-router-dom";
+import { trackClick, trackClickWithUser } from "../../utility/analytics";
 
 const AddToCart = () => {
     const [cartItems, setCartItems] = useState([]);
@@ -35,6 +36,12 @@ const AddToCart = () => {
 
     // ❌ Remove from cart
     const handleRemove = async (bundleId) => {
+        const removedItem = cartItems.find((item) => item.bundleId?._id === bundleId);
+        trackClick("cart_remove_click", {
+            bundle_id: bundleId,
+            price: removedItem?.bundleId?.price || 0,
+            cart_count: cartItems.length,
+        });
         try {
             await API.delete(`/user/cart/${bundleId}`);
 
@@ -69,6 +76,12 @@ const AddToCart = () => {
 
     // 🚀 Checkout (simple)
     const handleCheckout = async () => {
+        trackClickWithUser("checkout_click", {
+            cart_count: cartItems.length,
+            value: totalPrice,
+            currency: "USD",
+            bundle_ids: cartItems.map((item) => item.bundleId?._id).filter(Boolean).join(","),
+        });
         try {
             const res = await API.post("/user/createCheckoutSessionforCart");
 

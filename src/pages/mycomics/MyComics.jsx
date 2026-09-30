@@ -6,6 +6,7 @@ import { Loader } from "../../lib/loader";
 import API from "../../API";
 import dataTableCustomStyles from "../../assets/styles/dataTableCustomStyles";
 import { NoDataComponent } from "../../components/NoDataComponent";
+import { trackClick, trackClickWithUser, useScrollDepth } from "../../utility/analytics";
 
 const MyComics = () => {
   const navigate = useNavigate();
@@ -31,6 +32,9 @@ const MyComics = () => {
     description: "",
     price: ""
   });
+
+  // GA: how much users scroll on My Comics screen
+  useScrollDepth("my_comics_screen", { enabled: !loading, params: { total_comics: comics.length } });
 
   // FETCH SUBSCRIPTION
   useEffect(() => {
@@ -97,6 +101,11 @@ const MyComics = () => {
   const approvedCount = approvedComics.length;
 
   const handleResume = (comic) => {
+    trackClick("my_comics_resume_click", {
+      comic_id: comic._id,
+      series_id: comic.seriesId || "",
+      comic_status: comic.comicStatus || "",
+    });
     if (comic.seriesId) {
       navigate("/create-comic", {
         state: { comicId: comic._id, seriesId: comic.seriesId },
@@ -131,6 +140,11 @@ const MyComics = () => {
   };
 
   const handleSelectComic = (comicId) => {
+    trackClick("bundle_comic_select_click", {
+      comic_id: comicId,
+      action: selectedComics.includes(comicId) ? "unselect" : "select",
+      selected_count: selectedComics.includes(comicId) ? selectedComics.length - 1 : selectedComics.length + 1,
+    });
     if (selectedComics.includes(comicId)) {
       setSelectedComics(selectedComics.filter(id => id !== comicId));
     } else {
@@ -140,6 +154,7 @@ const MyComics = () => {
 
   const handleSelectAllApproved = () => {
     const approvedIds = approvedComics.map(c => c._id);
+    trackClick("bundle_comic_select_all_click", { approved_count: approvedIds.length });
     if (selectedComics.length === approvedIds.length && approvedIds.every(id => selectedComics.includes(id))) {
       setSelectedComics([]);
     } else {
@@ -148,6 +163,11 @@ const MyComics = () => {
   };
 
   const handleCreateBundle = async () => {
+    trackClickWithUser("bundle_popup_create_click", {
+      selected_count: selectedComics.length,
+      concept: selectedConcept || "",
+      bundle_price: Number(bundleData.price) || 0,
+    });
     try {
       if (!bundleData.title || !bundleData.price) {
         alert("Title and price are required");
@@ -318,7 +338,10 @@ const MyComics = () => {
       name: "Details",
       cell: row => (
         <div className="d-flex gap-2">
-          <Button size="sm" variant="outline-info" onClick={() => navigate(`/my-comics-details/${row._id}`)} >
+          <Button size="sm" variant="outline-info" onClick={() => {
+            trackClick("my_comics_details_click", { comic_id: row._id });
+            navigate(`/my-comics-details/${row._id}`);
+          }} >
             <i className="bi bi-eye me-1"></i> Details
           </Button>
         </div>
@@ -502,7 +525,10 @@ const MyComics = () => {
                     variant="primary"
                     className="px-4 position-relative"
                     disabled={selectedComics.length === 0 || !allSameConcept}
-                    onClick={() => setShowBundleModal(true)}
+                    onClick={() => {
+                      trackClick("create_bundle_click", { selected_count: selectedComics.length, concept: selectedConcept || "" });
+                      setShowBundleModal(true);
+                    }}
                     title={!allSameConcept && selectedComics.length > 1 ? "All selected comics must belong to the same concept" : ""}
                   >
                     <i className="bi bi-collection me-2"></i>

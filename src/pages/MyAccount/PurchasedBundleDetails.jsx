@@ -4,6 +4,7 @@ import API from "../../API";
 import { Loader } from "../../lib/loader";
 import { Button } from "react-bootstrap";
 import { toast } from "react-toastify";
+import { trackClick } from "../../utility/analytics";
 
 const PurchasedBundleDetails = () => {
     const { id } = useParams();
@@ -273,9 +274,10 @@ const PurchasedBundleDetails = () => {
                                         <Button
                                             variant="primary"
                                             size="sm"
-                                            onClick={() =>
-                                                navigate(`/comic-reader/${comic._id}`)
-                                            }
+                                            onClick={() => {
+                                                trackClick("purchased_comic_read_click", { comic_id: comic._id });
+                                                navigate(`/comic-reader/${comic._id}`);
+                                            }}
                                         >
                                             <i className="bi bi-eye me-1"></i>
                                             Read
@@ -285,9 +287,10 @@ const PurchasedBundleDetails = () => {
                                             <Button
                                                 variant="outline-secondary"
                                                 size="sm"
-                                                onClick={() =>
-                                                    window.open(comic.pdfUrl, "_blank")
-                                                }
+                                                onClick={() => {
+                                                    trackClick("purchased_comic_pdf_click", { comic_id: comic._id });
+                                                    window.open(comic.pdfUrl, "_blank");
+                                                }}
                                             >
                                                 <i className="bi bi-file-pdf me-1"></i>
                                                 PDF

@@ -7,6 +7,7 @@ import { Loader } from "../../lib/loader";
 import API from "../../API";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { trackClick } from "../../utility/analytics";
 
 
 const ParentManageChildren = () => {
@@ -137,7 +138,10 @@ const ParentManageChildren = () => {
                     <Button
                         size="sm"
                         variant="primary"
-                        onClick={() => navigate(`/activity/${row._id}`)}
+                        onClick={() => {
+                            trackClick("parent_view_activity_click");
+                            navigate(`/activity/${row._id}`);
+                        }}
                     >
                         <i className="bi bi-bar-chart"></i> View Activity
                     </Button>

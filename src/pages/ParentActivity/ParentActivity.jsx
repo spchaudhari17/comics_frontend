@@ -7,6 +7,7 @@ import API from "../../API";
 import "./ParentActivity.css";
 import { useParams } from "react-router-dom";
 import { Loader } from "../../lib/loader";
+import { trackClick } from "../../utility/analytics";
 
 const ParentActivity = () => {
     const navigate = useNavigate();
@@ -133,6 +134,7 @@ const ParentActivity = () => {
     // ⭐ Modal Open
     const openModal = (row) => {
         const comicId = row.comicId;
+        trackClick("student_activity_view_click", { comic_id: comicId || "" });
 
         setModalData({
             ...row,

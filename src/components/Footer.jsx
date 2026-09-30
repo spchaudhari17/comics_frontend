@@ -1,6 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Row, Col, Form, InputGroup, Button } from 'react-bootstrap';
+import { trackClick, trackClickWithUser } from '../utility/analytics';
+
+const trackSocial = (platform) => trackClick('social_link_click', { platform, location: 'footer' });
+const trackFooterLink = (linkName) => trackClick('footer_link_click', { link_name: linkName, location: 'footer' });
 
 export const Footer = () => {
     return (
@@ -16,11 +20,11 @@ export const Footer = () => {
                                 <span className="fw-semibold">Kridemy</span> an AI-powered education platform that helps you learn and teach complex academic concepts through fun.
                             </div>
                             <div className="social-sec d-flex align-items-center justify-content-center justify-content-md-start gap-3 mb-2">
-                                <Link to={"https://x.com/kridemy"} target='_blank'><img src={require('../assets/images/x.png')} className="img-fluid" alt="X" /></Link>
-                                <Link to={"https://www.instagram.com/kridemy/"} target='_blank'><img src={require('../assets/images/instagram.png')} className="img-fluid" alt="Instagram" /></Link>
-                                <Link to={"https://www.linkedin.com/company/kridemy/"} target='_blank'><img src={require('../assets/images/linkedin.png')} className="img-fluid" alt="Linkedin" /></Link>
-                                <Link to={"https://www.tiktok.com/@kridemy?lang=en"} target='_blank'><img src={require('../assets/images/tiktok.png')} className="img-fluid" alt="Tiktok" /></Link>
-                                <Link to={"https://www.reddit.com/r/Kridemy/"} target='_blank'><img src={require('../assets/images/reddit.png')} className="img-fluid" alt="Reddit" /></Link>
+                                <Link to={"https://x.com/kridemy"} target='_blank' onClick={() => trackSocial('x')}><img src={require('../assets/images/x.png')} className="img-fluid" alt="X" /></Link>
+                                <Link to={"https://www.instagram.com/kridemy/"} target='_blank' onClick={() => trackSocial('instagram')}><img src={require('../assets/images/instagram.png')} className="img-fluid" alt="Instagram" /></Link>
+                                <Link to={"https://www.linkedin.com/company/kridemy/"} target='_blank' onClick={() => trackSocial('linkedin')}><img src={require('../assets/images/linkedin.png')} className="img-fluid" alt="Linkedin" /></Link>
+                                <Link to={"https://www.tiktok.com/@kridemy?lang=en"} target='_blank' onClick={() => trackSocial('tiktok')}><img src={require('../assets/images/tiktok.png')} className="img-fluid" alt="Tiktok" /></Link>
+                                <Link to={"https://www.reddit.com/r/Kridemy/"} target='_blank' onClick={() => trackSocial('reddit')}><img src={require('../assets/images/reddit.png')} className="img-fluid" alt="Reddit" /></Link>
                             </div>
                         </div>
                     </Col>
@@ -28,12 +32,12 @@ export const Footer = () => {
                         <div className="wrapper text-center text-md-start">
                             <div className="menu-header fs-5 fw-bold text-warning mb-3">Quick Links</div>
                             <ul className="nav flex-column gap-2">
-                                <li className="nav-item"><Link to={'/'} className="nav-link">Home</Link></li>
-                                <li className="nav-item"><Link to={'/about'} className="nav-link">About Us</Link></li>
-                                <li className="nav-item"><Link to={'/contact'} className="nav-link">Contact Us</Link></li>
-                                <li className="nav-item"><Link to={'/faq'} className="nav-link">FAQ</Link></li>
-                                <li className="nav-item"><Link to={'/privacy-policy'} className="nav-link">Privacy Policy</Link></li>
-                                <li className="nav-item"><Link to={'/terms-and-condition'} className="nav-link">Terms and Condition</Link></li>
+                                <li className="nav-item"><Link to={'/'} className="nav-link" onClick={() => trackFooterLink('home')}>Home</Link></li>
+                                <li className="nav-item"><Link to={'/about'} className="nav-link" onClick={() => trackFooterLink('about_us')}>About Us</Link></li>
+                                <li className="nav-item"><Link to={'/contact'} className="nav-link" onClick={() => trackFooterLink('contact_us')}>Contact Us</Link></li>
+                                <li className="nav-item"><Link to={'/faq'} className="nav-link" onClick={() => trackFooterLink('faq')}>FAQ</Link></li>
+                                <li className="nav-item"><Link to={'/privacy-policy'} className="nav-link" onClick={() => trackFooterLink('privacy_policy')}>Privacy Policy</Link></li>
+                                <li className="nav-item"><Link to={'/terms-and-condition'} className="nav-link" onClick={() => trackFooterLink('terms_and_conditions')}>Terms and Condition</Link></li>
                             </ul>
                         </div>
                     </Col>
@@ -41,11 +45,11 @@ export const Footer = () => {
                         <div className="wrapper text-center text-md-start">
                             <div className="menu-header fs-5 fw-bold text-warning mb-3">Explore</div>
                             <ul className="nav flex-column gap-2">
-                                <li className="nav-item"><Link to={'/our-library'} className="nav-link">Library</Link></li>
-                                <li className="nav-item"><Link to={'/create-comic'} className="nav-link">Create Comic</Link></li>
-                                <li className="nav-item"><Link to={'/for-student'} className="nav-link">For Student</Link></li>
-                                <li className="nav-item"><Link to={'/for-teacher'} className="nav-link">For Teacher</Link></li>
-                                <li className="nav-item"><Link to={'/for-parent'} className="nav-link">For Parent</Link></li>
+                                <li className="nav-item"><Link to={'/our-library'} className="nav-link" onClick={() => trackFooterLink('library')}>Library</Link></li>
+                                <li className="nav-item"><Link to={'/create-comic'} className="nav-link" onClick={() => { trackFooterLink('create_comic'); trackClickWithUser('create_comics_click', { location: 'footer' }); }}>Create Comic</Link></li>
+                                <li className="nav-item"><Link to={'/for-student'} className="nav-link" onClick={() => trackFooterLink('for_student')}>For Student</Link></li>
+                                <li className="nav-item"><Link to={'/for-teacher'} className="nav-link" onClick={() => trackFooterLink('for_teacher')}>For Teacher</Link></li>
+                                <li className="nav-item"><Link to={'/for-parent'} className="nav-link" onClick={() => trackFooterLink('for_parent')}>For Parent</Link></li>
                             </ul>
                         </div>
                     </Col>
@@ -57,7 +61,7 @@ export const Footer = () => {
                                     {/* <Form.Label controlId="subscribe">Subscribe Now</Form.Label> */}
                                     <InputGroup>
                                         <Form.Control type="email" placeholder="Write your email here.." required />
-                                        <Button variant="primary">Subscribe</Button>
+                                        <Button variant="primary" onClick={() => trackClickWithUser('newsletter_subscribe_click', { location: 'footer' })}>Subscribe</Button>
                                     </InputGroup>
                                 </Form.Group>
                             </Form>

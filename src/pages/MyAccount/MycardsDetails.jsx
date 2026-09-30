@@ -216,6 +216,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Alert, Spinner, Badge } from "react-bootstrap";
 import API from "../../API";
+import { trackClickWithUser } from "../../utility/analytics";
 
 const MycardsDetails = () => {
     const [card, setCard] = useState(null);
@@ -253,6 +254,7 @@ const MycardsDetails = () => {
 
     // 🔥 Update Card
     const handleUpdateCard = async () => {
+        trackClickWithUser("manage_payment_method_click", { has_card: Boolean(card) });
         try {
             setUpdateLoading(true);
             const res = await API.post("/subscription/update-card");
@@ -266,6 +268,9 @@ const MycardsDetails = () => {
 
     // 🔥 Connect Bank
     const handleConnectBank = async () => {
+        trackClickWithUser("manage_stripe_account_click", {
+            action: payout?.isActive ? "open_stripe_dashboard" : "connect_stripe_account",
+        });
         try {
             setBankLoading(true);
 

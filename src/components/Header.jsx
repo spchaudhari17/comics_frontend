@@ -7,6 +7,7 @@ import LogoutIcon from "../assets/images/icons/log-out.svg";
 import { logoutUser } from "../redux/actions/userActions";
 import { useDispatch, useSelector } from "react-redux";
 import API from "../API";
+import { trackClick, trackClickWithUser } from "../utility/analytics";
 
 
 export const Header = () => {
@@ -92,6 +93,7 @@ export const Header = () => {
                       title="marketPlace"
                       className="nav-link p-0"
                       style={activeStyle('/market-Place')}
+                      onClick={() => trackClick("header_marketplace_click", { location: "header" })}
                     >
                       MarketPlace
                     </Link>
@@ -102,7 +104,10 @@ export const Header = () => {
                       <button
                         className="nav-link p-0 btn btn-link text-decoration-none"
                         style={activeStyle('/subscriptions-plan')}
-                        onClick={() => navigate("/subscriptions-plan")}
+                        onClick={() => {
+                          trackClick("header_subscription_plan_click", { location: "header" });
+                          navigate("/subscriptions-plan");
+                        }}
                       >
                         Pricing
                       </button>
@@ -115,7 +120,10 @@ export const Header = () => {
                         className="nav-link p-0 btn btn-link text-decoration-none"
                         title="create-comic"
                         style={activeStyle('/create-comic')}
-                        onClick={() => navigate("/create-comic")}
+                        onClick={() => {
+                          trackClickWithUser("create_comics_click", { location: "header" });
+                          navigate("/create-comic");
+                        }}
                       >
                         Create Comics
                       </button>
@@ -160,7 +168,7 @@ export const Header = () => {
 
                 {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
                   <li className="nav-item">
-                    <Link to={'/my-comics'} title="my-comics" className="nav-link p-0" style={activeStyle('/my-comics')}>
+                    <Link to={'/my-comics'} title="my-comics" className="nav-link p-0" style={activeStyle('/my-comics')} onClick={() => trackClick("header_my_comics_click", { location: "header" })}>
                       <i className="bi bi-book-half"></i>
                     </Link>
                   </li>
@@ -175,7 +183,7 @@ export const Header = () => {
                 )}
 
                 <li className="nav-item">
-                  <Link to={'/cart'} title="cart" className="nav-link p-0" style={activeStyle('/cart')}>
+                  <Link to={'/cart'} title="cart" className="nav-link p-0" style={activeStyle('/cart')} onClick={() => trackClick("my_cart_click", { location: "header", cart_count: cartCount })}>
                     <div className="position-relative">
                       <i className="bi bi-cart-fill fs-5"></i>
                       {cartCount > 0 && (
