@@ -35,18 +35,44 @@ export const trackPageView = (path) => {
     });
 };
 
+/** Reads the payload of the login JWT (no verification - only used to find the user id). */
+const getTokenPayload = () => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token || token.split(".").length !== 3) return null;
+        const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+        const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+        return JSON.parse(window.atob(padded));
+    } catch (e) {
+        return null;
+    }
+};
+
+const pickId = (obj) => {
+    if (!obj || typeof obj !== "object") return "";
+    const id = obj._id || obj.id || obj.userId || obj.user_id || obj.uid
+        || (obj.user && (obj.user._id || obj.user.id)) || "";
+    return id ? String(id) : "";
+};
+
 /** Logged-in user info that is safe to send to GA (no PII). */
 export const getAnalyticsUser = () => {
     if (!isBrowser()) return {};
     try {
         const raw = localStorage.getItem("user");
         const user = raw ? JSON.parse(raw) : null;
-        if (!user) return { is_logged_in: false };
-        return {
-            is_logged_in: true,
-            app_user_id: user._id || user.id || "",
-            user_role: user.userType || "",
-        };
+        const tokenPayload = getTokenPayload();
+        if (!user && !tokenPayload) return { is_logged_in: false };
+
+        const userId = pickId(user) || pickId(tokenPayload);
+        const role = (user && (user.userType || (user.user && user.user.userType)))
+            || (tokenPayload && (tokenPayload.userType || tokenPayload.role)) || "";
+
+        const data = { is_logged_in: true, user_role: role || "unknown" };
+        // GA drops empty params, so only send the id when we actually have one
+        if (userId) data.app_user_id = userId;
+        else data.app_user_id_missing = true;
+        return data;
     } catch (e) {
         return { is_logged_in: false };
     }
