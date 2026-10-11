@@ -1,14 +1,52 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import API from "../../API";
-import { Button } from "react-bootstrap";
+import { Button, Pagination, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { trackClick } from "../../utility/analytics";
 
+const PAGE_SIZE = 9;
+
+const SORT_OPTIONS = [
+    { value: "latest", label: "Newest" },
+    { value: "oldest", label: "Oldest" },
+    { value: "price_low", label: "Price: Low to High" },
+    { value: "price_high", label: "Price: High to Low" },
+    { value: "rating", label: "Top Rated" },
+    { value: "title", label: "Title A-Z" },
+];
+
+const EMPTY_FACETS = { subjects: [], concepts: [], grades: [], countries: [] };
+
+const uniqueValues = (items) => [...new Set(items.filter(Boolean))];
+
+// Comic ki countries (array ya purana single field)
+const getComicCountries = (comic) =>
+    Array.isArray(comic.countries) && comic.countries.length > 0
+        ? comic.countries
+        : comic.country
+            ? [comic.country]
+            : [];
+
+// 1 … 4 5 [6] 7 8 … 20
+const getPageItems = (current, total) => {
+    const pages = new Set([1, total, current - 1, current, current + 1]);
+    const sorted = [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b);
+
+    const items = [];
+    sorted.forEach((p, i) => {
+        if (i > 0 && p - sorted[i - 1] > 1) items.push("ellipsis-" + p);
+        items.push(p);
+    });
+    return items;
+};
+
 const MarketPlace = () => {
     const navigate = useNavigate();
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user"))
+        : null;
 
     const [marketplaceStatus, setMarketplaceStatus] = useState({
         purchasedBundleIds: [],
@@ -17,11 +55,13 @@ const MarketPlace = () => {
 
     const [bundles, setBundles] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [facets, setFacets] = useState(EMPTY_FACETS);
 
     // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        limit: 9,
+        limit: PAGE_SIZE,
         totalItems: 0,
         totalPages: 0,
         hasNextPage: false,
@@ -30,30 +70,49 @@ const MarketPlace = () => {
 
     // Filters
     const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [subjectFilter, setSubjectFilter] = useState("");
     const [conceptFilter, setConceptFilter] = useState("");
     const [gradeFilter, setGradeFilter] = useState("");
     const [countryFilter, setCountryFilter] = useState("");
     const [sort, setSort] = useState("latest");
 
-    // Debounced search
-    const [debouncedSearch, setDebouncedSearch] = useState("");
+    // Facets (dropdown options) sirf ek baar mangwao
+    const facetsLoadedRef = useRef(false);
+    // Purani request ka response nayi request ke baad aaye to ignore
+    const requestIdRef = useRef(0);
 
+    // 🔍 Search debounce (search badle to page 1)
     useEffect(() => {
-        const t = setTimeout(() => setDebouncedSearch(search), 500);
+        const t = setTimeout(() => {
+            const value = search.trim();
+            if (value !== debouncedSearch) {
+                setDebouncedSearch(value);
+                setCurrentPage(1);
+            }
+        }, 500);
         return () => clearTimeout(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
+
+    // Filter badle to page 1 se
+    const updateFilter = (setter) => (e) => {
+        setter(e.target.value);
+        setCurrentPage(1);
+    };
 
     // -----------------------------
     // Fetch Marketplace (server-side)
     // -----------------------------
-    const fetchMarketplace = async (page = 1) => {
+    const fetchMarketplace = useCallback(async () => {
+        const requestId = ++requestIdRef.current;
+
         try {
             setLoading(true);
 
             const params = {
-                page,
-                limit: pagination.limit,
+                page: currentPage,
+                limit: PAGE_SIZE,
                 sort
             };
 
@@ -62,52 +121,66 @@ const MarketPlace = () => {
             if (conceptFilter) params.conceptId = conceptFilter;
             if (gradeFilter) params.grade = gradeFilter;
             if (countryFilter) params.country = countryFilter;
+            if (!facetsLoadedRef.current) params.includeFacets = 1;
 
             const res = await API.get("/user/getMarketplace", { params });
 
+            if (requestId !== requestIdRef.current) return;
+
             setBundles(res.data.data || []);
             if (res.data.pagination) {
-                setPagination((prev) => ({
-                    ...prev,
-                    ...res.data.pagination
-                }));
+                setPagination(res.data.pagination);
+            }
+            if (res.data.facets) {
+                setFacets(res.data.facets);
+                facetsLoadedRef.current = true;
             }
         } catch (err) {
+            if (requestId !== requestIdRef.current) return;
             console.error("Error fetching marketplace:", err);
             toast.error("Failed to load marketplace ❌");
         } finally {
-            setLoading(false);
+            if (requestId === requestIdRef.current) setLoading(false);
         }
-    };
+    }, [currentPage, debouncedSearch, subjectFilter, conceptFilter, gradeFilter, countryFilter, sort]);
 
     useEffect(() => {
-        fetchMarketplace(1);
-        // eslint-disable-next-line
-    }, [debouncedSearch, subjectFilter, conceptFilter, gradeFilter, countryFilter, sort]);
+        fetchMarketplace();
+    }, [fetchMarketplace]);
 
     // -----------------------------
     // Fetch user's marketplace status
     // -----------------------------
-    const fetchMarketplaceStatus = async () => {
-        if (!user?._id) return;
-
-        try {
-            const res = await API.post("/user/marketplace-status", {
-                userId: user._id
-            });
-
-            if (!res.data.error) {
-                setMarketplaceStatus(res.data);
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    };
-
     useEffect(() => {
+        const fetchMarketplaceStatus = async () => {
+            if (!user?._id) return;
+
+            try {
+                const res = await API.post("/user/marketplace-status", {
+                    userId: user._id
+                });
+
+                if (!res.data.error) {
+                    setMarketplaceStatus({
+                        purchasedBundleIds: (res.data.purchasedBundleIds || []).map(String),
+                        ownBundleIds: (res.data.ownBundleIds || []).map(String)
+                    });
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        };
+
         fetchMarketplaceStatus();
         // eslint-disable-next-line
     }, []);
+
+    const goToPage = (page) => {
+        if (page < 1 || page > pagination.totalPages || page === currentPage) return;
+        trackClick("marketplace_page_click", { page });
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
     const handleView = (bundle) => {
         trackClick("marketplace_view_bundle_click", { bundle_id: bundle._id, price: bundle.price || 0 });
@@ -125,60 +198,26 @@ const MarketPlace = () => {
                 toast.warning(res.data.message);
             }
         } catch (err) {
-            toast.error("Error adding to cart ❌");
+            toast.error(err.response?.data?.message || "Error adding to cart ❌");
         }
     };
 
-    // -----------------------------
-    // Filter option lists (derived from current page bundles)
-    // NOTE: Since filtering is now server-side, these dropdowns will
-    // only show options from the current page. If you want global
-    // options, you'd need a separate "facets" API endpoint.
-    // -----------------------------
-    const subjects = useMemo(() => {
-        return [
-            ...new Set(
-                bundles.flatMap((bundle) =>
-                    bundle.comics?.map((comic) => comic.subjectId?.name || comic.subject).filter(Boolean) || []
-                )
-            )
-        ].filter(Boolean);
-    }, [bundles]);
-
-    const concepts = useMemo(() => {
-        return [
-            ...new Set(
-                bundles.flatMap((bundle) =>
-                    bundle.comics?.map((comic) => comic.conceptId?.name || comic.concept).filter(Boolean) || []
-                )
-            )
-        ].filter(Boolean);
-    }, [bundles]);
-
-    const grades = useMemo(() => {
-        return [
-            ...new Set(
-                bundles.flatMap((bundle) => bundle.comics?.map((c) => c.grade).filter(Boolean) || [])
-            )
-        ].filter(Boolean);
-    }, [bundles]);
-
-    const countries = useMemo(() => {
-        return [
-            ...new Set(
-                bundles.flatMap((bundle) => bundle.comics?.map((c) => c.country).filter(Boolean) || [])
-            )
-        ].filter(Boolean);
-    }, [bundles]);
-
     const handleResetFilters = () => {
         setSearch("");
+        setDebouncedSearch("");
         setSubjectFilter("");
         setConceptFilter("");
         setGradeFilter("");
         setCountryFilter("");
         setSort("latest");
+        setCurrentPage(1);
     };
+
+    const hasActiveFilters =
+        search || subjectFilter || conceptFilter || gradeFilter || countryFilter || sort !== "latest";
+
+    const firstItem = (pagination.currentPage - 1) * pagination.limit + 1;
+    const lastItem = Math.min(pagination.currentPage * pagination.limit, pagination.totalItems);
 
     return (
         <div className="comic-library-page pb-5">
@@ -199,9 +238,9 @@ const MarketPlace = () => {
             <div className="container-xl mt-5">
                 {/* Filters */}
                 <div className="row g-3 mb-4 align-items-center">
-                    <div className="col-md-3">
+                    <div className="col-lg-3 col-md-6">
                         <input
-                            type="text"
+                            type="search"
                             className="form-control"
                             placeholder="Search bundles, teachers, comics..."
                             value={search}
@@ -209,66 +248,67 @@ const MarketPlace = () => {
                         />
                     </div>
 
-                    <div className="col-md-2">
+                    <div className="col-lg-2 col-md-6">
                         <select
                             className="form-select"
                             value={subjectFilter}
-                            onChange={(e) => setSubjectFilter(e.target.value)}
+                            onChange={updateFilter(setSubjectFilter)}
                         >
                             <option value="">All Subjects</option>
-                            {subjects.map((s) => (
-                                <option key={s} value={s}>{s}</option>
+                            {facets.subjects.map((s) => (
+                                <option key={s.value} value={s.value}>{s.label}</option>
                             ))}
                         </select>
                     </div>
 
-                    <div className="col-md-2">
+                    <div className="col-lg-2 col-md-4">
                         <select
                             className="form-select"
                             value={conceptFilter}
-                            onChange={(e) => setConceptFilter(e.target.value)}
+                            onChange={updateFilter(setConceptFilter)}
                         >
                             <option value="">All Concepts</option>
-                            {concepts.map((c) => (
-                                <option key={c} value={c}>{c}</option>
+                            {facets.concepts.map((c) => (
+                                <option key={c.value} value={c.value}>{c.label}</option>
                             ))}
                         </select>
                     </div>
 
-                    <div className="col-md-2">
+                    <div className="col-lg-1 col-md-4">
                         <select
                             className="form-select"
                             value={gradeFilter}
-                            onChange={(e) => setGradeFilter(e.target.value)}
+                            onChange={updateFilter(setGradeFilter)}
                         >
                             <option value="">All Grades</option>
-                            {grades.map((g) => (
+                            {facets.grades.map((g) => (
                                 <option key={g} value={g}>{g}</option>
                             ))}
                         </select>
                     </div>
 
-                    <div className="col-md-2">
+                    <div className="col-lg-2 col-md-4">
                         <select
                             className="form-select"
                             value={countryFilter}
-                            onChange={(e) => setCountryFilter(e.target.value)}
+                            onChange={updateFilter(setCountryFilter)}
                         >
                             <option value="">All Countries</option>
-                            {countries.map((c) => (
+                            {facets.countries.map((c) => (
                                 <option key={c} value={c}>{c}</option>
                             ))}
                         </select>
                     </div>
 
-                    <div className="col-md-1 d-flex gap-2">
+                    <div className="col-lg-2 col-md-6">
                         <select
                             className="form-select"
                             value={sort}
-                            onChange={(e) => setSort(e.target.value)}
+                            onChange={updateFilter(setSort)}
                         >
-                            <option value="latest">New</option>
-                            <option value="oldest">Old</option>
+                            {SORT_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -276,51 +316,54 @@ const MarketPlace = () => {
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <div className="text-muted small">
                         {pagination.totalItems > 0 && (
-                            <>Showing page {pagination.currentPage} of {pagination.totalPages} • {pagination.totalItems} bundles</>
+                            <>Showing {firstItem}–{lastItem} of {pagination.totalItems} bundles</>
                         )}
                     </div>
-                    <Button variant="outline-secondary" size="sm" onClick={handleResetFilters}>
-                        Reset Filters
-                    </Button>
+                    {hasActiveFilters && (
+                        <Button variant="outline-secondary" size="sm" onClick={handleResetFilters}>
+                            Reset Filters
+                        </Button>
+                    )}
                 </div>
 
                 {loading ? (
-                    <p className="text-center py-5">Loading bundles...</p>
+                    <div className="text-center py-5">
+                        <Spinner className="me-2" size="sm" />
+                        Loading bundles...
+                    </div>
                 ) : bundles.length === 0 ? (
-                    <p className="text-center py-5">No bundles found.</p>
+                    <div className="text-center py-5">
+                        <p className="mb-3">No bundles found.</p>
+                        {hasActiveFilters && (
+                            <Button variant="outline-primary" size="sm" onClick={handleResetFilters}>
+                                Clear filters
+                            </Button>
+                        )}
+                    </div>
                 ) : (
                     <>
                         <div className="row gy-5">
                             {bundles.map((bundle) => {
-                                const isPurchased = marketplaceStatus.purchasedBundleIds.includes(bundle._id);
-                                const isOwnBundle = marketplaceStatus.ownBundleIds.includes(bundle._id);
+                                const isPurchased = marketplaceStatus.purchasedBundleIds.includes(String(bundle._id));
+                                const isOwnBundle = marketplaceStatus.ownBundleIds.includes(String(bundle._id));
 
-                                const subjectNames = [
-                                    ...new Set(
-                                        bundle.comics?.map((c) => c.subjectId?.name || c.subject).filter(Boolean) || []
-                                    )
-                                ];
+                                const comics = bundle.comics || [];
 
-                                const conceptNames = [
-                                    ...new Set(
-                                        bundle.comics?.map((c) => c.conceptId?.name || c.concept).filter(Boolean) || []
-                                    )
-                                ];
+                                const subjectNames = uniqueValues(comics.map((c) => c.subjectId?.name || c.subject));
+                                const conceptNames = uniqueValues(comics.map((c) => c.conceptId?.name || c.concept));
+                                const gradeNames = uniqueValues(comics.map((c) => c.grade));
 
-                                const gradeNames = [
-                                    ...new Set(bundle.comics?.map((c) => c.grade).filter(Boolean) || [])
-                                ];
-
-                                const countryNames = [
-                                    ...new Set(bundle.comics?.map((c) => c.country).filter(Boolean) || [])
-                                ];
+                                const allCountryCodes = uniqueValues(comics.flatMap(getComicCountries));
+                                const countryLabel = allCountryCodes.includes("ALL")
+                                    ? "🌍 All Countries"
+                                    : allCountryCodes.join(", ");
 
                                 return (
                                     <div key={bundle._id} className="col-lg-4 col-md-6">
                                         <div className="bg-white h-100 border border-primary rounded-4 shadow-sm overflow-hidden d-flex flex-column">
                                             <img
                                                 src={
-                                                    bundle.comics?.[0]?.thumbnail ||
+                                                    comics[0]?.thumbnail ||
                                                     "https://via.placeholder.com/400x250?text=Bundle"
                                                 }
                                                 alt={bundle.title}
@@ -359,17 +402,24 @@ const MarketPlace = () => {
                                                     </div>
                                                 )}
 
-                                                {countryNames.length > 0 && (
+                                                {countryLabel && (
                                                     <div className="info mb-1">
                                                         <span className="fw-semibold text-success">Country:</span>{" "}
-                                                        {countryNames.join(", ")}
+                                                        {countryLabel}
                                                     </div>
                                                 )}
 
                                                 <div className="info mb-1">
                                                     <span className="fw-semibold text-info">Total Comics:</span>{" "}
-                                                    {bundle.comics?.length}
+                                                    {comics.length}
                                                 </div>
+
+                                                {bundle.totalRatings > 0 && (
+                                                    <div className="info mb-1">
+                                                        <span className="fw-semibold text-warning">Rating:</span>{" "}
+                                                        ⭐ {bundle.averageRating} ({bundle.totalRatings})
+                                                    </div>
+                                                )}
 
                                                 <div className="info mb-3">
                                                     <span className="fw-semibold text-success">Price:</span>{" "}
@@ -386,9 +436,9 @@ const MarketPlace = () => {
                                                     </Button>
 
                                                     {isOwnBundle ? (
-                                                        <Button variant="secondary" disabled>Your Bundle</Button>
+                                                        <Button variant="secondary" size="sm" disabled>Your Bundle</Button>
                                                     ) : isPurchased ? (
-                                                        <Button variant="success" disabled>Purchased</Button>
+                                                        <Button variant="success" size="sm" disabled>Purchased</Button>
                                                     ) : (
                                                         <Button
                                                             variant="success"
@@ -409,26 +459,31 @@ const MarketPlace = () => {
 
                         {/* Pagination */}
                         {pagination.totalPages > 1 && (
-                            <div className="d-flex justify-content-center align-items-center gap-3 mt-5">
-                                <Button
-                                    variant="outline-primary"
-                                    disabled={!pagination.hasPrevPage || loading}
-                                    onClick={() => fetchMarketplace(pagination.currentPage - 1)}
-                                >
-                                    ← Prev
-                                </Button>
-
-                                <span className="fw-semibold">
-                                    Page {pagination.currentPage} / {pagination.totalPages}
-                                </span>
-
-                                <Button
-                                    variant="outline-primary"
-                                    disabled={!pagination.hasNextPage || loading}
-                                    onClick={() => fetchMarketplace(pagination.currentPage + 1)}
-                                >
-                                    Next →
-                                </Button>
+                            <div className="d-flex justify-content-center mt-5">
+                                <Pagination className="mb-0">
+                                    <Pagination.Prev
+                                        disabled={!pagination.hasPrevPage || loading}
+                                        onClick={() => goToPage(currentPage - 1)}
+                                    />
+                                    {getPageItems(currentPage, pagination.totalPages).map((item) =>
+                                        typeof item === "string" ? (
+                                            <Pagination.Ellipsis key={item} disabled />
+                                        ) : (
+                                            <Pagination.Item
+                                                key={item}
+                                                active={item === currentPage}
+                                                disabled={loading}
+                                                onClick={() => goToPage(item)}
+                                            >
+                                                {item}
+                                            </Pagination.Item>
+                                        )
+                                    )}
+                                    <Pagination.Next
+                                        disabled={!pagination.hasNextPage || loading}
+                                        onClick={() => goToPage(currentPage + 1)}
+                                    />
+                                </Pagination>
                             </div>
                         )}
                     </>

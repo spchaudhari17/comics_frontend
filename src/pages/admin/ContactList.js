@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Badge, Form, Button, Modal } from "react-bootstrap";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Badge, Form, Button, Modal, Spinner, Alert } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import dataTableCustomStyles from "../../assets/styles/dataTableCustomStyles";
 import { NoDataComponent } from "../../components/NoDataComponent";
@@ -7,12 +7,25 @@ import { Loader } from "../../lib/loader";
 import API from "../../API";
 import { toast } from "react-toastify";
 
+const DEFAULT_SORT = { sortBy: "createdAt", order: "desc" };
 
 const ContactList = () => {
+  // ---------------- List data ----------------
   const [contacts, setContacts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [totalRows, setTotalRows] = useState(0);
+  const [stats, setStats] = useState({ total: 0, roles: [] });
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // ---------------- Pagination / search / filter / sort ----------------
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [sort, setSort] = useState(DEFAULT_SORT);
 
   // View Modal state
   const [showViewModal, setShowViewModal] = useState(false);
@@ -23,57 +36,97 @@ const ContactList = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  // Purani request ka response nayi request ke baad aaye to ignore
+  const requestIdRef = useRef(0);
 
+  // DataTable ko kisi page pe le jao (filter/sort change, delete ke baad)
+  const goToPage = (page) => {
+    setCurrentPage(page);
+    setResetPaginationToggle((prev) => !prev);
+  };
 
-  // Fetch contacts
-  const fetchContacts = async () => {
+  // 📥 Fetch contacts (server-side pagination)
+  const fetchContacts = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
     try {
-      setLoading(true);
+      setTableLoading(true);
       setError("");
-      const { data } = await API.get("/user/contacts");
+
+      const params = {
+        page: currentPage,
+        limit: perPage,
+        sortBy: sort.sortBy,
+        order: sort.order,
+      };
+      if (debouncedSearch) params.search = debouncedSearch;
+      if (roleFilter) params.role = roleFilter;
+
+      const { data } = await API.get("/user/contacts", { params });
+
+      if (requestId !== requestIdRef.current) return;
 
       if (data.success) {
-        setContacts(data.contacts);
+        setContacts(data.contacts || []);
+        setTotalRows(data.total || 0);
+        setStats(data.stats || { total: 0, roles: [] });
       } else {
         setError("Failed to fetch contacts");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong");
+      if (requestId !== requestIdRef.current) return;
+      setError(err.response?.data?.message || err.response?.data?.error || "Something went wrong");
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) {
+        setTableLoading(false);
+        setInitialLoading(false);
+      }
     }
-  };
+  }, [currentPage, perPage, debouncedSearch, roleFilter, sort]);
 
   useEffect(() => {
     fetchContacts();
-  }, []);
+  }, [fetchContacts]);
 
-  // Filter contacts by name, email or role
-  const filteredContacts = contacts.filter((c) => {
-    const searchTerm = search.toLowerCase();
-    return (
-      (c.name && c.name.toLowerCase().includes(searchTerm)) ||
-      (c.email && c.email.toLowerCase().includes(searchTerm)) ||
-      (c.role && c.role.toLowerCase().includes(searchTerm))
-    );
-  });
+  // 🔍 Search debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const value = search.trim();
+      if (value !== debouncedSearch) {
+        setDebouncedSearch(value);
+        goToPage(1);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
-  // Delete confirm
+  // ↕️ Column sort (poore data pe, backend se)
+  const handleSort = (column, direction) => {
+    if (!column?.sortField) return;
+    setSort({ sortBy: column.sortField, order: direction });
+    goToPage(1);
+  };
+
+  // 🗑️ Delete confirm
   const handleDeleteConfirm = async () => {
     if (!deleteId) return;
     try {
       setDeleting(true);
       await API.delete(`/user/contact/${deleteId}`);
-      setContacts((prev) => prev.filter((c) => c._id !== deleteId));
 
       toast.success("Contact deleted successfully!");
-
       setShowDeleteModal(false);
+
+      // Page ka aakhri contact delete hua to pichhle page pe jao
+      if (contacts.length === 1 && currentPage > 1) {
+        goToPage(currentPage - 1);
+      } else {
+        fetchContacts();
+      }
     } catch (err) {
       toast.error(
-        err.response?.data?.message || "Failed to delete contact"
+        err.response?.data?.message || err.response?.data?.error || "Failed to delete contact"
       );
     } finally {
       setDeleting(false);
@@ -81,7 +134,7 @@ const ContactList = () => {
     }
   };
 
-  // Table columns
+  // Table columns (sortField = backend ka sortBy)
   const columns = [
     {
       name: "#",
@@ -89,15 +142,19 @@ const ContactList = () => {
       width: "60px",
     },
     {
+      id: "name",
       name: "Name",
       selector: (row) => row.name,
       sortable: true,
+      sortField: "name",
       minWidth: "180px",
     },
     {
+      id: "email",
       name: "Email",
       selector: (row) => row.email,
       sortable: true,
+      sortField: "email",
       minWidth: "220px",
     },
     {
@@ -106,9 +163,11 @@ const ContactList = () => {
       minWidth: "150px",
     },
     {
+      id: "role",
       name: "Role",
       selector: (row) => row.role,
       sortable: true,
+      sortField: "role",
       minWidth: "150px",
       cell: (row) => <Badge bg="info">{row.role || "N/A"}</Badge>,
     },
@@ -119,10 +178,12 @@ const ContactList = () => {
       wrap: true,
     },
     {
+      id: "createdAt",
       name: "Submitted At",
-      selector: (row) => new Date(row.createdAt).toLocaleDateString(),
+      selector: (row) => new Date(row.createdAt).toLocaleString(),
       sortable: true,
-      minWidth: "150px",
+      sortField: "createdAt",
+      minWidth: "170px",
     },
     {
       name: "Actions",
@@ -154,50 +215,98 @@ const ContactList = () => {
     },
   ];
 
+  if (initialLoading) {
+    return (
+      <div className="contact-list-page pt-4 pb-3">
+        <div className="container-xl">
+          <Loader />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="contact-list-page pt-4 pb-3">
       <div className="container-xl">
-        {loading ? (
-          <Loader />
-        ) : error ? (
-          <p className="text-danger">{error}</p>
-        ) : (
-          <div className="info-wrapper bg-white rounded-4 p-3">
-            {/* Header Section */}
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <div className="main-heading">Contact Messages -</div>
-              <div className="fs-5 fw-semibold text-primary">
-                Total: {contacts.length}
-              </div>
-            </div>
-
-            {/* Search Box */}
-            <div className="mb-3">
-              <Form.Control
-                type="text"
-                placeholder="Search by name, email or role..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-
-            {/* Contacts Table */}
-            <div className="table-responsive table-custom-wrapper">
-              <DataTable
-                columns={columns}
-                data={filteredContacts}
-                highlightOnHover
-                responsive
-                pagination
-                customStyles={dataTableCustomStyles}
-                noDataComponent={<NoDataComponent />}
-                striped
-                onChangePage={(page) => setCurrentPage(page)}
-                onChangeRowsPerPage={(rows) => setPerPage(rows)}
-              />
+        <div className="info-wrapper bg-white rounded-4 p-3">
+          {/* Header Section */}
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="main-heading">Contact Messages</div>
+            <div className="fs-5 fw-semibold text-primary">
+              Total: {totalRows}
             </div>
           </div>
-        )}
+
+          {/* Role Filter + Search */}
+          <div className="mb-3 d-flex gap-2">
+            <Form.Select
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value);
+                goToPage(1);
+              }}
+              className="w-50"
+            >
+              <option value="">All Roles ({stats.total || 0})</option>
+              {stats.roles?.map((r) => (
+                <option key={r.role} value={r.role}>
+                  {r.role} ({r.count})
+                </option>
+              ))}
+              {/* Selected role abhi list me nahi (search ki wajah se) to bhi dikhe */}
+              {roleFilter && !stats.roles?.some((r) => r.role === roleFilter) && (
+                <option value={roleFilter}>{roleFilter} (0)</option>
+              )}
+            </Form.Select>
+
+            <Form.Control
+              type="search"
+              placeholder="Search by name, email, phone, role or message..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-50"
+            />
+          </div>
+
+          {error && <Alert variant="danger">{error}</Alert>}
+
+          {/* Contacts Table */}
+          <div className="table-responsive table-custom-wrapper">
+            <DataTable
+              columns={columns}
+              data={contacts}
+              highlightOnHover
+              responsive
+              striped
+              customStyles={dataTableCustomStyles}
+              noDataComponent={<NoDataComponent />}
+              progressPending={tableLoading}
+              progressComponent={
+                <div className="py-5 text-center">
+                  <Spinner />
+                </div>
+              }
+              // Sorting (server-side)
+              sortServer
+              onSort={handleSort}
+              defaultSortFieldId="createdAt"
+              defaultSortAsc={false}
+              // Pagination (server-side)
+              pagination
+              paginationServer
+              paginationTotalRows={totalRows}
+              paginationPerPage={perPage}
+              paginationRowsPerPageOptions={[10, 25, 50, 100]}
+              paginationDefaultPage={currentPage}
+              paginationResetDefaultPage={resetPaginationToggle}
+              onChangePage={(page) => setCurrentPage(page)}
+              onChangeRowsPerPage={(rows) => {
+                setPerPage(rows);
+                goToPage(1);
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* View Modal */}
@@ -212,7 +321,7 @@ const ContactList = () => {
               <p><strong>Email:</strong> {selectedContact.email}</p>
               <p><strong>Phone:</strong> {selectedContact.phone}</p>
               <p><strong>Role:</strong> {selectedContact.role}</p>
-              <p><strong>Message:</strong> {selectedContact.message}</p>
+              <p style={{ whiteSpace: "pre-wrap" }}><strong>Message:</strong> {selectedContact.message}</p>
               <p><strong>Submitted At:</strong> {new Date(selectedContact.createdAt).toLocaleString()}</p>
             </div>
           )}
@@ -220,7 +329,7 @@ const ContactList = () => {
       </Modal>
 
       {/* Delete Modal */}
-      <Modal show={showDeleteModal} centered onHide={() => setShowDeleteModal(false)}>
+      <Modal show={showDeleteModal} centered onHide={deleting ? undefined : () => setShowDeleteModal(false)}>
         <Modal.Body>
           <div className="content-wrapper text-center">
             <div
@@ -237,6 +346,7 @@ const ContactList = () => {
                 variant="secondary"
                 className="px-4 py-2"
                 onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
               >
                 Cancel
               </Button>

@@ -105,7 +105,15 @@ const PurchasedBundleDetails = () => {
         subject: firstComic?.series?.subjectName || firstComic?.subjectName || "N/A",
         concept: firstComic?.series?.conceptName || firstComic?.concept || "N/A",
         grade: firstComic?.series?.grade || "N/A",
-        country: firstComic?.series?.country || "N/A",
+        country: (() => {
+            const list = firstComic?.series?.countries?.length
+                ? firstComic.series.countries
+                : firstComic?.countries?.length
+                    ? firstComic.countries
+                    : [firstComic?.series?.country || firstComic?.country].filter(Boolean);
+            if (list.length === 0) return "N/A";
+            return list.includes("ALL") ? "🌍 All Countries" : list.join(", ");
+        })(),
         partNumber: firstComic?.series?.partNumber || null,
         theme: firstComic?.themeId?.name || "N/A",
         style: firstComic?.styleId?.name || "N/A",
@@ -257,7 +265,7 @@ const PurchasedBundleDetails = () => {
                         <div className="d-flex flex-wrap gap-4">
                             <div>
                                 <span className="fw-semibold text-muted">Price:</span>
-                                <span className="text-success fw-bold fs-5 ms-2">${bundle.price}</span>
+                                <span className="text-success fw-bold fs-5 ms-2">${bundle.amountPaid ?? bundle.price}</span>
                             </div>
                             <div>
                                 <span className="fw-semibold text-muted">Comics Included:</span>
@@ -267,6 +275,12 @@ const PurchasedBundleDetails = () => {
                                 <span className="fw-semibold text-muted">Status:</span>
                                 <span className="badge bg-success ms-2">Purchased</span>
                             </div>
+                            {bundle.purchaseDate && (
+                                <div>
+                                    <span className="fw-semibold text-muted">Purchased On:</span>
+                                    <span className="ms-2">{new Date(bundle.purchaseDate).toLocaleDateString()}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -314,7 +328,7 @@ const PurchasedBundleDetails = () => {
                                     <div className="d-flex align-items-center justify-content-between mt-auto">
                                         <div className="text-muted small">
                                             <i className="bi bi-file-earmark-text me-1"></i>
-                                            {comic.pages?.length || 0} pages
+                                            {comic.pageCount || 0} page{comic.pageCount === 1 ? "" : "s"}
                                         </div>
 
                                         <div className="d-flex gap-2">
@@ -335,9 +349,9 @@ const PurchasedBundleDetails = () => {
                                             <Button
                                                 variant="outline-secondary"
                                                 size="sm"
-                                                disabled={isDownloading || !comic.pages?.length}
+                                                disabled={isDownloading || !comic.pageCount}
                                                 onClick={() => handleDownloadPdf(comic, index)}
-                                                title={!comic.pages?.length ? "This comic has no pages yet" : "Download as PDF"}
+                                                title={!comic.pageCount ? "This comic has no pages yet" : "Download as PDF"}
                                             >
                                                 {isDownloading ? (
                                                     <>
