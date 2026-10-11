@@ -9,6 +9,17 @@ import { registerUser } from '../../redux/actions/userActions';
 import { clearError } from "../../redux/actions/userActions";
 import { toast } from "react-toastify";
 
+// Har naya user Teacher hi banega
+const USER_TYPE = "user";
+
+const initialFormData = {
+    firstname: '',
+    lastname: '',
+    email: '',
+    username: '',
+    countryCode: '+91',
+    mobileNumber: ''
+};
 
 export const SignUp = () => {
     const dispatch = useDispatch();
@@ -22,15 +33,7 @@ export const SignUp = () => {
     const [confirmPassVisible, setConfirmPassVisible] = useState(false);
     const [phone, setPhone] = useState('');
 
-    const [formData, setFormData] = useState({
-        firstname: '',
-        lastname: '',
-        email: '',
-        username: '',
-        userType: '',
-        countryCode: '+91',
-        mobileNumber: ''
-    });
+    const [formData, setFormData] = useState(initialFormData);
 
     useEffect(() => {
         dispatch(clearError());
@@ -64,19 +67,15 @@ export const SignUp = () => {
             //     navigate("/OtpVerification", { state: { email } });
             // }));
 
-            await dispatch(registerUser({ ...formData, password: newPassword }));
+            await dispatch(registerUser({
+                ...formData,
+                userType: USER_TYPE,
+                password: newPassword
+            }));
             // only redirect if registration succeeds
             navigate("/OtpVerification", { state: { email: formData.email } });
 
-            setFormData({
-                firstname: '',
-                lastname: '',
-                email: '',
-                username: '',
-                userType: '',
-                countryCode: '+91',
-                mobileNumber: ''
-            });
+            setFormData(initialFormData);
             setNewPassword('');
             setConfirmPassword('');
             setPhone('');
@@ -218,22 +217,6 @@ export const SignUp = () => {
                                                 : <i className="bi bi-eye-fill fs-16"></i>}
                                         </span>
                                     </div>
-                                </Form.Group>
-                            </Col>
-
-                            <Col md={6}>
-                                <Form.Group controlId="UserType">
-                                    <Form.Label>User Type<span className="text-danger">*</span></Form.Label>
-                                    <Form.Select
-                                        value={formData.userType}
-                                        onChange={(e) => setFormData({ ...formData, userType: e.target.value })}
-                                        required
-                                    >
-                                        <option value="" disabled>Select user type</option>
-                                        {/* <option value="student">Student</option> */}
-                                        <option value="user">Teacher</option>
-                                        <option value="parent">Parent</option>
-                                    </Form.Select>
                                 </Form.Group>
                             </Col>
                         </Row>

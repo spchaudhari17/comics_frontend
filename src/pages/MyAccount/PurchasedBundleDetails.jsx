@@ -6,12 +6,17 @@ import { Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { trackClick } from "../../utility/analytics";
 
+// Windows/Mac file names me ye characters allowed nahi
+const toFileName = (name) =>
+    (name || "comic").replace(/[\\/:*?"<>|]/g, "").trim() || "comic";
+
 const PurchasedBundleDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
     const [bundle, setBundle] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [downloadingId, setDownloadingId] = useState(null);
 
     const fetchBundleDetails = async () => {
         try {
@@ -43,6 +48,45 @@ const PurchasedBundleDetails = () => {
     useEffect(() => {
         if (id) fetchBundleDetails();
     }, [id]);
+
+    // 📥 PDF download
+    // Agar comic pe pdfUrl saved hai to wahi kholo, warna backend se PDF generate karwao
+    const handleDownloadPdf = async (comic, index) => {
+        trackClick("purchased_comic_pdf_click", { comic_id: comic._id });
+
+        if (comic.pdfUrl) {
+            window.open(comic.pdfUrl, "_blank");
+            return;
+        }
+
+        try {
+            setDownloadingId(comic._id);
+
+            const res = await API.get(`/user/comic-pdf/${comic._id}`, {
+                responseType: "blob",
+            });
+
+            const url = URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${toFileName(comic.title || `Part ${index + 1}`)}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        } catch (err) {
+            // responseType blob hai, isliye error message bhi blob me aata hai
+            let message = "Failed to download PDF";
+            try {
+                const text = await err.response?.data?.text();
+                message = JSON.parse(text).message || message;
+            } catch { /* ignore */ }
+            toast.error(message);
+        } finally {
+            setDownloadingId(null);
+        }
+    };
 
     if (loading) return <Loader />;
 
@@ -232,78 +276,90 @@ const PurchasedBundleDetails = () => {
             <h5 className="mb-3 fw-semibold">📖 Comics in this Bundle</h5>
 
             <div className="row g-4">
-                {bundle.comics?.map((comic, index) => (
-                    <div key={comic._id} className="col-lg-4 col-md-6">
+                {bundle.comics?.map((comic, index) => {
+                    const isDownloading = downloadingId === comic._id;
 
-                        <div className="border rounded-4 shadow-sm overflow-hidden h-100 bg-white">
+                    return (
+                        <div key={comic._id} className="col-lg-4 col-md-6">
 
-                            {/* Thumbnail */}
-                            <img
-                                src={
-                                    comic.thumbnail ||
-                                    "https://via.placeholder.com/300x200?text=Comic"
-                                }
-                                alt={comic.title}
-                                className="w-100"
-                                style={{ height: "180px", objectFit: "cover" }}
-                            />
+                            <div className="border rounded-4 shadow-sm overflow-hidden h-100 bg-white">
 
-                            <div className="p-3 d-flex flex-column">
+                                {/* Thumbnail */}
+                                <img
+                                    src={
+                                        comic.thumbnail ||
+                                        "https://via.placeholder.com/300x200?text=Comic"
+                                    }
+                                    alt={comic.title}
+                                    className="w-100"
+                                    style={{ height: "180px", objectFit: "cover" }}
+                                />
 
-                                {/* Comic Title */}
-                                <div className="fw-bold text-capitalize mb-1">
-                                    {commonInfo.seriesTitle}
-                                    <span className="text-muted fs-6 ms-1">
-                                        (Part {index + 1})
-                                    </span>
-                                </div>
+                                <div className="p-3 d-flex flex-column">
 
-                                {/* Subtitle */}
-                                <div className="text-muted small mb-2">
-                                    {comic.title || `Part ${index + 1}`}
-                                </div>
-
-                                {/* Pages & Actions */}
-                                <div className="d-flex align-items-center justify-content-between mt-auto">
-                                    <div className="text-muted small">
-                                        <i className="bi bi-file-earmark-text me-1"></i>
-                                        {comic.pages?.length || 0} pages
+                                    {/* Comic Title */}
+                                    <div className="fw-bold text-capitalize mb-1">
+                                        {commonInfo.seriesTitle}
+                                        <span className="text-muted fs-6 ms-1">
+                                            (Part {index + 1})
+                                        </span>
                                     </div>
 
-                                    <div className="d-flex gap-2">
-                                        <Button
-                                            variant="primary"
-                                            size="sm"
-                                            onClick={() => {
-                                                trackClick("purchased_comic_read_click", { comic_id: comic._id });
-                                                navigate(`/comic-reader/${comic._id}`);
-                                            }}
-                                        >
-                                            <i className="bi bi-eye me-1"></i>
-                                            Read
-                                        </Button>
+                                    {/* Subtitle */}
+                                    <div className="text-muted small mb-2">
+                                        {comic.title || `Part ${index + 1}`}
+                                    </div>
 
-                                        {comic.pdfUrl && (
+                                    {/* Pages & Actions */}
+                                    <div className="d-flex align-items-center justify-content-between mt-auto">
+                                        <div className="text-muted small">
+                                            <i className="bi bi-file-earmark-text me-1"></i>
+                                            {comic.pages?.length || 0} pages
+                                        </div>
+
+                                        <div className="d-flex gap-2">
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                onClick={() => {
+                                                    trackClick("purchased_comic_read_click", { comic_id: comic._id });
+                                                    navigate(`/comic-reader/${comic._id}`, {
+                                                        state: { from: `/purchasedBundleDetails/${id}` },
+                                                    });
+                                                }}
+                                            >
+                                                <i className="bi bi-eye me-1"></i>
+                                                Read
+                                            </Button>
+
                                             <Button
                                                 variant="outline-secondary"
                                                 size="sm"
-                                                onClick={() => {
-                                                    trackClick("purchased_comic_pdf_click", { comic_id: comic._id });
-                                                    window.open(comic.pdfUrl, "_blank");
-                                                }}
+                                                disabled={isDownloading || !comic.pages?.length}
+                                                onClick={() => handleDownloadPdf(comic, index)}
+                                                title={!comic.pages?.length ? "This comic has no pages yet" : "Download as PDF"}
                                             >
-                                                <i className="bi bi-file-pdf me-1"></i>
-                                                PDF
+                                                {isDownloading ? (
+                                                    <>
+                                                        <span className="spinner-border spinner-border-sm me-1"></span>
+                                                        Preparing...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <i className="bi bi-file-pdf me-1"></i>
+                                                        Download
+                                                    </>
+                                                )}
                                             </Button>
-                                        )}
+                                        </div>
                                     </div>
+
                                 </div>
-
                             </div>
-                        </div>
 
-                    </div>
-                ))}
+                        </div>
+                    );
+                })}
             </div>
 
         </div>

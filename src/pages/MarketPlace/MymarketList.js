@@ -6,6 +6,7 @@ import { NoDataComponent } from "../../components/NoDataComponent";
 import { Loader } from "../../lib/loader";
 import API from "../../API";
 import { toast } from "react-toastify";
+import EditBundleModal from "./EditBundleModal";
 
 const MymarketList = () => {
     const [bundles, setBundles] = useState([]);
@@ -24,6 +25,10 @@ const MymarketList = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteBundleId, setDeleteBundleId] = useState(null);
     const [deleting, setDeleting] = useState(false);
+
+    // ✏️ Edit Modal states
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editBundleId, setEditBundleId] = useState(null);
 
     // 🔥 Fetch Teacher Bundles
     const fetchBundles = async () => {
@@ -63,14 +68,12 @@ const MymarketList = () => {
             if (!res.data.error) {
                 toast.success("Bundle published successfully");
 
-                // update UI instantly
                 setBundles((prev) =>
                     prev.map((b) =>
                         b._id === selectedBundleId ? { ...b, status: "published" } : b
                     )
                 );
 
-                // Close modal
                 setShowPublishModal(false);
                 setSelectedBundleId(null);
             }
@@ -91,9 +94,7 @@ const MymarketList = () => {
 
             if (!data.error) {
                 toast.success(data.message || "Bundle deleted successfully");
-                // Refresh list
                 fetchBundles();
-                // Close modal
                 setShowDeleteModal(false);
                 setDeleteBundleId(null);
             }
@@ -102,6 +103,12 @@ const MymarketList = () => {
         } finally {
             setDeleting(false);
         }
+    };
+
+    // ✏️ Edit ke baad list me bundle replace karo (refetch ki zarurat nahi)
+    const handleBundleUpdated = (updated) => {
+        if (!updated?._id) return fetchBundles();
+        setBundles((prev) => prev.map((b) => (b._id === updated._id ? updated : b)));
     };
 
     // 📊 Table Columns
@@ -150,7 +157,19 @@ const MymarketList = () => {
             name: "Actions",
             cell: (row) => (
                 <div className="d-flex gap-2">
-                    {/* Publish Button - Only show if not published */}
+                    {/* Edit - draft + published dono ke liye */}
+                    <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => {
+                            setEditBundleId(row._id);
+                            setShowEditModal(true);
+                        }}
+                    >
+                        <i className="bi bi-pencil me-1"></i>
+                        Edit
+                    </Button>
+
                     {row.status !== "published" && (
                         <Button
                             size="sm"
@@ -165,7 +184,6 @@ const MymarketList = () => {
                         </Button>
                     )}
 
-                    {/* Delete Button - Only show if draft */}
                     {row.status !== "published" && (
                         <Button
                             size="sm"
@@ -181,13 +199,13 @@ const MymarketList = () => {
                     )}
                 </div>
             ),
-            minWidth: "200px",
+            minWidth: "280px",
         },
     ];
 
-    // Get bundle details for modals
     const selectedBundle = bundles.find(b => b._id === selectedBundleId);
     const deleteBundle = bundles.find(b => b._id === deleteBundleId);
+    const editBundle = bundles.find(b => b._id === editBundleId);
 
     return (
         <div className="contact-list-page pt-4 pb-3">
@@ -243,6 +261,17 @@ const MymarketList = () => {
                 )}
             </div>
 
+            {/* ✏️ Edit Bundle Modal */}
+            <EditBundleModal
+                show={showEditModal}
+                bundle={editBundle}
+                onHide={() => {
+                    setShowEditModal(false);
+                    setEditBundleId(null);
+                }}
+                onUpdated={handleBundleUpdated}
+            />
+
             {/* Publish Confirmation Modal */}
             <Modal
                 show={showPublishModal}
@@ -275,7 +304,7 @@ const MymarketList = () => {
                                     <li>Once published, the bundle will be visible to all users in the marketplace</li>
                                     <li><strong className="text-danger">You cannot delete or unpublish this bundle after publishing</strong></li>
                                     <li>Make sure all comics in the bundle are ready and approved</li>
-                                    <li>You can still edit the bundle details after publishing</li>
+                                    <li>After publishing you can still edit the title, description and price, and add new comics, but you can't remove comics already in the bundle</li>
                                 </ul>
                             </div>
                         </div>

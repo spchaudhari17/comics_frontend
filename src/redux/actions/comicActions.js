@@ -15,7 +15,7 @@ export const setComicStatus = (comicId, comicStatus) => async (dispatch, getStat
     try {
         dispatch({ type: SET_COMIC_STATUS_REQUEST });
 
-        const { data } = await API.post("/user/comics/set-status", { comicId, comicStatus });
+        const { data } = await API.post("/user/comics/auto-approve-country", { comicId, comicStatus });
 
         dispatch({
             type: SET_COMIC_STATUS_SUCCESS,

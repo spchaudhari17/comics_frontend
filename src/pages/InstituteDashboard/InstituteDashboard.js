@@ -501,7 +501,7 @@ const InstituteDashboard = () => {
                   ))}
                 </Form.Select>
 
-                <Button
+                {/* <Button
                   variant="primary"
                   onClick={() => {
                     trackClick("dashboard_import_click");
@@ -511,9 +511,9 @@ const InstituteDashboard = () => {
                   title={isStudentLimitReached ? "Student limit reached" : "Import students from Excel"}
                 >
                   <i className="bi bi-upload"></i> Import
-                </Button>
+                </Button> */}
 
-                <Button
+                {/* <Button
                   variant="dark"
                   onClick={() => {
                     trackClick("dashboard_add_click");
@@ -523,7 +523,7 @@ const InstituteDashboard = () => {
                   title={isStudentLimitReached ? "Student limit reached" : "Add new student"}
                 >
                   <i className="bi bi-person-plus"></i> Add
-                </Button>
+                </Button> */}
 
                 <Button
                   variant="info"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import API from "../../API";
 import { Loader } from "../../lib/loader";
 import { Button, Nav } from "react-bootstrap";
@@ -7,11 +7,14 @@ import { trackClick, useScrollDepth } from "../../utility/analytics";
 
 const ComicReader = () => {
     const { comicId } = useParams();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const [data, setData] = useState({});
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [activeTab, setActiveTab] = useState("reader");
+    const [openingPdf, setOpeningPdf] = useState(false);
 
     const fetchComic = async () => {
         try {
@@ -31,6 +34,71 @@ const ComicReader = () => {
         fetchComic();
     }, [comicId]);
 
+    // ⬅️ Back: app ke andar se aaye ho to pichhle page pe,
+    // link seedha khola ho (history nahi) to bundle page pe, warna home
+    const handleBack = () => {
+        trackClick("comic_reader_back_click", { comic_id: comicId });
+
+        if (location.key !== "default") {
+            navigate(-1);
+        } else {
+            navigate(location.state?.from || "/");
+        }
+    };
+
+    // 📄 PDF naye tab me kholo
+    const handleOpenPdf = async () => {
+        trackClick("comic_reader_pdf_click", { comic_id: comicId });
+
+        // pdfUrl saved hai to seedha wahi kholo
+        if (data?.comic?.pdfUrl) {
+            window.open(data.comic.pdfUrl, "_blank");
+            return;
+        }
+
+        // Tab abhi (click ke time) khol lo, warna API call ke baad
+        // browser ise popup samajh ke block kar deta hai
+        const pdfTab = window.open("", "_blank");
+        if (pdfTab) {
+            pdfTab.document.title = "Preparing PDF...";
+            pdfTab.document.body.innerHTML =
+                '<p style="font-family:sans-serif;padding:24px">Preparing PDF...</p>';
+        }
+
+        try {
+            setOpeningPdf(true);
+
+            const res = await API.get(`/user/comic-pdf/${comicId}`, {
+                responseType: "blob",
+            });
+
+            const url = URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+
+            if (pdfTab) {
+                pdfTab.location.href = url;
+            } else {
+                // Popup block ho gaya to isi tab me khol do
+                window.location.href = url;
+            }
+
+            // Tab ko PDF load karne ka time do, phir memory free karo
+            setTimeout(() => URL.revokeObjectURL(url), 60 * 1000);
+
+        } catch (err) {
+            pdfTab?.close();
+
+            // responseType blob hai, isliye error message bhi blob me aata hai
+            let message = "Failed to open PDF";
+            try {
+                const text = await err.response?.data?.text();
+                message = JSON.parse(text).message || message;
+            } catch { /* ignore */ }
+            alert(message);
+        } finally {
+            setOpeningPdf(false);
+        }
+    };
+
     // GA: reader tab buttons (reader / faq / facts / quiz / hardcore)
     const handleTabSelect = (tab) => {
         trackClick("comic_reader_tab_click", { tab_name: tab === "hard" ? "hardcore" : tab, comic_id: comicId });
@@ -48,6 +116,18 @@ const ComicReader = () => {
 
     return (
         <div className="container py-4">
+
+            {/* ⬅️ Back Button */}
+            <div className="mb-3">
+                <Button
+                    variant="outline-secondary"
+                    onClick={handleBack}
+                    className="d-flex align-items-center gap-2"
+                >
+                    <i className="bi bi-arrow-left"></i>
+                    Back
+                </Button>
+            </div>
 
             <h4 className="fw-bold mb-3">{data?.comic?.title}</h4>
 
@@ -246,6 +326,33 @@ const ComicReader = () => {
                         </div>
                     ))}
 
+                </div>
+            )}
+
+            {/* 📄 Open PDF */}
+            {data?.pages?.length > 0 && (
+                <div className="border-top mt-4 pt-4 text-center">
+                    <Button
+                        variant="outline-danger"
+                        onClick={handleOpenPdf}
+                        disabled={openingPdf}
+                        className="px-4"
+                    >
+                        {openingPdf ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2"></span>
+                                Preparing PDF...
+                            </>
+                        ) : (
+                            <>
+                                <i className="bi bi-file-earmark-pdf me-2"></i>
+                                Open PDF
+                            </>
+                        )}
+                    </Button>
+                    <div className="text-muted small mt-2">
+                        Opens the full comic as a PDF in a new tab. You can save it from there.
+                    </div>
                 </div>
             )}
 
