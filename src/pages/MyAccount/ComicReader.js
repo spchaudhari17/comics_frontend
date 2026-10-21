@@ -14,7 +14,7 @@ const ComicReader = () => {
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [activeTab, setActiveTab] = useState("reader");
-    const [openingPdf, setOpeningPdf] = useState(false);
+    const [pdfAction, setPdfAction] = useState(null); // "download" | "open" | null
 
     const fetchComic = async () => {
         try {
@@ -46,15 +46,55 @@ const ComicReader = () => {
         }
     };
 
-    // 📄 PDF naye tab me kholo
+    // Windows/Mac file names me ye characters allowed nahi
+    const pdfFileName = `${(data?.comic?.title || "comic").replace(/[\\/:*?"<>|]/g, "").trim() || "comic"}.pdf`;
+
+    // Backend se poori PDF (comic + FAQ + facts + quiz + hardcore quiz)
+    // NOTE: comic.pdfUrl jaan-boojh ke use NAHI kar rahe, wo purani PDF hai
+    // jisme sirf comic pages hain
+    const fetchPdfBlobUrl = async () => {
+        const res = await API.get(`/user/comic-pdf/${comicId}`, {
+            responseType: "blob",
+        });
+        return URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+    };
+
+    // responseType blob hai, isliye error message bhi blob me aata hai
+    const getPdfErrorMessage = async (err, fallback) => {
+        try {
+            const text = await err.response?.data?.text();
+            return JSON.parse(text).message || fallback;
+        } catch {
+            return fallback;
+        }
+    };
+
+    // 📥 Seedha download (file name ke saath)
+    const handleDownloadPdf = async () => {
+        trackClick("comic_reader_pdf_download_click", { comic_id: comicId });
+
+        try {
+            setPdfAction("download");
+            const url = await fetchPdfBlobUrl();
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = pdfFileName;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (err) {
+            alert(await getPdfErrorMessage(err, "Failed to download PDF"));
+        } finally {
+            setPdfAction(null);
+        }
+    };
+
+    // 📄 Naye tab me kholo (dekhne ke liye)
     const handleOpenPdf = async () => {
         trackClick("comic_reader_pdf_click", { comic_id: comicId });
-
-        // pdfUrl saved hai to seedha wahi kholo
-        if (data?.comic?.pdfUrl) {
-            window.open(data.comic.pdfUrl, "_blank");
-            return;
-        }
 
         // Tab abhi (click ke time) khol lo, warna API call ke baad
         // browser ise popup samajh ke block kar deta hai
@@ -66,13 +106,8 @@ const ComicReader = () => {
         }
 
         try {
-            setOpeningPdf(true);
-
-            const res = await API.get(`/user/comic-pdf/${comicId}`, {
-                responseType: "blob",
-            });
-
-            const url = URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+            setPdfAction("open");
+            const url = await fetchPdfBlobUrl();
 
             if (pdfTab) {
                 pdfTab.location.href = url;
@@ -83,19 +118,11 @@ const ComicReader = () => {
 
             // Tab ko PDF load karne ka time do, phir memory free karo
             setTimeout(() => URL.revokeObjectURL(url), 60 * 1000);
-
         } catch (err) {
             pdfTab?.close();
-
-            // responseType blob hai, isliye error message bhi blob me aata hai
-            let message = "Failed to open PDF";
-            try {
-                const text = await err.response?.data?.text();
-                message = JSON.parse(text).message || message;
-            } catch { /* ignore */ }
-            alert(message);
+            alert(await getPdfErrorMessage(err, "Failed to open PDF"));
         } finally {
-            setOpeningPdf(false);
+            setPdfAction(null);
         }
     };
 
@@ -329,29 +356,50 @@ const ComicReader = () => {
                 </div>
             )}
 
-            {/* 📄 Open PDF */}
+            {/* 📄 PDF: Download + Open */}
             {data?.pages?.length > 0 && (
                 <div className="border-top mt-4 pt-4 text-center">
-                    <Button
-                        variant="outline-danger"
-                        onClick={handleOpenPdf}
-                        disabled={openingPdf}
-                        className="px-4"
-                    >
-                        {openingPdf ? (
-                            <>
-                                <span className="spinner-border spinner-border-sm me-2"></span>
-                                Preparing PDF...
-                            </>
-                        ) : (
-                            <>
-                                <i className="bi bi-file-earmark-pdf me-2"></i>
-                                Open PDF
-                            </>
-                        )}
-                    </Button>
+                    <div className="d-flex justify-content-center flex-wrap gap-2">
+                        <Button
+                            variant="danger"
+                            onClick={handleDownloadPdf}
+                            disabled={!!pdfAction}
+                            className="px-4"
+                        >
+                            {pdfAction === "download" ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2"></span>
+                                    Preparing PDF...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="bi bi-download me-2"></i>
+                                    Download PDF
+                                </>
+                            )}
+                        </Button>
+
+                        <Button
+                            variant="outline-danger"
+                            onClick={handleOpenPdf}
+                            disabled={!!pdfAction}
+                            className="px-4"
+                        >
+                            {pdfAction === "open" ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2"></span>
+                                    Opening...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="bi bi-file-earmark-pdf me-2"></i>
+                                    Open PDF
+                                </>
+                            )}
+                        </Button>
+                    </div>
                     <div className="text-muted small mt-2">
-                        Opens the full comic as a PDF in a new tab. You can save it from there.
+                        Includes the comic pages, FAQs, Did You Know facts, Quiz and Hardcore Quiz with answer keys.
                     </div>
                 </div>
             )}

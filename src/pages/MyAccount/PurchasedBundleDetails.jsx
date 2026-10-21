@@ -49,15 +49,10 @@ const PurchasedBundleDetails = () => {
         if (id) fetchBundleDetails();
     }, [id]);
 
-    // 📥 PDF download
-    // Agar comic pe pdfUrl saved hai to wahi kholo, warna backend se PDF generate karwao
+    // 📥 PDF download (backend se poori PDF: comic + FAQ + facts + quiz)
+    // comic.pdfUrl jaan-boojh ke use nahi kar rahe, usme sirf comic pages hain
     const handleDownloadPdf = async (comic, index) => {
         trackClick("purchased_comic_pdf_click", { comic_id: comic._id });
-
-        if (comic.pdfUrl) {
-            window.open(comic.pdfUrl, "_blank");
-            return;
-        }
 
         try {
             setDownloadingId(comic._id);
