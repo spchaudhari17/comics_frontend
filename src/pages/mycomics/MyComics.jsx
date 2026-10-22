@@ -7,6 +7,8 @@ import API from "../../API";
 import dataTableCustomStyles from "../../assets/styles/dataTableCustomStyles";
 import { NoDataComponent } from "../../components/NoDataComponent";
 import { trackClick, trackClickWithUser, useScrollDepth } from "../../utility/analytics";
+import EditCreditsCard from "../../components/EditCreditsCard";
+import { getPdfErrorMessage, downloadComicPdf } from "../../utility/Comicpdf";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All Status" },
@@ -66,6 +68,9 @@ const MyComics = () => {
     description: "",
     price: ""
   });
+
+  // 📥 PDF download (kaunsi comic download ho rahi hai)
+  const [downloadingId, setDownloadingId] = useState(null);
 
   const selectedComics = useMemo(() => Object.keys(selectedMap), [selectedMap]);
   const selectedComicsData = useMemo(() => Object.values(selectedMap), [selectedMap]);
@@ -184,6 +189,23 @@ const MyComics = () => {
       });
     } else {
       navigate("/create-comic", { state: { comicId: comic._id } });
+    }
+  };
+
+  // 📥 Poori PDF download (comic + FAQ + facts + quiz)
+  const handleDownloadPdf = async (comic) => {
+    trackClick("my_comics_pdf_download_click", {
+      comic_id: comic._id,
+      comic_status: comic.comicStatus || "",
+    });
+
+    try {
+      setDownloadingId(comic._id);
+      await downloadComicPdf(comic._id, comic.title);
+    } catch (err) {
+      alert(await getPdfErrorMessage(err));
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -388,17 +410,39 @@ const MyComics = () => {
     },
     {
       name: "Details",
-      cell: row => (
-        <div className="d-flex gap-2">
-          <Button size="sm" variant="outline-info" onClick={() => {
-            trackClick("my_comics_details_click", { comic_id: row._id });
-            navigate(`/my-comics-details/${row._id}`);
-          }} >
-            <i className="bi bi-eye me-1"></i> Details
-          </Button>
-        </div>
-      ),
-      minWidth: "120px",
+      cell: row => {
+        // Thumbnail = comic ke pages ban chuke hain -> PDF ban sakti hai
+        const hasPages = !!row.thumbnail;
+        const isDownloading = downloadingId === row._id;
+
+        return (
+          <div className="d-flex gap-2">
+            <Button size="sm" variant="outline-info" onClick={() => {
+              trackClick("my_comics_details_click", { comic_id: row._id });
+              navigate(`/my-comics-details/${row._id}`);
+            }} >
+              <i className="bi bi-eye me-1"></i> Details
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline-danger"
+              onClick={() => handleDownloadPdf(row)}
+              disabled={!hasPages || !!downloadingId}
+              title={hasPages ? "Download PDF (comic + FAQ + quiz)" : "Generate the comic pages first"}
+            >
+              {isDownloading ? (
+                <Spinner size="sm" />
+              ) : (
+                <>
+                  <i className="bi bi-download me-1"></i> PDF
+                </>
+              )}
+            </Button>
+          </div>
+        );
+      },
+      minWidth: "200px",
     },
     {
       id: "country",
@@ -467,6 +511,9 @@ const MyComics = () => {
             </Button>
           </Alert>
         )}
+
+        {/* 💳 Page edit credits: balance + khareedna */}
+        {!isDashboardUser && <EditCreditsCard className="mb-4" />}
 
         {/* Stats Cards (concept filter ke hisaab se, saare pages ka total) */}
         <Row className="g-3 mb-4">

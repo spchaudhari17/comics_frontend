@@ -64,6 +64,7 @@ import Offers from "./pages/coupon/Offers";
 import CouponHeadlinePage from "./pages/coupon/CouponHeadline";
 import TeacherDashboard from "./pages/MyAccount/TeacherDashboard";
 import FoundingTeacherSuccess from "./pages/subscriptions/FoundingTeacherSuccess";
+import CreditsPaymentResult from "./pages/ComicGenerator/CreditsPaymentResult";
 
 
 function App() {
@@ -188,6 +189,7 @@ function App() {
 
             {/* <Route path="my-comics-details/:id" element={<MyComicsDetails />} /> */}
             <Route path="my-comics-details/:id" element={<ProtectedRoute> <MyComicsDetails /> </ProtectedRoute>} />
+            <Route path="/credits/payment-result" element={<CreditsPaymentResult />} />
 
             <Route path="*" element={<PageNotFound />} />
           </Route>

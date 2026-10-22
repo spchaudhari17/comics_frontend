@@ -10,6 +10,7 @@ import { useLocation } from "react-router-dom";
 import forComics from "../../assets/images/forComics.jpeg";
 import forImage from "../../assets/images/forImage.jpeg";
 import { trackClick, trackClickWithUser, trackEvent, useScrollDepth } from "../../utility/analytics";
+import EditComicPageModal from './EditComicPageModal';
 
 const Stepper = ({ currentStep }) => {
   const steps = [
@@ -174,6 +175,10 @@ export const ComicGenerator = () => {
   // Quiz and FAQ states
   const [selectedImage, setSelectedImage] = useState(null);
 
+  // ✏️ Single page edit
+  const [editingPage, setEditingPage] = useState(null);   // { page, imageUrl, panels }
+  const [editedPages, setEditedPages] = useState([]);     // kaunse pages badle (badge ke liye)
+
   // ---------------- Google Analytics ----------------
   // JSON script edit tracking (fires "json_script_edited" once per comic part)
   const scriptEditedRef = useRef(false);
@@ -279,13 +284,25 @@ export const ComicGenerator = () => {
               setPrompt(JSON.stringify(JSON.parse(comic.prompt), null, 2));
             }
             setStep(4);
-          } else if (comic?.images && comic.images.length > 0) {
-            // Images already generated - go to step 3 (preview)
-            // setComicImages(comic.images.map(img => img.imageUrl));
-            // setSelectedImage(comic.images[0]?.imageUrl);
-            setComicImages(comic.images);
-            setSelectedImage(comic.images[0]);
-            setStep(3);
+          } else if (data.pages && data.pages.length > 0) {
+            // Images ban chuki hain -> preview (yahan se page edit + PDF ho sakta hai)
+            // (pehle `comic.images` check hota tha jo API bhejti hi nahi thi)
+            const resumedImages = data.pages.map((p) => ({
+              page: p.pageNumber,
+              imageUrl: p.imageUrl,
+              panels: p.panels || [],
+              caption: (p.panels || []).map((panel) => panel.caption).filter(Boolean).join("\n"),
+            }));
+
+            if (comic?.prompt) {
+              const script = JSON.parse(comic.prompt);
+              setPrompt(JSON.stringify(script, null, 2));
+              if (Array.isArray(script)) setPages(script);
+            }
+
+            setComicImages(resumedImages);
+            setSelectedImage(resumedImages[0]);
+            setStep(2);
           } else if (comic?.prompt) {
             // Prompt generated but no images - go to step 2 (prompt editor)
             setPrompt(JSON.stringify(JSON.parse(comic.prompt), null, 2));
@@ -455,6 +472,7 @@ export const ComicGenerator = () => {
       setComicId(part.comicId);
       setComicImages([]);
       setSelectedImage(null);
+      setEditedPages([]);
       setPdfUrl("");
       setPages([]);
 
@@ -624,12 +642,14 @@ export const ComicGenerator = () => {
       script_changed: scriptEditedRef.current && prompt !== originalPromptRef.current,
     });
     setErrorMsg("");
+    setSuccessMsg("");
     setLoadingImage(true);
     setIsGenerating(true);
     setProgress(0);
     setEstimatedTime("Starting comic generation...");
     setCurrentGeneratingPage(0);
     setComicImages([]);
+    setEditedPages([]);
 
     try {
       let finalPages = pages;
@@ -695,18 +715,23 @@ export const ComicGenerator = () => {
       }
 
       // 🖼️ Process actual images
-      // const imgs = (data?.images || []).map(it => it.imageUrl).filter(Boolean);
-      // const imgs = (data?.images || []).filter(it => it.imageUrl);
-      const imgs = (data?.images || []).map((img, index) => ({
-        imageUrl: img.imageUrl,
-        caption:
-          finalPages?.[index]?.panels
-            ?.map(p => p.caption)
-            .filter(Boolean)
-            .join("\n") ||
-          finalPages?.[index]?.caption ||
-          ""
-      }));
+      // Har image ke saath page number + panels bhi, taaki baad me single page edit ho sake
+      const imgs = (data?.images || [])
+        .filter((img) => img.imageUrl)
+        .map((img, index) => {
+          const scriptPage =
+            finalPages.find((p) => Number(p.page) === Number(img.page)) || finalPages[index];
+
+          return {
+            page: img.page ?? index + 1,
+            imageUrl: img.imageUrl,
+            panels: scriptPage?.panels || [],
+            caption:
+              scriptPage?.panels?.map((p) => p.caption).filter(Boolean).join("\n") ||
+              scriptPage?.caption ||
+              "",
+          };
+        });
       if (imgs.length === 0) throw new Error("No images generated.");
 
       // ✅ FINAL PROGRESS - Show actual completion
@@ -737,6 +762,37 @@ export const ComicGenerator = () => {
     }
   };
 
+  // ✏️ Ek page dobara bana -> sirf wahi image badlo, baaki waise ke waise
+  const handlePageRegenerated = ({ page, imageUrl, panels, caption }) => {
+    const updatePage = (img) =>
+      img?.page === page ? { ...img, imageUrl, panels, caption } : img;
+
+    setComicImages((prev) => prev.map(updatePage));
+    setSelectedImage((prev) => updatePage(prev));
+
+    // Script bhi update, taaki FAQ / quiz / dobara generate me naya version jaye
+    setPages((prev) => prev.map((p) => (Number(p.page) === page ? { ...p, panels } : p)));
+    setPrompt((prev) => {
+      try {
+        const script = JSON.parse(prev);
+        return JSON.stringify(
+          script.map((p) => (Number(p.page) === page ? { ...p, panels } : p)),
+          null,
+          2
+        );
+      } catch {
+        return prev;
+      }
+    });
+
+    setEditedPages((prev) => [...new Set([...prev, page])]);
+
+    // Purani PDF me purani image hai -> dobara banani padegi
+    setPdfUrl("");
+    setErrorMsg("");
+    setSuccessMsg(`Page ${page} updated. Click "Generate Comic PDF" to include the new image.`);
+  };
+
   // STEP 3: Generate PDF
   const handleGeneratePDF = async () => {
     trackClick("generate_comic_pdf_click", {
@@ -745,6 +801,7 @@ export const ComicGenerator = () => {
       total_images: comicImages?.length || 0,
     });
     setErrorMsg("");
+    setSuccessMsg("");
     setPublishing(true);
     try {
       const { data } = await API.post("/user/generateComicPDF", { comicId });
@@ -782,6 +839,7 @@ export const ComicGenerator = () => {
     setComicImages([]);
     setPdfUrl("");
     setSelectedImage(null);
+    setEditedPages([]);
   };
 
 
@@ -810,8 +868,8 @@ export const ComicGenerator = () => {
 
 
   const isWeeklyLimitReached =
-    subscription.comicsPerWeek > 0 &&
-    subscription.comicsLeft === 0;
+    subscription?.comicsPerWeek > 0 &&
+    subscription?.comicsLeft === 0;
 
 
   return (
@@ -856,7 +914,7 @@ export const ComicGenerator = () => {
           </div> */}
 
           {successMsg && (
-            <Alert variant="success" className="mb-4">
+            <Alert variant="success" className="mb-4" dismissible onClose={() => setSuccessMsg("")}>
               {successMsg}
               {redirecting && <Spinner size="sm" className="ms-2" />}
             </Alert>
@@ -1410,7 +1468,7 @@ export const ComicGenerator = () => {
                         <div className="d-flex flex-column gap-2">
 
                           {comicImages.map((img, idx) => (
-                            <div key={idx} className="text-center">
+                            <div key={img.page ?? idx} className="text-center">
                               <img
                                 src={img.imageUrl}
                                 alt={`comic-${idx}`}
@@ -1425,6 +1483,12 @@ export const ComicGenerator = () => {
                                   height: "80px",
                                 }}
                               />
+
+                              {editedPages.includes(img.page) && (
+                                <div>
+                                  <Badge bg="success" className="mt-1">Edited</Badge>
+                                </div>
+                              )}
 
                               <small className="d-block mt-1 text-muted" style={{
                                 fontSize: "11px",
@@ -1461,6 +1525,27 @@ export const ComicGenerator = () => {
                                 <Badge bg="dark" className="p-2">
                                   {selectedImage.caption}
                                 </Badge>
+                              </div>
+                            )}
+
+                            {/* ✏️ Sirf is page ko edit + regenerate */}
+                            {selectedImage.page && (
+                              <div className="mt-3">
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  disabled={publishing}
+                                  onClick={() => {
+                                    trackClick("edit_comic_page_click", {
+                                      comic_id: comicId || "",
+                                      page_number: selectedImage.page,
+                                    });
+                                    setEditingPage(selectedImage);
+                                  }}
+                                >
+                                  <i className="bi bi-pencil-square me-1"></i>
+                                  Edit page {selectedImage.page}
+                                </Button>
                               </div>
                             )}
                           </div>
@@ -1789,6 +1874,15 @@ export const ComicGenerator = () => {
 
         </Modal.Body>
       </Modal>
+
+      {/* ✏️ Single page edit modal */}
+      <EditComicPageModal
+        show={!!editingPage}
+        onHide={() => setEditingPage(null)}
+        comicId={comicId}
+        page={editingPage}
+        onRegenerated={handlePageRegenerated}
+      />
     </div>
   );
 };
