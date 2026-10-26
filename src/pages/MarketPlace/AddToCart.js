@@ -4,6 +4,8 @@ import API from "../../API";
 import { Loader } from "../../lib/loader";
 import { useNavigate } from "react-router-dom";
 import { trackClick, trackClickWithUser } from "../../utility/analytics";
+import { isUserLoggedIn, saveReturnAfterLogin } from "../../utility/authRedirect";
+import { notifyCartUpdated } from "../../utility/cartEvents";
 
 const AddToCart = () => {
     const [cartItems, setCartItems] = useState([]);
@@ -31,7 +33,14 @@ const AddToCart = () => {
     };
 
     useEffect(() => {
+        // 🔐 Logout user /cart pe aaya -> login, phir wapas cart pe
+        if (!isUserLoggedIn()) {
+            saveReturnAfterLogin("/cart");
+            navigate("/login", { replace: true });
+            return;
+        }
         fetchCart();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // ❌ Remove from cart
@@ -48,6 +57,7 @@ const AddToCart = () => {
             setCartItems((prev) =>
                 prev.filter((item) => item.bundleId._id !== bundleId)
             );
+            notifyCartUpdated();
         } catch (err) {
             alert("Failed to remove item");
         }
@@ -117,6 +127,7 @@ const AddToCart = () => {
 
                         {cartItems.map((item) => {
                             const bundle = item.bundleId;
+                            if (!bundle) return null; // bundle delete ho gaya
 
                             return (
                                 <div
@@ -208,4 +219,4 @@ const AddToCart = () => {
     );
 };
 
-export default AddToCart;
+export default AddToCart;

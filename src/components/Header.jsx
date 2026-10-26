@@ -8,6 +8,7 @@ import { logoutUser } from "../redux/actions/userActions";
 import { useDispatch, useSelector } from "react-redux";
 import API from "../API";
 import { trackClick, trackClickWithUser } from "../utility/analytics";
+import { CART_UPDATED_EVENT } from "../utility/cartEvents";
 
 
 export const Header = () => {
@@ -50,10 +51,26 @@ export const Header = () => {
     }
   };
 
+  // 🛒 Cart count: page badalne pe + cart me add/remove hone pe refresh
+  // (pehle sirf pehli baar load hota tha, isliye login / add ke baad purana count dikhta tha)
+  const isLoggedIn = !!userInfo;
+
   useEffect(() => {
-    if (userInfo) {
+    if (isLoggedIn) {
       fetchCartCount();
+    } else {
+      setCartCount(0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, location.pathname]);
+
+  useEffect(() => {
+    const onCartUpdated = () => {
+      if (localStorage.getItem("token")) fetchCartCount();
+    };
+    window.addEventListener(CART_UPDATED_EVENT, onCartUpdated);
+    return () => window.removeEventListener(CART_UPDATED_EVENT, onCartUpdated);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -278,4 +295,4 @@ export const Header = () => {
       </nav>
     </div>
   );
-};
+};

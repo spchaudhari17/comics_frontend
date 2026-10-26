@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import API from "../../API";
-import { Button } from "react-bootstrap";
+import { Alert, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { trackClick } from "../../utility/analytics";
+import { useAutoAddToCart, goToLoginThenAddToCart } from "../../hooks/useAutoAddToCart";
+import { isUserLoggedIn } from "../../utility/authRedirect";
+import { notifyCartUpdated } from "../../utility/cartEvents";
 
 const MarketPlaceDetails = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user"))
+        : null;
 
     const [bundle, setBundle] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [addingToCart, setAddingToCart] = useState(false);
 
     const [hoverRating, setHoverRating] = useState(0);
     const [selectedRating, setSelectedRating] = useState(0);
@@ -20,6 +27,9 @@ const MarketPlaceDetails = () => {
         purchasedBundleIds: [],
         ownBundleIds: []
     });
+
+    // 🛒 WordPress / login ke baad (?autoAdd=1) -> apne aap cart me + /cart
+    const { autoAdding, autoAddMessage, clearAutoAddMessage } = useAutoAddToCart(id);
 
     const fetchBundle = async () => {
         try {
@@ -42,7 +52,10 @@ const MarketPlaceDetails = () => {
             });
 
             if (!res.data.error) {
-                setMarketplaceStatus(res.data);
+                setMarketplaceStatus({
+                    purchasedBundleIds: (res.data.purchasedBundleIds || []).map(String),
+                    ownBundleIds: (res.data.ownBundleIds || []).map(String)
+                });
             }
         } catch (err) {
             console.log(err);
@@ -52,9 +65,15 @@ const MarketPlaceDetails = () => {
     useEffect(() => {
         fetchBundle();
         fetchMarketplaceStatus();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const submitRating = async (rating) => {
+        if (!isUserLoggedIn()) {
+            toast.info("Please log in to rate this bundle");
+            return;
+        }
+
         try {
             setSelectedRating(rating);
 
@@ -68,7 +87,7 @@ const MarketPlaceDetails = () => {
                 fetchBundle();
             }
         } catch (err) {
-            toast.error("Failed to submit rating");
+            toast.error(err.response?.data?.message || "Failed to submit rating");
         }
     };
 
@@ -88,25 +107,53 @@ const MarketPlaceDetails = () => {
     };
 
     const handleAddToCart = async () => {
-        trackClick("add_to_cart_click", { bundle_id: id, location: "marketplace_details" });
+        trackClick("add_to_cart_click", {
+            bundle_id: id,
+            location: "marketplace_details",
+            logged_in: isUserLoggedIn(),
+        });
+
+        // 🔐 Logout hai -> login, phir wapas aake apne aap cart me
+        if (!isUserLoggedIn()) {
+            toast.info("Please log in. We'll add this bundle to your cart right after.");
+            goToLoginThenAddToCart(navigate, id);
+            return;
+        }
+
         try {
+            setAddingToCart(true);
             const res = await API.post("/user/addToCart", { bundleId: id });
 
             if (!res.data.error) {
                 toast.success("Added to cart 🛒");
+                notifyCartUpdated();
             } else {
                 toast.warning(res.data.message);
             }
         } catch (err) {
-            toast.error("Error adding to cart");
+            // Token expire ho gaya -> dobara login, phir cart me
+            if (err.response?.status === 401) {
+                toast.info("Your session expired. Please log in again.");
+                goToLoginThenAddToCart(navigate, id);
+                return;
+            }
+            toast.error(err.response?.data?.message || "Error adding to cart");
+        } finally {
+            setAddingToCart(false);
         }
     };
 
-    if (loading) return <p className="text-center mt-5">Loading...</p>;
+    if (loading || autoAdding) {
+        return (
+            <p className="text-center mt-5">
+                {autoAdding ? "Adding to your cart..." : "Loading..."}
+            </p>
+        );
+    }
     if (!bundle) return <p className="text-center mt-5">No Data Found</p>;
 
-    const isPurchased = marketplaceStatus.purchasedBundleIds.includes(bundle._id);
-    const isOwnBundle = marketplaceStatus.ownBundleIds.includes(bundle._id);
+    const isPurchased = marketplaceStatus.purchasedBundleIds.includes(String(bundle._id));
+    const isOwnBundle = marketplaceStatus.ownBundleIds.includes(String(bundle._id));
 
     // Get common info from first comic
     const firstComic = bundle.comics?.[0];
@@ -123,8 +170,18 @@ const MarketPlaceDetails = () => {
         createdAt: firstComic?.createdAt || bundle.createdAt
     };
 
+    // getBundleDetails backend `teacher` bhejta hai, purana `teacherId` bhi chal jaye
+    const teacher = bundle.teacher || bundle.teacherId;
+
     return (
         <div className="container-xl py-5">
+
+            {/* WordPress se aaye user ka bundle add nahi hua (apna bundle / kharida hua) */}
+            {autoAddMessage && (
+                <Alert variant="warning" dismissible onClose={clearAutoAddMessage}>
+                    {autoAddMessage}
+                </Alert>
+            )}
 
             <div className="row g-4">
 
@@ -204,19 +261,19 @@ const MarketPlaceDetails = () => {
                                 <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
                                     Creator:
                                 </span>
-                                <span>{bundle.teacherId?.firstname} {bundle.teacherId?.lastname}</span>
+                                <span>{teacher?.firstname} {teacher?.lastname}</span>
                             </div>
                             <div className="d-flex py-1">
                                 <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
                                     Email:
                                 </span>
-                                <span>{bundle.teacherId?.email || "N/A"}</span>
+                                <span>{teacher?.email || "N/A"}</span>
                             </div>
                             <div className="d-flex py-1">
                                 <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
                                     Country:
                                 </span>
-                                <span>{commonInfo.country}</span>
+                                <span>{commonInfo.country === "ALL" ? "🌍 All Countries" : commonInfo.country}</span>
                             </div>
                             <div className="d-flex py-1">
                                 <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
@@ -306,10 +363,16 @@ const MarketPlaceDetails = () => {
                             </Button>
                         ) : (
                             <>
-                                <Button variant="success" onClick={handleAddToCart}>
+                                <Button variant="success" onClick={handleAddToCart} disabled={addingToCart}>
                                     <i className="bi bi-cart-plus me-1"></i>
-                                    Add To Cart
+                                    {addingToCart ? "Adding..." : "Add To Cart"}
                                 </Button>
+                                {isUserLoggedIn() && (
+                                    <Button variant="outline-success" onClick={() => navigate("/cart")}>
+                                        <i className="bi bi-cart3 me-1"></i>
+                                        View Cart
+                                    </Button>
+                                )}
                             </>
                         )}
                     </div>
@@ -380,10 +443,7 @@ const MarketPlaceDetails = () => {
                                                     key={star}
                                                     onMouseEnter={() => setHoverRating(star)}
                                                     onMouseLeave={() => setHoverRating(0)}
-                                                    onClick={() => {
-                                                        setSelectedRating(star);
-                                                        submitRating(star);
-                                                    }}
+                                                    onClick={() => submitRating(star)}
                                                     style={{
                                                         cursor: "pointer",
                                                         fontSize: "32px",

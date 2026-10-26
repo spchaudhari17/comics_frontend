@@ -4,6 +4,9 @@ import { Button, Pagination, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { trackClick } from "../../utility/analytics";
+import { goToLoginThenAddToCart } from "../../hooks/useAutoAddToCart";
+import { isUserLoggedIn } from "../../utility/authRedirect";
+import { notifyCartUpdated } from "../../utility/cartEvents";
 
 const PAGE_SIZE = 9;
 
@@ -188,16 +191,35 @@ const MarketPlace = () => {
     };
 
     const handleAddToCart = async (bundleId) => {
-        trackClick("add_to_cart_click", { bundle_id: bundleId, location: "marketplace_list" });
+        trackClick("add_to_cart_click", {
+            bundle_id: bundleId,
+            location: "marketplace_list",
+            logged_in: isUserLoggedIn(),
+        });
+
+        // 🔐 Logout hai -> login, phir wapas aake apne aap cart me
+        if (!isUserLoggedIn()) {
+            toast.info("Please log in. We'll add this bundle to your cart right after.");
+            goToLoginThenAddToCart(navigate, bundleId);
+            return;
+        }
+
         try {
             const res = await API.post("/user/addToCart", { bundleId });
 
             if (!res.data.error) {
                 toast.success("Added to cart 🛒");
+                notifyCartUpdated();
             } else {
                 toast.warning(res.data.message);
             }
         } catch (err) {
+            // Token expire -> dobara login, phir cart me
+            if (err.response?.status === 401) {
+                toast.info("Your session expired. Please log in again.");
+                goToLoginThenAddToCart(navigate, bundleId);
+                return;
+            }
             toast.error(err.response?.data?.message || "Error adding to cart ❌");
         }
     };
@@ -493,4 +515,4 @@ const MarketPlace = () => {
     );
 };
 
-export default MarketPlace;
+export default MarketPlace;

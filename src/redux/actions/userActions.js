@@ -1,4 +1,5 @@
 import API from "../../API";
+import { consumeReturnAfterLogin, getHomeForUserType } from "../../utility/authRedirect";
 
 
 
@@ -16,6 +17,22 @@ import {
     USER_CLEAR_ERROR,
 } from '../constants/userConstants';
 
+
+// ✅ Token mil gaya -> user ko login karo aur sahi page pe bhejo
+// (login, OTP verify aur signup, teeno yahi use karte hain)
+// Agar user "Add to cart" jaise kaam se login pe aaya tha to wapas wahin,
+// warna role ke hisaab se default page
+export const finishLogin = (userData, dispatch, navigate) => {
+    localStorage.setItem("token", userData.token);
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    dispatch({ type: USER_LOGIN_SUCCESS, payload: userData });
+
+    if (navigate) {
+        const returnTo = consumeReturnAfterLogin();
+        navigate(returnTo || getHomeForUserType(userData.userType), { replace: true });
+    }
+};
 
 export const registerUser = (userData) => async (dispatch) => {
     try {
@@ -63,25 +80,9 @@ export const loginUser = (formData, navigate) => async (dispatch) => {
         }
 
         //  CASE 2: Login success
+        // (pehle se "Add to cart" jaisa kaam pending hai to wahin, warna role based page)
         if (!data.error) {
-            localStorage.setItem("token", data.data.token);
-            localStorage.setItem("user", JSON.stringify(data.data));
-
-            dispatch({ type: USER_LOGIN_SUCCESS, payload: data.data });
-            // navigate("/create-comic");
-
-            const userType = data.data.userType;
-
-            //  ROLE BASED REDIRECT HERE
-            if (userType === "admin" || userType === "moderator") {
-                navigate("/super-admin");
-            }
-            else if (userType === "parent") {
-                navigate("/parent/manage-children");
-            }
-            else {
-                navigate("/create-comic"); // normal user
-            }
+            finishLogin(data.data, dispatch, navigate);
         } else {
             dispatch({ type: USER_LOGIN_FAIL, payload: data.message });
         }
@@ -104,12 +105,21 @@ export const verifyOtp = (formData, navigate) => async (dispatch) => {
             { headers: { "Content-Type": "application/json" } }
         );
 
-        // localStorage.setItem("token", data.data.token);
-        // localStorage.setItem("user", JSON.stringify(data.data));
+        if (data.error) {
+            dispatch({ type: USER_VERIFY_OTP_FAIL, payload: data.message });
+            return;
+        }
 
         dispatch({ type: USER_VERIFY_OTP_SUCCESS, payload: data.data });
-        navigate("/login");
-        window.location.reload();
+
+        // ✅ Backend token de raha hai -> seedha login, dobara login page nahi
+        if (data.data?.token) {
+            finishLogin(data.data, dispatch, navigate);
+            return;
+        }
+
+        // Token nahi aaya (purana backend) -> pehle jaisa login page
+        navigate("/login", { replace: true });
 
     } catch (error) {
         dispatch({

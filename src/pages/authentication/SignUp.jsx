@@ -5,7 +5,7 @@ import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import './authentication.scss';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser } from '../../redux/actions/userActions';
+import { registerUser, finishLogin } from '../../redux/actions/userActions';
 import { clearError } from "../../redux/actions/userActions";
 import { toast } from "react-toastify";
 
@@ -67,13 +67,19 @@ export const SignUp = () => {
             //     navigate("/OtpVerification", { state: { email } });
             // }));
 
-            await dispatch(registerUser({
+            const result = await dispatch(registerUser({
                 ...formData,
                 userType: USER_TYPE,
                 password: newPassword
             }));
-            // only redirect if registration succeeds
-            navigate("/OtpVerification", { state: { email: formData.email } });
+
+            // ✅ Signup pe hi token mil gaya -> seedha login (OTP / login page nahi)
+            if (result?.data?.token) {
+                finishLogin(result.data, dispatch, navigate);
+            } else {
+                // Email verify karna hai -> OTP page (verify ke baad apne aap login)
+                navigate("/OtpVerification", { state: { email: formData.email } });
+            }
 
             setFormData(initialFormData);
             setNewPassword('');
@@ -242,4 +248,4 @@ export const SignUp = () => {
             </div>
         </div>
     );
-};
+};
