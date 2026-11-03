@@ -6,6 +6,9 @@ import { trackClick } from "../../utility/analytics";
 
 const getId = (c) => String(c?._id || c);
 const INSTRUCTIONS_MAX = 200;
+const UPLOAD_MAX_BYTES = 5 * 1024 * 1024; // 5 MB (backend ke barabar)
+const UPLOAD_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const isUpload = (t) => t.source === "upload";
 
 const tileStyle = (enabled) => ({
     width: 92,
@@ -14,10 +17,12 @@ const tileStyle = (enabled) => ({
 });
 
 // Bundle cover chunne ke liye:
-//   - har selected comic ka pehla page (free)
-//   - AI se bana cover (har nayi thumbnail = 1 credit), pehle bani hui dobara free me chun sakte ho
+//   1. har selected comic ka pehla page (free)
+//   2. AI se bana cover (har nayi thumbnail = 1 credit), pehle bani hui dobara free me chun sakte ho
+//   3. teacher ki apni image upload (free)
 // value = cover comic id ("" / null = pehla comic, default)
-// aiThumbnailId / onAiChange na do to AI wala option nahi dikhega
+// aiThumbnailId = chuna hua AI / upload cover (backend me customThumbnailId)
+// aiThumbnailId / onAiChange na do to AI aur upload wale option nahi dikhenge
 const BundleCoverPicker = ({ comics, value, onChange, aiThumbnailId, onAiChange }) => {
     const aiEnabled = typeof onAiChange === "function";
 
@@ -28,6 +33,8 @@ const BundleCoverPicker = ({ comics, value, onChange, aiThumbnailId, onAiChange 
     const [instructions, setInstructions] = useState("");
     const [generating, setGenerating] = useState(false);
     const [error, setError] = useState("");
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState("");
 
     const [credits, setCredits] = useState(null); // null = abhi load nahi hua
     const [isUnlimited, setIsUnlimited] = useState(false);
@@ -47,11 +54,11 @@ const BundleCoverPicker = ({ comics, value, onChange, aiThumbnailId, onAiChange 
     }, [aiEnabled, idsKey]);
 
     // Jis comic se AI cover bana tha wo bundle se hat gaya -> AI cover bhi hatao
-    // (warna save pe backend reject karega)
+    // (warna save pe backend reject karega). Upload wali kisi comic se judi nahi.
     useEffect(() => {
         if (!aiEnabled || !aiLoaded || !aiThumbnailId) return;
         const stillThere = aiThumbs.some(
-            (t) => String(t._id) === String(aiThumbnailId) && ids.includes(String(t.comicId))
+            (t) => String(t._id) === String(aiThumbnailId) && (isUpload(t) || ids.includes(String(t.comicId)))
         );
         if (!stillThere) onAiChange("");
     }, [aiEnabled, aiLoaded, aiThumbnailId, aiThumbs, ids, onAiChange]);
@@ -69,8 +76,10 @@ const BundleCoverPicker = ({ comics, value, onChange, aiThumbnailId, onAiChange 
 
     if (!comics.length) return null;
 
-    const visibleAiThumbs = aiThumbs.filter((t) => ids.includes(String(t.comicId)));
-    const activeAi = aiEnabled && aiThumbnailId && visibleAiThumbs.some((t) => String(t._id) === String(aiThumbnailId))
+    const visibleAiThumbs = aiThumbs.filter((t) => !isUpload(t) && ids.includes(String(t.comicId)));
+    const uploadedThumbs = aiThumbs.filter(isUpload);
+    const activeAi = aiEnabled && aiThumbnailId &&
+        [...visibleAiThumbs, ...uploadedThumbs].some((t) => String(t._id) === String(aiThumbnailId))
         ? String(aiThumbnailId)
         : "";
     const activeComicId = activeAi ? "" : (value && ids.includes(String(value)) ? String(value) : ids[0]);
@@ -90,6 +99,36 @@ const BundleCoverPicker = ({ comics, value, onChange, aiThumbnailId, onAiChange 
     const selectComic = (id) => {
         onChange(id);
         if (aiEnabled) onAiChange("");
+    };
+
+    // 📤 Apni image upload (free)
+    const handleUpload = async (event) => {
+        const file = event.target.files?.[0];
+        event.target.value = ""; // same file dobara chun sake
+        if (!file) return;
+
+        if (!UPLOAD_TYPES.includes(file.type)) return setUploadError("Only JPG, PNG or WEBP images are allowed.");
+        if (file.size > UPLOAD_MAX_BYTES) return setUploadError("Image size cannot be greater than 5 MB.");
+
+        setUploadError("");
+        setUploading(true);
+        trackClick("bundle_thumbnail_upload_click", { size_kb: Math.round(file.size / 1024) });
+
+        try {
+            const formData = new FormData();
+            formData.append("image", file);
+            const { data } = await API.post("/user/bundle-thumbnail/upload", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            const thumb = data.thumbnail;
+            setAiThumbs((prev) => [thumb, ...prev.filter((t) => t._id !== thumb._id)]);
+            onAiChange(String(thumb._id));
+        } catch (err) {
+            setUploadError(err.response?.data?.message || "Upload failed. Please try again.");
+        } finally {
+            setUploading(false);
+        }
     };
 
     const handleGenerate = async () => {
@@ -332,6 +371,77 @@ const BundleCoverPicker = ({ comics, value, onChange, aiThumbnailId, onAiChange 
                     </div>
                 </div>
             )}
+                </div>
+            )}
+
+            {/* ================= 3. UPLOAD (free, teacher ki apni image) ================= */}
+            {aiEnabled && (
+                <div className="border rounded-3 p-3 mt-2">
+                    <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <div className="fw-semibold">
+                                <i className="bi bi-upload text-primary me-1"></i>Upload your own
+                                <Badge bg="success-subtle" text="success" className="ms-2 border border-success-subtle fw-normal">
+                                    Free
+                                </Badge>
+                            </div>
+                            <div className="small text-muted">
+                                Made your own thumbnail? Upload it (JPG, PNG or WEBP, max 5 MB).
+                            </div>
+                        </div>
+                        <label
+                            className={`btn btn-sm btn-outline-primary mb-0 ${uploading || generating ? "disabled" : ""}`}
+                            style={{ cursor: uploading || generating ? "not-allowed" : "pointer" }}
+                        >
+                            {uploading ? (
+                                <><Spinner size="sm" className="me-1" />Uploading...</>
+                            ) : (
+                                <><i className="bi bi-image me-1"></i>Upload image</>
+                            )}
+                            <input
+                                type="file"
+                                accept="image/jpeg,image/jpg,image/png,image/webp"
+                                onChange={handleUpload}
+                                disabled={uploading || generating}
+                                hidden
+                            />
+                        </label>
+                    </div>
+
+                    {uploadError && <Alert variant="danger" className="py-2 small mt-3 mb-0">{uploadError}</Alert>}
+
+                    {uploadedThumbs.length > 0 && (
+                        <div className="d-flex gap-2 pt-3 pb-1" style={{ overflowX: "auto" }}>
+                            {uploadedThumbs.map((thumb) => {
+                                const active = String(thumb._id) === activeAi;
+                                return (
+                                    <button
+                                        key={thumb._id}
+                                        type="button"
+                                        onClick={() => onAiChange(String(thumb._id))}
+                                        disabled={uploading || generating}
+                                        title="Your uploaded image"
+                                        aria-pressed={active}
+                                        className={`p-0 bg-white rounded-3 position-relative flex-shrink-0 border ${active ? "border-primary border-3 shadow-sm" : ""}`}
+                                        style={tileStyle(true)}
+                                    >
+                                        <img
+                                            src={thumb.imageUrl}
+                                            alt="Uploaded cover"
+                                            className="rounded-top-2 d-block"
+                                            style={{ width: "100%", height: 116, objectFit: "cover" }}
+                                        />
+                                        {active && (
+                                            <span className="badge bg-primary position-absolute top-0 start-0 m-1">
+                                                <i className="bi bi-check2 me-1"></i>Cover
+                                            </span>
+                                        )}
+                                        <div className="small text-truncate px-1 py-1">Uploaded</div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             )}
         </Form.Group>

@@ -382,7 +382,21 @@ const MarketPlace = () => {
 
                                 return (
                                     <div key={bundle._id} className="col-lg-4 col-md-6">
-                                        <div className="bg-white h-100 border border-primary rounded-4 shadow-sm overflow-hidden d-flex flex-column">
+                                        {/* Poora card click -> details page */}
+                                        <div
+                                            className="mp-bundle-card bg-white h-100 border border-primary rounded-4 shadow-sm overflow-hidden d-flex flex-column"
+                                            role="link"
+                                            tabIndex={0}
+                                            aria-label={`View ${bundle.title}`}
+                                            onClick={() => handleView(bundle)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter" || e.key === " ") {
+                                                    e.preventDefault();
+                                                    handleView(bundle);
+                                                }
+                                            }}
+                                            style={{ cursor: "pointer", transition: "transform 0.2s ease, box-shadow 0.2s ease" }}
+                                        >
                                             <img
                                                 src={
                                                     bundle.thumbnail ||
@@ -449,15 +463,12 @@ const MarketPlace = () => {
                                                     ${bundle.price}
                                                 </div>
 
-                                                <div className="d-flex gap-2 mt-auto">
-                                                    <Button
-                                                        variant="outline-primary"
-                                                        size="sm"
-                                                        onClick={() => handleView(bundle)}
-                                                    >
-                                                        View
-                                                    </Button>
-
+                                                {/* Button pe click -> card ka click (details) na chale */}
+                                                <div
+                                                    className="d-flex gap-2 mt-auto"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    onKeyDown={(e) => e.stopPropagation()}
+                                                >
                                                     {isOwnBundle ? (
                                                         <Button variant="secondary" size="sm" disabled>Your Bundle</Button>
                                                     ) : isPurchased ? (

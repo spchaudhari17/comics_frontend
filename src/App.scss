@@ -623,3 +623,17 @@ footer {
     object-fit: contain;
   }
 }
+// Start: Marketplace bundle card (poora card clickable)
+.mp-bundle-card {
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba($theme4, 0.15) !important;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba($primary, 0.5);
+    outline-offset: 2px;
+  }
+}
+// End: Marketplace bundle card
