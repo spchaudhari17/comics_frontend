@@ -11,7 +11,7 @@ const POLL_MAX_TRIES = 75; // ~5 minute
  * 💳 Page edit credits: balance + credit pack khareedna
  * Kahin bhi laga sakte ho: <EditCreditsCard />
  */
-const EditCreditsCard = ({ className = "" }) => {
+const EditCreditsCard = ({ className = "", onCreditsChange }) => {
     const [credits, setCredits] = useState(null);
     const [isUnlimited, setIsUnlimited] = useState(false);
     const [costPerEdit, setCostPerEdit] = useState(1);
@@ -25,6 +25,10 @@ const EditCreditsCard = ({ className = "" }) => {
     const pollRef = useRef(null);
     const creditsBeforeRef = useRef(0);
 
+    // Parent ko naya balance batana (ref: har render pe credits dobara fetch na ho)
+    const onCreditsChangeRef = useRef(onCreditsChange);
+    onCreditsChangeRef.current = onCreditsChange;
+
     const fetchCredits = useCallback(async () => {
         try {
             const { data } = await API.get("/user/credits");
@@ -33,6 +37,7 @@ const EditCreditsCard = ({ className = "" }) => {
             setCostPerEdit(data.costPerEdit || 1);
             setPacks(data.packs || []);
             setLoadError("");
+            onCreditsChangeRef.current?.(data.credits ?? 0, !!data.isUnlimited);
             return data.credits ?? 0;
         } catch (err) {
             console.error("Failed to load credits:", err);

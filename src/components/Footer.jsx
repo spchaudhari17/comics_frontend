@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Row, Col, Form, InputGroup, Button } from 'react-bootstrap';
 import { trackClick, trackClickWithUser } from '../utility/analytics';
+import { SHOP_PAGES } from '../utility/shopLinks';
 
 const trackSocial = (platform) => trackClick('social_link_click', { platform, location: 'footer' });
 const trackFooterLink = (linkName) => trackClick('footer_link_click', { link_name: linkName, location: 'footer' });
@@ -32,8 +33,8 @@ export const Footer = () => {
                         <div className="wrapper text-center text-md-start">
                             <div className="menu-header fs-5 fw-bold text-warning mb-3">Quick Links</div>
                             <ul className="nav flex-column gap-2">
-                                <li className="nav-item"><Link to={'/'} className="nav-link" onClick={() => trackFooterLink('home')}>Home</Link></li>
-                                <li className="nav-item"><Link to={'/about'} className="nav-link" onClick={() => trackFooterLink('about_us')}>About Us</Link></li>
+                                <li className="nav-item"><Link to={SHOP_PAGES.home} className="nav-link" onClick={() => trackFooterLink('home')}>Home</Link></li>
+                                <li className="nav-item"><Link to={SHOP_PAGES.about} className="nav-link" onClick={() => trackFooterLink('about_us')}>About Us</Link></li>
                                 <li className="nav-item"><Link to={'/contact'} className="nav-link" onClick={() => trackFooterLink('contact_us')}>Contact Us</Link></li>
                                 <li className="nav-item"><Link to={'/faq'} className="nav-link" onClick={() => trackFooterLink('faq')}>FAQ</Link></li>
                                 <li className="nav-item"><Link to={'/privacy-policy'} className="nav-link" onClick={() => trackFooterLink('privacy_policy')}>Privacy Policy</Link></li>
@@ -47,9 +48,9 @@ export const Footer = () => {
                             <ul className="nav flex-column gap-2">
                                 <li className="nav-item"><Link to={'/our-library'} className="nav-link" onClick={() => trackFooterLink('library')}>Library</Link></li>
                                 <li className="nav-item"><Link to={'/create-comic'} className="nav-link" onClick={() => { trackFooterLink('create_comic'); trackClickWithUser('create_comics_click', { location: 'footer' }); }}>Create Comic</Link></li>
-                                <li className="nav-item"><Link to={'/for-student'} className="nav-link" onClick={() => trackFooterLink('for_student')}>For Student</Link></li>
-                                <li className="nav-item"><Link to={'/for-teacher'} className="nav-link" onClick={() => trackFooterLink('for_teacher')}>For Teacher</Link></li>
-                                <li className="nav-item"><Link to={'/for-parent'} className="nav-link" onClick={() => trackFooterLink('for_parent')}>For Parent</Link></li>
+                                <li className="nav-item"><Link to={SHOP_PAGES.studentsParents} className="nav-link" onClick={() => trackFooterLink('for_student')}>For Student</Link></li>
+                                <li className="nav-item"><Link to={SHOP_PAGES.forTeachers} className="nav-link" onClick={() => trackFooterLink('for_teacher')}>For Teacher</Link></li>
+                                <li className="nav-item"><Link to={SHOP_PAGES.studentsParents} className="nav-link" onClick={() => trackFooterLink('for_parent')}>For Parent</Link></li>
                             </ul>
                         </div>
                     </Col>

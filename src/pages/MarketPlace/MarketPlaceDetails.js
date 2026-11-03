@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import API from "../../API";
-import { Alert, Button } from "react-bootstrap";
+import { Alert, Button, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { trackClick } from "../../utility/analytics";
 import { useAutoAddToCart, goToLoginThenAddToCart } from "../../hooks/useAutoAddToCart";
 import { isUserLoggedIn } from "../../utility/authRedirect";
 import { notifyCartUpdated } from "../../utility/cartEvents";
+import "./MarketPlaceDetails.scss";
+
+const PLACEHOLDER_IMG = "https://via.placeholder.com/600x450?text=Comic";
 
 const MarketPlaceDetails = () => {
     const { id } = useParams();
@@ -22,6 +25,9 @@ const MarketPlaceDetails = () => {
 
     const [hoverRating, setHoverRating] = useState(0);
     const [selectedRating, setSelectedRating] = useState(0);
+
+    // Bada preview: kaunsi image dikh rahi hai (null = bundle cover)
+    const [activeImage, setActiveImage] = useState(null);
 
     const [marketplaceStatus, setMarketplaceStatus] = useState({
         purchasedBundleIds: [],
@@ -63,6 +69,7 @@ const MarketPlaceDetails = () => {
     };
 
     useEffect(() => {
+        setActiveImage(null);
         fetchBundle();
         fetchMarketplaceStatus();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -93,14 +100,7 @@ const MarketPlaceDetails = () => {
 
     const renderStars = (rating = 0) => {
         return [...Array(5)].map((_, index) => (
-            <span
-                key={index}
-                style={{
-                    color: index < Math.round(rating) ? "#ffc107" : "#d6d6d6",
-                    fontSize: "24px",
-                    marginRight: "2px"
-                }}
-            >
+            <span key={index} className={index < Math.round(rating) ? "" : "is-empty"}>
                 ★
             </span>
         ));
@@ -145,12 +145,25 @@ const MarketPlaceDetails = () => {
 
     if (loading || autoAdding) {
         return (
-            <p className="text-center mt-5">
-                {autoAdding ? "Adding to your cart..." : "Loading..."}
-            </p>
+            <div className="mp-details d-flex flex-column align-items-center justify-content-center gap-3 pt-5">
+                <Spinner animation="border" style={{ color: "#B88746" }} />
+                <div className="text-muted">
+                    {autoAdding ? "Adding to your cart..." : "Loading bundle..."}
+                </div>
+            </div>
         );
     }
-    if (!bundle) return <p className="text-center mt-5">No Data Found</p>;
+    if (!bundle) {
+        return (
+            <div className="mp-details text-center pt-5">
+                <i className="bi bi-journal-x fs-1 text-muted"></i>
+                <p className="mt-2 text-muted">No Data Found</p>
+                <Button variant="primary" onClick={() => navigate("/market-place")}>
+                    Back to Marketplace
+                </Button>
+            </div>
+        );
+    }
 
     const isPurchased = marketplaceStatus.purchasedBundleIds.includes(String(bundle._id));
     const isOwnBundle = marketplaceStatus.ownBundleIds.includes(String(bundle._id));
@@ -163,8 +176,8 @@ const MarketPlaceDetails = () => {
         concept: firstComic?.series?.conceptName || firstComic?.conceptName || "N/A",
         grade: firstComic?.series?.grade || firstComic?.grade || "N/A",
         country: firstComic?.series?.country || firstComic?.country || "N/A",
-        theme: firstComic?.themeId?.name || firstComic?.theme || "N/A",
-        style: firstComic?.styleId?.name || firstComic?.style || "N/A",
+        theme: firstComic?.themeId?.name || firstComic?.customTheme || firstComic?.theme || "N/A",
+        style: firstComic?.styleId?.name || firstComic?.customStyle || firstComic?.style || "N/A",
         partNumber: firstComic?.series?.partNumber || null,
         hasQuiz: firstComic?.hasQuiz || false,
         createdAt: firstComic?.createdAt || bundle.createdAt
@@ -172,329 +185,351 @@ const MarketPlaceDetails = () => {
 
     // getBundleDetails backend `teacher` bhejta hai, purana `teacherId` bhi chal jaye
     const teacher = bundle.teacher || bundle.teacherId;
+    const teacherName = [teacher?.firstname, teacher?.lastname].filter(Boolean).join(" ") || "Kridemy Teacher";
+    const avatarSrc = teacher?.profile_pic || require("../../assets/images/avatar.png");
+
+    const coverImage = bundle.thumbnail || firstComic?.thumbnail || null;
+    const previewImage = activeImage || coverImage || PLACEHOLDER_IMG;
+
+    // Hero background: teacher ki cover photo, warna bundle cover (blur)
+    const heroImage = teacher?.background_image || coverImage;
+    const heroIsCover = !teacher?.background_image;
+
+    const comicsCount = bundle.comics?.length || 0;
+    const countryLabel = commonInfo.country === "ALL" ? "🌍 All Countries" : commonInfo.country;
+
+    const infoTiles = [
+        { icon: "bi-book", label: "Subject", value: commonInfo.subject },
+        { icon: "bi-lightbulb", label: "Concept", value: commonInfo.concept },
+        { icon: "bi-mortarboard", label: "Grade", value: commonInfo.grade },
+        { icon: "bi-globe2", label: "Country", value: countryLabel },
+        { icon: "bi-palette", label: "Theme", value: commonInfo.theme },
+        { icon: "bi-brush", label: "Style", value: commonInfo.style },
+        {
+            icon: "bi-calendar3",
+            label: "Created on",
+            value: commonInfo.createdAt ? new Date(commonInfo.createdAt).toLocaleDateString() : "N/A"
+        },
+        { icon: "bi-journals", label: "Comics", value: `${comicsCount} included` }
+    ];
+
+    const includes = [
+        `${comicsCount} comic${comicsCount === 1 ? "" : "s"} included`,
+        ...(commonInfo.hasQuiz ? ["Quiz"] : []),
+        "Did You Know facts",
+        "FAQs",
+        "Hardcore Quiz",
+        "Instant access after purchase",
+        "Downloadable PDF"
+    ];
+
+    // Price + cart card: mobile pe preview ke niche, desktop pe right side (sticky)
+    const renderBuyCard = (className = "") => (
+        <div className={`mp-card mp-buy ${className}`}>
+            <div className="d-flex align-items-end justify-content-between mb-1">
+                <div className="mp-price">${bundle.price}</div>
+                <span className="badge rounded-pill text-bg-light border">
+                    <i className="bi bi-journals me-1"></i>{comicsCount} {comicsCount === 1 ? "Comic" : "Comics"}
+                </span>
+            </div>
+            <div className="small text-muted mb-3">One-time purchase · Lifetime access</div>
+        
+            <div className="d-flex gap-2 mb-3">
+                <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                    <i className="bi bi-patch-check-fill me-1"></i>Approved
+                </span>
+                <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                    <i className="bi bi-megaphone-fill me-1"></i>Published
+                </span>
+            </div>
+        
+            {/* Buttons */}
+            <div className="d-grid gap-2 mb-3">
+                {isOwnBundle ? (
+                    <Button variant="secondary" size="lg" disabled>
+                        Your Bundle
+                    </Button>
+                ) : isPurchased ? (
+                    <Button variant="success" size="lg" disabled>
+                        <i className="bi bi-check2-circle me-1"></i>Purchased
+                    </Button>
+                ) : (
+                    <>
+                        <Button variant="primary" size="lg" onClick={handleAddToCart} disabled={addingToCart}>
+                            {addingToCart ? (
+                                <><Spinner size="sm" className="me-2" />Adding...</>
+                            ) : (
+                                <><i className="bi bi-cart-plus me-2"></i>Add To Cart</>
+                            )}
+                        </Button>
+                        {isUserLoggedIn() && (
+                            <Button variant="outline-primary" onClick={() => navigate("/cart")}>
+                                <i className="bi bi-cart3 me-1"></i>
+                                View Cart
+                            </Button>
+                        )}
+                    </>
+                )}
+            </div>
+        
+            {/* Messages */}
+            {isOwnBundle && (
+                <div className="alert alert-info py-2 small">
+                    📚 This is your bundle. You can view it anytime.
+                </div>
+            )}
+            {isPurchased && (
+                <div className="alert alert-success py-2 small">
+                    ✅ You have already purchased this bundle.
+                </div>
+            )}
+        
+            <hr />
+        
+            <div className="fw-semibold mb-2">What's included</div>
+            <ul className="mp-include-list">
+                {includes.map((item) => (
+                    <li key={item}><i className="bi bi-check-circle-fill"></i>{item}</li>
+                ))}
+            </ul>
+        </div>
+    );
 
     return (
-        <div className="container-xl py-5">
+        <div className="mp-details">
 
-            {/* WordPress se aaye user ka bundle add nahi hua (apna bundle / kharida hua) */}
-            {autoAddMessage && (
-                <Alert variant="warning" dismissible onClose={clearAutoAddMessage}>
-                    {autoAddMessage}
-                </Alert>
-            )}
+            {/* ============ HERO (background image) ============ */}
+            <section className="mp-hero">
+                {heroImage && (
+                    <div
+                        className={`mp-hero-bg ${heroIsCover ? "is-blurred" : ""}`}
+                        style={{ backgroundImage: `url("${heroImage}")` }}
+                    />
+                )}
+                <div className="mp-hero-overlay" />
 
-            <div className="row g-4">
+                <div className="container-xl mp-hero-content">
+                    <button type="button" className="mp-back mb-3" onClick={() => navigate("/market-place")}>
+                        <i className="bi bi-arrow-left me-1"></i> Marketplace
+                    </button>
 
-                {/* LEFT SIDE - IMAGES */}
-                <div className="col-lg-6">
-
-                    {/* Main Image */}
-                    <div className="border rounded-4 overflow-hidden mb-3">
-                        <img
-                            src={
-                                bundle.comics?.[0]?.thumbnail ||
-                                "https://via.placeholder.com/600x400"
-                            }
-                            alt="preview"
-                            style={{ width: "100%", height: "400px", objectFit: "cover" }}
-                        />
-                    </div>
-
-                    {/* Thumbnail List */}
-                    <div className="d-flex gap-2 flex-wrap">
-                        {bundle.comics?.slice(0, 5).map((comic) => (
-                            <img
-                                key={comic._id}
-                                src={comic.thumbnail || "https://via.placeholder.com/100"}
-                                alt="thumb"
-                                style={{
-                                    width: "80px",
-                                    height: "80px",
-                                    objectFit: "cover",
-                                    borderRadius: "8px",
-                                    border: "1px solid #ddd"
-                                }}
-                            />
-                        ))}
-                    </div>
-
-                </div>
-
-                {/* RIGHT SIDE - DETAILS */}
-                <div className="col-lg-6">
-
-                    {/* Title */}
-                    <h3 className="fw-bold mb-1 text-capitalize">
+                    <h1 className="mp-title text-capitalize mb-2">
                         {commonInfo.seriesTitle}
-                        {commonInfo.partNumber && (
-                            <span className="text-muted fs-5 ms-2">
-                                {bundle.title}
-                            </span>
-                        )}
-                    </h3>
-
-                    {/* Created Date */}
-                    {commonInfo.createdAt && (
-                        <div className="text-muted small mb-2">
-                            <i className="bi bi-calendar3 me-1"></i>
-                            Created on {new Date(commonInfo.createdAt).toLocaleString()}
-                        </div>
+                    </h1>
+                    {commonInfo.partNumber && bundle.title !== commonInfo.seriesTitle && (
+                        <div className="fs-5 opacity-75 mb-2">{bundle.title}</div>
                     )}
 
-                    {/* Status Badges */}
-                    <div className="mb-3">
-                        <span className="badge bg-success me-2 px-3 py-2">
-                            ✅ Approved
-                        </span>
-                        <span className="badge bg-primary px-3 py-2">
-                            📢 Published
-                        </span>
+                    <div className="d-flex flex-wrap gap-2 my-3">
+                        <span className="mp-chip"><i className="bi bi-book"></i>{commonInfo.subject}</span>
+                        <span className="mp-chip"><i className="bi bi-lightbulb"></i>{commonInfo.concept}</span>
+                        <span className="mp-chip"><i className="bi bi-mortarboard"></i>Grade {commonInfo.grade}</span>
+                        <span className="mp-chip"><i className="bi bi-journals"></i>{comicsCount} {comicsCount === 1 ? "Comic" : "Comics"}</span>
                     </div>
 
-                    <hr />
-
-                    {/* Details Grid - 2 Columns */}
-                    <div className="row g-2 mb-3">
-                        {/* Left Column */}
-                        <div className="col-md-6">
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Creator:
-                                </span>
-                                <span>{teacher?.firstname} {teacher?.lastname}</span>
-                            </div>
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Email:
-                                </span>
-                                <span>{teacher?.email || "N/A"}</span>
-                            </div>
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Country:
-                                </span>
-                                <span>{commonInfo.country === "ALL" ? "🌍 All Countries" : commonInfo.country}</span>
-                            </div>
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Grade:
-                                </span>
-                                <span>{commonInfo.grade}</span>
-                            </div>
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Has Quiz:
-                                </span>
-                                <span className={commonInfo.hasQuiz ? "text-success" : "text-danger"}>
-                                    {commonInfo.hasQuiz ? "✅ Yes" : "❌ No"}
-                                </span>
-                            </div>
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Has Did You Know:
-                                </span>
-                                <span className="text-success">✅ Yes</span>
+                    <div className="d-flex flex-wrap align-items-center gap-4">
+                        <div className="mp-hero-creator d-flex align-items-center gap-2">
+                            <img src={avatarSrc} alt={teacherName} className="rounded-circle" />
+                            <div>
+                                <div className="small opacity-75">Created by</div>
+                                <div className="fw-semibold text-capitalize">{teacherName}</div>
                             </div>
                         </div>
 
-                        {/* Right Column */}
-                        <div className="col-md-6">
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Subject:
-                                </span>
-                                <span>{commonInfo.subject}</span>
-                            </div>
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Theme:
-                                </span>
-                                <span>{commonInfo.theme}</span>
-                            </div>
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Style:
-                                </span>
-                                <span>{commonInfo.style}</span>
-                            </div>
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Concept:
-                                </span>
-                                <span>{commonInfo.concept}</span>
-                            </div>
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Has FAQ:
-                                </span>
-                                <span className="text-success">✅ Yes</span>
-                            </div>
-                            <div className="d-flex py-1">
-                                <span className="fw-semibold text-muted" style={{ minWidth: "100px" }}>
-                                    Has Hardcore Quiz:
-                                </span>
-                                <span className="text-success">✅ Yes</span>
-                            </div>
+                        <div className="d-flex align-items-center gap-2">
+                            <span className="mp-stars fs-5">{renderStars(bundle.averageRating)}</span>
+                            <span className="fw-semibold">{bundle.averageRating?.toFixed(1) || "0.0"}</span>
+                            <span className="small opacity-75">({bundle.totalRatings || 0} ratings)</span>
                         </div>
                     </div>
+                </div>
+            </section>
 
-                    <hr />
+            {/* ============ MAIN ============ */}
+            <div className="container-xl mp-main">
 
-                    {/* Price & Actions */}
-                    <div className="d-flex flex-wrap align-items-center gap-3 mb-3">
-                        <span className="fs-3 fw-bold text-success">
-                            ${bundle.price}
-                        </span>
-                        <span className="text-muted">
-                            <i className="bi bi-journal me-1"></i>
-                            {bundle.comics?.length} Comics Included
-                        </span>
-                    </div>
+                {/* WordPress se aaye user ka bundle add nahi hua (apna bundle / kharida hua) */}
+                {autoAddMessage && (
+                    <Alert variant="warning" dismissible onClose={clearAutoAddMessage}>
+                        {autoAddMessage}
+                    </Alert>
+                )}
 
-                    {/* Buttons */}
-                    <div className="d-flex gap-3 mb-4">
-                        {isOwnBundle ? (
-                            <Button variant="secondary" disabled>
-                                Your Bundle
-                            </Button>
-                        ) : isPurchased ? (
-                            <Button variant="success" disabled>
-                                ✅ Purchased
-                            </Button>
-                        ) : (
-                            <>
-                                <Button variant="success" onClick={handleAddToCart} disabled={addingToCart}>
-                                    <i className="bi bi-cart-plus me-1"></i>
-                                    {addingToCart ? "Adding..." : "Add To Cart"}
-                                </Button>
-                                {isUserLoggedIn() && (
-                                    <Button variant="outline-success" onClick={() => navigate("/cart")}>
-                                        <i className="bi bi-cart3 me-1"></i>
-                                        View Cart
-                                    </Button>
-                                )}
-                            </>
-                        )}
-                    </div>
+                <div className="row g-4">
 
-                    {/* Messages */}
-                    {isOwnBundle && (
-                        <div className="alert alert-info py-2">
-                            📚 This is your bundle. You can view it anytime.
-                        </div>
-                    )}
+                    {/* LEFT: preview + details */}
+                    <div className="col-lg-8">
 
-                    {isPurchased && (
-                        <div className="alert alert-success py-2">
-                            ✅ You have already purchased this bundle.
-                        </div>
-                    )}
+                        {/* Preview */}
+                        <div className="mp-card mp-preview mb-4">
+                            <div className="mp-preview-main">
+                                <img src={previewImage} alt={bundle.title} />
+                            </div>
 
-                    {/* Description */}
-                    <div className="mb-4">
-                        <h5>About this bundle</h5>
-                        <p className="text-muted">
-                            {bundle.description || "No description available."}
-                        </p>
-                    </div>
-
-                    {/* Highlights & Rating - LEFT | RIGHT */}
-                    <div className="row g-4 mb-4">
-                        {/* LEFT: Highlights */}
-                        <div className="col-md-6">
-                            <h5>Highlights</h5>
-                            <ul className="text-muted ps-3">
-                                <li>{bundle.comics?.length} Comics included</li>
-                                <li>Instant access after purchase</li>
-                                <li>Downloadable content</li>
-                            </ul>
-                        </div>
-
-                        {/* RIGHT: Rating */}
-                        <div className="col-md-6">
-                            <div
-                                className="p-3 rounded-3 h-100"
-                                style={{
-                                    background: "#FFF8E1",
-                                    border: "1px solid #FFE082"
-                                }}
-                            >
-                                <div className="d-flex align-items-center mb-2">
-                                    {renderStars(bundle.averageRating)}
-
-                                    <span className="ms-2 fw-bold">
-                                        {bundle.averageRating?.toFixed(1) || "0.0"}
-                                    </span>
-
-                                    <span className="ms-2 text-muted">
-                                        ({bundle.totalRatings || 0} ratings)
-                                    </span>
+                            {comicsCount > 1 && (
+                                <div className="mp-thumbs">
+                                    {bundle.comics.map((comic, index) => {
+                                        const src = comic.thumbnail || PLACEHOLDER_IMG;
+                                        const isActive = previewImage === src;
+                                        return (
+                                            <button
+                                                key={comic._id}
+                                                type="button"
+                                                className={isActive ? "active" : ""}
+                                                onClick={() => setActiveImage(src)}
+                                                title={`Part ${index + 1}: ${comic.title}`}
+                                                aria-label={`Preview part ${index + 1}`}
+                                            >
+                                                <img src={src} alt="" />
+                                            </button>
+                                        );
+                                    })}
                                 </div>
+                            )}
+                        </div>
 
-                                {!isOwnBundle && (
-                                    <>
-                                        <small className="text-muted d-block mb-2">
-                                            Rate this bundle
-                                        </small>
+                        {/* Price + cart (mobile) */}
+                        {renderBuyCard("d-lg-none mb-4")}
 
-                                        <div>
-                                            {[1, 2, 3, 4, 5].map((star) => (
-                                                <span
-                                                    key={star}
-                                                    onMouseEnter={() => setHoverRating(star)}
-                                                    onMouseLeave={() => setHoverRating(0)}
-                                                    onClick={() => submitRating(star)}
-                                                    style={{
-                                                        cursor: "pointer",
-                                                        fontSize: "32px",
-                                                        transition: "transform 0.2s"
-                                                    }}
-                                                >
-                                                    {star <= (hoverRating || selectedRating) ? "★" : "☆"}
-                                                </span>
-                                            ))}
+                        {/* About */}
+                        <div className="mp-card p-4 mb-4">
+                            <h5 className="mp-section-title">About this bundle</h5>
+                            <p className="text-muted mb-0" style={{ whiteSpace: "pre-line" }}>
+                                {bundle.description || "No description available."}
+                            </p>
+                        </div>
+
+                        {/* Details */}
+                        <div className="mp-card p-4 mb-4">
+                            <h5 className="mp-section-title">Bundle details</h5>
+                            <div className="row g-3">
+                                {infoTiles.map((tile) => (
+                                    <div key={tile.label} className="col-6 col-xl-4">
+                                        <div className="mp-info-tile">
+                                            <div className="mp-info-icon"><i className={`bi ${tile.icon}`}></i></div>
+                                            <div className="min-w-0">
+                                                <div className="mp-info-label">{tile.label}</div>
+                                                <div className="mp-info-value">{tile.value}</div>
+                                            </div>
                                         </div>
-                                    </>
-                                )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
 
-                                {isOwnBundle && (
-                                    <small className="text-muted">
-                                        ⚡ You cannot rate your own bundle.
-                                    </small>
-                                )}
+                        {/* Creator */}
+                        <div className="mp-card mp-creator mb-4">
+                            <div
+                                className="mp-creator-cover"
+                                style={teacher?.background_image
+                                    ? { backgroundImage: `url("${teacher.background_image}")` }
+                                    : { backgroundImage: "linear-gradient(135deg, #B88746 0%, #DEC46A 100%)" }}
+                            />
+                            <div className="px-4 pb-4">
+                                <img src={avatarSrc} alt={teacherName} className="mp-creator-avatar rounded-circle shadow-sm" />
+                                <div className="d-flex flex-wrap justify-content-between align-items-end gap-2 mt-2">
+                                    <div>
+                                        <div className="small text-muted">About the creator</div>
+                                        <h5 className="fw-bold mb-0 text-capitalize">{teacherName}</h5>
+                                        {teacher?.email && (
+                                            <div className="small text-muted">
+                                                <i className="bi bi-envelope me-1"></i>{teacher.email}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <p className="text-muted mt-3 mb-0" style={{ whiteSpace: "pre-line" }}>
+                                    {teacher?.bio || "This teacher hasn't added a bio yet."}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Rating */}
+                        <div className="mp-card p-4">
+                            <h5 className="mp-section-title">Ratings</h5>
+                            <div className="d-flex flex-wrap align-items-center gap-4">
+                                <div className="text-center">
+                                    <div className="display-6 fw-bold lh-1">
+                                        {bundle.averageRating?.toFixed(1) || "0.0"}
+                                    </div>
+                                    <div className="mp-stars mp-stars-light">
+                                        {renderStars(bundle.averageRating)}
+                                    </div>
+                                    <div className="small text-muted">{bundle.totalRatings || 0} ratings</div>
+                                </div>
+
+                                <div className="vr d-none d-sm-block"></div>
+
+                                <div>
+                                    {isOwnBundle ? (
+                                        <small className="text-muted">⚡ You cannot rate your own bundle.</small>
+                                    ) : (
+                                        <>
+                                            <small className="text-muted d-block mb-1">Rate this bundle</small>
+                                            <div onMouseLeave={() => setHoverRating(0)}>
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <button
+                                                        key={star}
+                                                        type="button"
+                                                        className="mp-rate-star"
+                                                        onMouseEnter={() => setHoverRating(star)}
+                                                        onClick={() => submitRating(star)}
+                                                        aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                                                    >
+                                                        {star <= (hoverRating || selectedRating) ? "★" : "☆"}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
 
+                    {/* RIGHT: buy card (desktop) */}
+                    <div className="col-lg-4 d-none d-lg-block">
+                        {renderBuyCard()}
+                    </div>
                 </div>
-            </div>
 
-            {/* Comics List */}
-            <div className="mt-5">
-                <h4 className="mb-3">📖 Included Comics</h4>
+                {/* ============ COMICS ============ */}
+                <div className="mt-5">
+                    <div className="d-flex align-items-center justify-content-between mb-3">
+                        <h4 className="mp-section-title mb-0">📖 Included Comics</h4>
+                        <span className="text-muted small">{comicsCount} total</span>
+                    </div>
 
-                <div className="row g-3">
-                    {bundle.comics?.map((comic, index) => (
-                        <div key={comic._id} className="col-md-4">
-                            <div className="border rounded-3 p-2 h-100">
-
-                                <img
-                                    src={comic.thumbnail || "https://via.placeholder.com/200"}
-                                    alt={comic.title}
-                                    style={{ width: "100%", height: "150px", objectFit: "cover" }}
-                                />
-
-                                <div className="mt-2 fw-semibold">
-                                    Part {index + 1}: {comic.title}
+                    <div className="row g-4">
+                        {bundle.comics?.map((comic, index) => {
+                            const isCover = comic.thumbnail && comic.thumbnail === coverImage;
+                            return (
+                                <div key={comic._id} className="col-6 col-md-4 col-xl-3">
+                                    <div className="mp-card mp-comic-card">
+                                        <div className="mp-comic-img">
+                                            {comic.thumbnail ? (
+                                                <img src={comic.thumbnail} alt={comic.title} loading="lazy" />
+                                            ) : (
+                                                <div className="mp-placeholder"><i className="bi bi-image"></i></div>
+                                            )}
+                                            <span className="mp-part-badge">Part {index + 1}</span>
+                                            {isCover && comicsCount > 1 && <span className="mp-cover-badge">Cover</span>}
+                                        </div>
+                                        <div className="p-3">
+                                            <div className="fw-semibold text-truncate" title={comic.title}>{comic.title}</div>
+                                            <div className="text-muted small text-truncate">
+                                                {comic.subjectName || commonInfo.subject}
+                                                {comic.conceptName ? ` · ${comic.conceptName}` : ""}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="text-muted small">{commonInfo.subject}</div>
-
-                            </div>
-                        </div>
-                    ))}
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
 
+            </div>
         </div>
     );
 };

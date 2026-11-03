@@ -106,7 +106,7 @@ const MyComicDetails = () => {
     }
   };
 
-  // 📥 Comic + FAQ + facts + quiz ek PDF me (watermark ke saath)
+  // 📥 Comic + FAQ + facts + quiz ek PDF me
   const handleDownloadPdf = async () => {
     trackClick("comic_details_pdf_download_click", {
       comic_id: id,

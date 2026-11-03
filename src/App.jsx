@@ -6,7 +6,10 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import './App.scss';
 
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { isUserLoggedIn, saveReturnAfterLogin } from "./utility/authRedirect";
+import ExternalRedirect from "./components/ExternalRedirect";
+import { SHOP_PAGES } from "./utility/shopLinks";
 import ToastContainers from './lib/ToastContainer';
 
 // Scroll To Top 
@@ -19,8 +22,6 @@ import { ForgotPassword } from './pages/authentication/ForgotPassword';
 
 // Main Layout and Pages
 import { Layout } from './components/layouts/Layout';
-import { Home } from './pages/Homepage/Home';
-import { AboutUs } from './pages/AboutUs';
 import { ContactUs } from './pages/ContactUs';
 import { ComicSubmittedSuccessfully } from './pages/ComicSubmittedSuccessfully';
 import { PageNotFound } from './pages/PageNotFound';
@@ -32,9 +33,6 @@ import ParentActivity from './pages/ParentActivity/ParentActivity';
 import Privacy from './pages/PrivacyPolicy/Privacy';
 import TermsAndCondition from './pages/TermsCondition/TermsAndCondition';
 import ComicsList from './pages/ComicsList/ComicsList';
-import ParentsLanding from './pages/Homepage/Parent/ParentsLanding';
-import StudentLanding from './pages/Homepage/Student/StudentLanding';
-import TeacherLanding from './pages/Homepage/Teacher/TeacherLanding';
 import FAQLanding from './pages/Homepage/Faq/FAQLanding';
 import AllUsers from './pages/admin/AllUsers';
 import ContactList from './pages/admin/ContactList';
@@ -67,6 +65,18 @@ import FoundingTeacherSuccess from "./pages/subscriptions/FoundingTeacherSuccess
 import CreditsPaymentResult from "./pages/ComicGenerator/CreditsPaymentResult";
 
 
+// Login zaroori wale pages: logout user -> /login, login ke baad wapas isi page pe
+const ProtectedRoute = ({ children }) => {
+  const location = useLocation();
+
+  if (!isUserLoggedIn()) {
+    saveReturnAfterLogin(location.pathname + location.search);
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
 function App() {
   // AOS Animations
   useEffect(() => {
@@ -78,16 +88,6 @@ function App() {
     }); // set options as needed
   }, []);
 
-
-  const ProtectedRoute = ({ children }) => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      return <Navigate to="/login" replace />;
-    }
-
-    return children;
-  };
 
 
   return (
@@ -108,12 +108,13 @@ function App() {
 
           {/* Main Layout Routes */}
           <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="about" element={<AboutUs />} />
+            {/* Marketing pages ab shop.kridemy.com pe (utility/shopLinks.js) */}
+            <Route index element={<ExternalRedirect to={SHOP_PAGES.home} />} />
+            <Route path="about" element={<ExternalRedirect to={SHOP_PAGES.about} />} />
             <Route path="contact" element={<ContactUs />} />
-            <Route path="for-teacher" element={<TeacherLanding />} />
-            <Route path="for-student" element={<StudentLanding />} />
-            <Route path="for-parent" element={<ParentsLanding />} />
+            <Route path="for-teacher" element={<ExternalRedirect to={SHOP_PAGES.forTeachers} />} />
+            <Route path="for-student" element={<ExternalRedirect to={SHOP_PAGES.studentsParents} />} />
+            <Route path="for-parent" element={<ExternalRedirect to={SHOP_PAGES.studentsParents} />} />
             <Route path="faq" element={<FAQLanding />} />
             <Route path="our-library" element={<ComicsList />} />
             <Route path="privacy-policy" element={<Privacy />} />
@@ -125,16 +126,16 @@ function App() {
             <Route path="/payment-success" element={<CartSuccess />} />
             <Route path="/founding-teacher-success" element={<FoundingTeacherSuccess />} />
             <Route path="/cancel" element={<CancelPage />} />
-            <Route path="/my-account" element={<MyAccount />} />
+            <Route path="/my-account" element={<ProtectedRoute><MyAccount /></ProtectedRoute>} />
             <Route path="/subscription-rules" element={<SubscriptionRules />} />
 
             <Route path="/market-place" element={<MarketPlace />} />
             <Route path="/marketPlaceDetails/:id" element={<MarketPlaceDetails />} />
-            <Route path="/purchasedBundleDetails/:id" element={<PurchasedBundleDetails />} />
-            <Route path="/comic-reader/:comicId" element={<ComicReader />} />
-            <Route path="/mybundleList" element={<MymarketList />} />
+            <Route path="/purchasedBundleDetails/:id" element={<ProtectedRoute><PurchasedBundleDetails /></ProtectedRoute>} />
+            <Route path="/comic-reader/:comicId" element={<ProtectedRoute><ComicReader /></ProtectedRoute>} />
+            <Route path="/mybundleList" element={<ProtectedRoute><MymarketList /></ProtectedRoute>} />
             <Route path="/cart" element={<AddToCart />} />
-            <Route path="/teacherDashboard" element={<TeacherDashboard />} />
+            <Route path="/teacherDashboard" element={<ProtectedRoute><TeacherDashboard /></ProtectedRoute>} />
 
             {/* protected routes  */}
 

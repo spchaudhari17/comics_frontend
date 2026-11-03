@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import API from "../API";
 import { trackClick, trackClickWithUser } from "../utility/analytics";
 import { CART_UPDATED_EVENT } from "../utility/cartEvents";
+import { SHOP_PAGES } from "../utility/shopLinks";
 
 
 export const Header = () => {
@@ -86,7 +87,7 @@ export const Header = () => {
       <nav className="navbar navbar-light bg-white border-bottom navbar-expand-lg py-1" data-bs-theme="light" style={{ minHeight: "61px" }}>
         <div className="container-xl">
           {/* Logo */}
-          <Link className="navbar-brand logo-wrapper text-center" to={"/"}>
+          <Link className="navbar-brand logo-wrapper text-center" to={SHOP_PAGES.home}>
             <img src={require("../assets/images/logo2.png")} alt="Logo" className="img-fluid" />
           </Link>
 

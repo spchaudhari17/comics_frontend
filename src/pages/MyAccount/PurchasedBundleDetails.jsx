@@ -110,8 +110,8 @@ const PurchasedBundleDetails = () => {
             return list.includes("ALL") ? "🌍 All Countries" : list.join(", ");
         })(),
         partNumber: firstComic?.series?.partNumber || null,
-        theme: firstComic?.themeId?.name || "N/A",
-        style: firstComic?.styleId?.name || "N/A",
+        theme: firstComic?.themeId?.name || firstComic?.customTheme || "N/A",
+        style: firstComic?.styleId?.name || firstComic?.customStyle || "N/A",
         hasQuiz: firstComic?.hasQuiz || false,
         createdAt: firstComic?.createdAt || bundle.createdAt
     };

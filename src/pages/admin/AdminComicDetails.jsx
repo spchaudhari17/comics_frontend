@@ -121,7 +121,7 @@ const AdminComicDetails = () => {
             addText(`Creator: ${comic.user_id?.firstname || 'N/A'}`);
             addText(`Grade: ${comic.grade || 'N/A'}`);
             addText(`Subject: ${comic.subjectId?.name || 'N/A'}`);
-            addText(`Theme: ${comic.themeId?.name || 'N/A'}`);
+            addText(`Theme: ${comic.themeId?.name || comic.customTheme || 'N/A'}`);
             y += 10;
 
             // ==========================================================
@@ -267,8 +267,8 @@ const AdminComicDetails = () => {
                             </Col>
                             <Col md={6}>
                                 <div><strong>Subject:</strong> {comic.subjectId?.name}</div>
-                                <div><strong>Theme:</strong> {comic.themeId?.name}</div>
-                                <div><strong>Style:</strong> {comic.styleId?.name}</div>
+                                <div><strong>Theme:</strong> {comic.themeId?.name || comic.customTheme}</div>
+                                <div><strong>Style:</strong> {comic.styleId?.name || comic.customStyle}</div>
                                 <div><strong>Concept:</strong> {comic.concept}</div>
 
                                 <div><strong>Has FAQ:</strong> {data.hasFaq ? "✅ Yes" : "❌ No"}</div>

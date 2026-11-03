@@ -12,6 +12,10 @@ import forImage from "../../assets/images/forImage.jpeg";
 import { trackClick, trackClickWithUser, trackEvent, useScrollDepth } from "../../utility/analytics";
 import EditComicPageModal from './EditComicPageModal';
 
+// Theme / Style dropdown me "Custom" option ki value (backend limit ke barabar)
+const CUSTOM_OPTION = "__custom__";
+const CUSTOM_TEXT_MAX = 100;
+
 const Stepper = ({ currentStep }) => {
   const steps = [
     "Write a story",
@@ -77,6 +81,11 @@ export const ComicGenerator = () => {
   const [classGrade, setClassGrade] = useState("");
   const [themeType, setThemeType] = useState("");
   const [styleType, setStyleType] = useState("");
+  // Custom theme / style: sirf is comic ke liye, list me save nahi hota
+  const [customTheme, setCustomTheme] = useState("");
+  const [customStyle, setCustomStyle] = useState("");
+  const isCustomTheme = themeType === CUSTOM_OPTION;
+  const isCustomStyle = styleType === CUSTOM_OPTION;
   const [comicTitle, setComicTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [subject, setSubject] = useState("");
@@ -414,8 +423,8 @@ export const ComicGenerator = () => {
       subject: subjectsList.find(s => s._id === subject)?.name || subject,
       grade: classGrade,
       country: selectedCountry?.value || "",
-      theme: themeType,
-      style: styleType,
+      theme: isCustomTheme ? "custom" : themeType,
+      style: isCustomStyle ? "custom" : styleType,
       show_text_in_image: showTextInImage,
     });
     setErrorMsg("");
@@ -429,8 +438,10 @@ export const ComicGenerator = () => {
         subjectId: subject,
         concept,
         story,
-        themeId: themes.find(t => t.name === themeType)?._id,
-        styleId: styles.find(s => s.name === styleType)?._id,
+        themeId: isCustomTheme ? undefined : themes.find(t => t.name === themeType)?._id,
+        styleId: isCustomStyle ? undefined : styles.find(s => s.name === styleType)?._id,
+        customTheme: isCustomTheme ? customTheme.trim() : undefined,
+        customStyle: isCustomStyle ? customStyle.trim() : undefined,
         grade: classGrade,
         country: selectedCountry?.value,
         showTextInImage,
@@ -833,7 +844,8 @@ export const ComicGenerator = () => {
   };
 
   // Helper functions
-  const isStep0Valid = story?.trim()?.length > 0 && comicTitle.trim() && subject.trim();
+  const isStep0Valid = story?.trim()?.length > 0 && comicTitle.trim() && subject.trim() &&
+    (!isCustomTheme || customTheme.trim()) && (!isCustomStyle || customStyle.trim());
 
   const resetAfterBackToPrompt = () => {
     setComicImages([]);
@@ -1005,7 +1017,25 @@ export const ComicGenerator = () => {
                         {themes.map((theme) => (
                           <option key={theme._id} value={theme.name}>{theme.name}</option>
                         ))}
+                        <option value={CUSTOM_OPTION}>✏️ Custom theme...</option>
                       </Form.Select>
+                      {isCustomTheme && (
+                        <>
+                          <Form.Control
+                            className="mt-2"
+                            type="text"
+                            value={customTheme}
+                            maxLength={CUSTOM_TEXT_MAX}
+                            onChange={(e) => setCustomTheme(e.target.value)}
+                            placeholder="e.g. Space adventure, Jungle mystery"
+                            autoFocus
+                          />
+                          <Form.Text className="d-flex justify-content-between">
+                            <span>Only for this comic</span>
+                            <span>{customTheme.length}/{CUSTOM_TEXT_MAX}</span>
+                          </Form.Text>
+                        </>
+                      )}
                     </Form.Group>
                   </Col>
                   <Col sm={6} md={4}>
@@ -1024,7 +1054,25 @@ export const ComicGenerator = () => {
                         {styles.map((style) => (
                           <option key={style._id} value={style.name}>{style.name}</option>
                         ))}
+                        <option value={CUSTOM_OPTION}>✏️ Custom style...</option>
                       </Form.Select>
+                      {isCustomStyle && (
+                        <>
+                          <Form.Control
+                            className="mt-2"
+                            type="text"
+                            value={customStyle}
+                            maxLength={CUSTOM_TEXT_MAX}
+                            onChange={(e) => setCustomStyle(e.target.value)}
+                            placeholder="e.g. Neon, Watercolor, Pixel art"
+                            autoFocus
+                          />
+                          <Form.Text className="d-flex justify-content-between">
+                            <span>Only for this comic</span>
+                            <span>{customStyle.length}/{CUSTOM_TEXT_MAX}</span>
+                          </Form.Text>
+                        </>
+                      )}
                     </Form.Group>
                   </Col>
                   <Col sm={6} md={4}>
@@ -1805,11 +1853,15 @@ export const ComicGenerator = () => {
 
       <Modal show={showThemeModal} onHide={closeThemeModal} size="lg" centered>
         <Modal.Header closeButton>
-          <Modal.Title>{themeType} Theme</Modal.Title>
+          <Modal.Title>{isCustomTheme ? "Custom" : themeType} Theme</Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-4 text-start">
           <h5 className="mb-3">Description</h5>
-          <p>{themes.find(t => t.name === themeType)?.description || "No description available"}</p>
+          <p>
+            {isCustomTheme
+              ? (customTheme.trim() || "Type your own theme in the box below the dropdown. It is used only for this comic.")
+              : (themes.find(t => t.name === themeType)?.description || "No description available")}
+          </p>
           {themes.find(t => t.name === themeType)?.examplePages?.length > 0 && (
             <>
               <h5 className="mt-4 mb-2">Example Pages</h5>

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Modal, Button, Form, Badge, Spinner } from "react-bootstrap";
 import API from "../../API";
 import { toast } from "react-toastify";
+import BundleCoverPicker from "./BundleCoverPicker";
 
 const getId = (c) => String(c?._id || c);
 
@@ -10,6 +11,8 @@ const EditBundleModal = ({ show, bundle, onHide, onUpdated }) => {
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
     const [selectedIds, setSelectedIds] = useState([]);
+    const [coverId, setCoverId] = useState(""); // "" = pehla comic (default)
+    const [aiCoverId, setAiCoverId] = useState(""); // AI se bana cover (credit wala)
 
     const [myComics, setMyComics] = useState([]);
     const [loadingComics, setLoadingComics] = useState(false);
@@ -30,6 +33,8 @@ const EditBundleModal = ({ show, bundle, onHide, onUpdated }) => {
         setDescription(bundle.description || "");
         setPrice(bundle.price ?? "");
         setSelectedIds(originalIds);
+        setCoverId(bundle.thumbnailComicId ? getId(bundle.thumbnailComicId) : "");
+        setAiCoverId(bundle.customThumbnailId ? getId(bundle.customThumbnailId) : "");
         setComicSearch("");
 
         const loadComics = async () => {
@@ -106,6 +111,18 @@ const EditBundleModal = ({ show, bundle, onHide, onUpdated }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [eligibleComics, comicSearch]);
 
+    // Cover picker ke liye: selected comics (bundle ke order me) + unka pehla page
+    const coverComics = useMemo(
+        () =>
+            selectedIds
+                .map((id) => comicMap.get(id))
+                .filter(Boolean),
+        [selectedIds, comicMap]
+    );
+
+    // Cover wala comic hata diya -> default (pehla comic)
+    const effectiveCoverId = coverId && selectedIds.includes(coverId) ? coverId : "";
+
     const handleSave = async () => {
         if (!title.trim()) return toast.error("Title is required");
 
@@ -133,6 +150,8 @@ const EditBundleModal = ({ show, bundle, onHide, onUpdated }) => {
                 description,
                 price: priceNumber,
                 comics: selectedIds,
+                thumbnailComicId: effectiveCoverId || null,
+                customThumbnailId: aiCoverId || null,
             });
 
             if (!data.error) {
@@ -191,6 +210,17 @@ const EditBundleModal = ({ show, bundle, onHide, onUpdated }) => {
                         onChange={(e) => setPrice(e.target.value)}
                     />
                 </Form.Group>
+
+                {/* Cover */}
+                {!loadingComics && (
+                    <BundleCoverPicker
+                        comics={coverComics}
+                        value={effectiveCoverId}
+                        onChange={setCoverId}
+                        aiThumbnailId={aiCoverId}
+                        onAiChange={setAiCoverId}
+                    />
+                )}
 
                 {/* Comics */}
                 <div className="d-flex justify-content-between align-items-center mb-2">

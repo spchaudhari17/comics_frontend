@@ -385,6 +385,7 @@ const MarketPlace = () => {
                                         <div className="bg-white h-100 border border-primary rounded-4 shadow-sm overflow-hidden d-flex flex-column">
                                             <img
                                                 src={
+                                                    bundle.thumbnail ||
                                                     comics[0]?.thumbnail ||
                                                     "https://via.placeholder.com/400x250?text=Bundle"
                                                 }

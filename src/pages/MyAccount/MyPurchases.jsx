@@ -202,6 +202,7 @@ const MyPurchases = () => {
                                         {/* Thumbnail */}
                                         <img
                                             src={
+                                                bundle.thumbnail ||
                                                 bundle.comics?.[0]?.thumbnail ||
                                                 "https://via.placeholder.com/300x200"
                                             }

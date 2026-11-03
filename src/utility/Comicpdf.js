@@ -1,5 +1,5 @@
 // src/utility/comicPdf.js
-// Comic ki poori PDF (pages + FAQ + Did You Know + Quiz + Hardcore Quiz + Kridemy watermark)
+// Comic ki poori PDF (pages + FAQ + Did You Know + Quiz + Hardcore Quiz)
 // backend se download karna. My Comics, Comic Details, Reader sab jagah use ho sakta hai.
 
 import API from "../API";

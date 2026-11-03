@@ -9,6 +9,7 @@ import { NoDataComponent } from "../../components/NoDataComponent";
 import { trackClick, trackClickWithUser, useScrollDepth } from "../../utility/analytics";
 import EditCreditsCard from "../../components/EditCreditsCard";
 import { getPdfErrorMessage, downloadComicPdf } from "../../utility/Comicpdf";
+import BundleCoverPicker from "../MarketPlace/BundleCoverPicker";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All Status" },
@@ -74,6 +75,11 @@ const MyComics = () => {
 
   const selectedComics = useMemo(() => Object.keys(selectedMap), [selectedMap]);
   const selectedComicsData = useMemo(() => Object.values(selectedMap), [selectedMap]);
+
+  // Bundle cover: kis comic ka pehla page thumbnail banega ("" = pehla comic)
+  const [coverComicId, setCoverComicId] = useState("");
+  const effectiveCoverId = coverComicId && selectedMap[coverComicId] ? coverComicId : "";
+  const [aiCoverId, setAiCoverId] = useState(""); // AI se bana cover (credit wala)
 
   // GA: how much users scroll on My Comics screen
   useScrollDepth("my_comics_screen", { enabled: !initialLoading, params: { total_comics: totalComicsCreated } });
@@ -300,6 +306,8 @@ const MyComics = () => {
         description: bundleData.description,
         price: bundleData.price,
         comics: selectedComics,
+        thumbnailComicId: effectiveCoverId || undefined,
+        customThumbnailId: aiCoverId || undefined,
         concept: Array.from(concepts)[0] // Send concept name
       };
 
@@ -309,6 +317,8 @@ const MyComics = () => {
         setShowSuccessAlert(true);
         setShowBundleModal(false);
         setSelectedMap({});
+        setCoverComicId("");
+        setAiCoverId("");
         setSelectedConceptFilter("");
         setBundleData({
           title: "",
@@ -796,6 +806,14 @@ const MyComics = () => {
                 </div>
               )}
             </div>
+
+            <BundleCoverPicker
+              comics={selectedComicsData}
+              value={effectiveCoverId}
+              onChange={setCoverComicId}
+              aiThumbnailId={aiCoverId}
+              onAiChange={setAiCoverId}
+            />
 
             <Form>
               <Form.Group className="mb-3">
