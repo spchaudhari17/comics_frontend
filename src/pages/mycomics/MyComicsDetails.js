@@ -18,6 +18,7 @@ import { trackClick, useScrollDepth } from "../../utility/analytics";
 import EditCreditsCard from "../../components/EditCreditsCard";
 import EditComicPageModal from "../ComicGenerator/EditComicPageModal";
 import { getPdfErrorMessage, downloadComicPdf } from "../../utility/Comicpdf";
+import ZoomImage from "../../components/ZoomImage";
 
 
 const MyComicDetails = () => {
@@ -327,13 +328,14 @@ const MyComicDetails = () => {
               {pages.map((page) => (
                 <Col md={6} lg={4} key={page._id}>
                   <div className="comic-page-card text-center border rounded-4 shadow-sm p-2 bg-light h-100 d-flex flex-column">
-                    <Image
-                      src={page.imageUrl}
-                      alt={`Page ${page.pageNumber}`}
-                      fluid
-                      className="rounded-3 mb-2"
-                      style={{ maxHeight: "350px", objectFit: "cover" }}
-                    />
+                    <div className="mb-2">
+                      <ZoomImage
+                        src={page.imageUrl}
+                        alt={`Page ${page.pageNumber}`}
+                        className="img-fluid rounded-3"
+                        style={{ maxHeight: "350px", objectFit: "cover" }}
+                      />
+                    </div>
                     <div className="fw-semibold mb-1 d-flex justify-content-center align-items-center gap-2">
                       Page {page.pageNumber}
                       {editedPages.includes(page.pageNumber) && <Badge bg="success">Edited</Badge>}

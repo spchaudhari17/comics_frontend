@@ -3,6 +3,7 @@ import { Form, Row, Col, Button, InputGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import API from "../../API";
+import AuthShell from "./AuthShell";
 
 export const ForgotPassword = () => {
     const navigate = useNavigate();
@@ -107,12 +108,7 @@ export const ForgotPassword = () => {
     };
 
     return (
-        <div className="auth-page forgotPassword-page d-flex justify-content-center align-items-center min-vh-100 py-4">
-            <div className="container-xl" style={{ maxWidth: "550px" }}>
-                <div className="content-wrapper bg-theme1 border">
-                    <div className="logo-wrapper text-center mb-4 pb-2">
-                        <img src={require('../../assets/images/logo.png')} alt="Logo" className="img-fluid" />
-                    </div>
+        <AuthShell className="forgotPassword-page">
 
                     {/* STEP 1 - Email or Username */}
                     {step === 1 && (
@@ -323,8 +319,6 @@ export const ForgotPassword = () => {
                             </div>
                         </Form>
                     )}
-                </div>
-            </div>
-        </div>
+        </AuthShell>
     );
 };

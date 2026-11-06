@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../redux/actions/userActions';
 import { clearError } from "../../redux/actions/userActions";
+import AuthShell from './AuthShell';
 
 export const LogIn = () => {
     const navigate = useNavigate();
@@ -29,15 +30,10 @@ export const LogIn = () => {
     }, [dispatch]);
 
     return (
-        <div className="auth-page login-page d-flex justify-content-center align-items-center min-vh-100 py-4">
-            <div className="container-xl" style={{ maxWidth: '550px' }}>
-                <div className="content-wrapper bg-theme1 border">
-                    <div className="logo-wrapper text-center mb-4">
-                        <img src={require('../../assets/images/logo.png')} onClick={() => navigate("/")} style={{ cursor: "pointer" }} alt="Logo" className="img-fluid" />
-                    </div>
+        <AuthShell className="login-page">
                     <div className="heading-wrapper text-dark mb-4">
-                        <div className="fs-4 fw-bold font-roboto lh-sm mb-1">Welcome!</div>
-                        <div className="subtitle fs-14 text-muted">Enter your login details below!</div>
+                        <div className="fs-4 fw-bold font-roboto lh-sm mb-1">Welcome back! 👋</div>
+                        <div className="subtitle fs-14 text-muted">Log in to create comics, quizzes and more.</div>
                     </div>
 
                     {error && <Alert variant="danger">{error}</Alert>}
@@ -104,8 +100,6 @@ export const LogIn = () => {
                             Don't have an account? <Link to={'/signup'} className='btn-link fw-medium text-decoration-none'>Signup</Link>
                         </div>
                     </Form>
-                </div>
-            </div>
-        </div>
+        </AuthShell>
     );
 };

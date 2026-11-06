@@ -1,99 +1,127 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Row, Col, Form, InputGroup, Button } from 'react-bootstrap';
-import { trackClick, trackClickWithUser } from '../utility/analytics';
-import { SHOP_PAGES } from '../utility/shopLinks';
+import { trackClick } from '../utility/analytics';
+import { SHOP_PAGES, SOCIAL_LINKS, SUPPORT_EMAIL } from '../utility/shopLinks';
+import './Footer.scss';
 
 const trackSocial = (platform) => trackClick('social_link_click', { platform, location: 'footer' });
 const trackFooterLink = (linkName) => trackClick('footer_link_click', { link_name: linkName, location: 'footer' });
 
+// shop.kridemy.com footer jaisa. `to` = app ka page, `href` = shop ka page
+const QUICK_LINKS = [
+    { label: 'Home', href: SHOP_PAGES.home, track: 'home' },
+    { label: 'For Teachers', href: SHOP_PAGES.forTeachers, track: 'for_teacher' },
+    { label: 'Students & Parent', href: SHOP_PAGES.studentsParents, track: 'for_student' },
+    { label: 'For Creators', href: SHOP_PAGES.forCreators, track: 'for_creators' },
+    { label: 'Marketplace', href: SHOP_PAGES.marketplace, track: 'marketplace' },
+];
+
+const RESOURCE_LINKS = [
+    { label: 'About Us', href: SHOP_PAGES.about, track: 'about_us' },
+    { label: 'Contact Us', to: '/contact', track: 'contact_us' },
+    { label: 'FAQ', to: '/faq', track: 'faq' },
+    { label: 'Terms & Conditions', to: '/terms-and-condition', track: 'terms_and_conditions' },
+    { label: 'Privacy Policy', to: '/privacy-policy', track: 'privacy_policy' },
+    { label: 'Blog', href: SHOP_PAGES.blog, track: 'blog' },
+    { label: 'Support', href: SHOP_PAGES.support, track: 'support' },
+];
+
+const FooterLink = ({ item }) =>
+    item.to ? (
+        <Link to={item.to} onClick={() => trackFooterLink(item.track)}>{item.label}</Link>
+    ) : (
+        <a href={item.href} onClick={() => trackFooterLink(item.track)}>{item.label}</a>
+    );
+
 export const Footer = () => {
+    const [showTop, setShowTop] = useState(false);
+
+    useEffect(() => {
+        const onScroll = () => setShowTop(window.pageYOffset > 300);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
     return (
-        <footer className="footer-wrapper bg-theme2 text-body">
-            <div className="container-xl py-5">
-                <Row className="gx-3 gy-4">
-                    <Col md={12} lg={4}>
-                        <div className="wrapper text-center text-md-start mx-auto mx-md-0" style={{ maxWidth: '380px' }}>
-                            <div className="logo-wrapper mb-3">
-                                <img src={require('../assets/images/logo.png')} alt="Logo" className="img-fluid" style={{ width: '80px' }} />
-                            </div>
-                            <div className="description mb-3">
-                                <span className="fw-semibold">Kridemy</span> an AI-powered education platform that helps you learn and teach complex academic concepts through fun.
-                            </div>
-                            <div className="social-sec d-flex align-items-center justify-content-center justify-content-md-start gap-3 mb-2">
-                                <Link to={"https://x.com/kridemy"} target='_blank' onClick={() => trackSocial('x')}><img src={require('../assets/images/x.png')} className="img-fluid" alt="X" /></Link>
-                                <Link to={"https://www.instagram.com/kridemy/"} target='_blank' onClick={() => trackSocial('instagram')}><img src={require('../assets/images/instagram.png')} className="img-fluid" alt="Instagram" /></Link>
-                                <Link to={"https://www.linkedin.com/company/kridemy/"} target='_blank' onClick={() => trackSocial('linkedin')}><img src={require('../assets/images/linkedin.png')} className="img-fluid" alt="Linkedin" /></Link>
-                                <Link to={"https://www.tiktok.com/@kridemy?lang=en"} target='_blank' onClick={() => trackSocial('tiktok')}><img src={require('../assets/images/tiktok.png')} className="img-fluid" alt="Tiktok" /></Link>
-                                <Link to={"https://www.reddit.com/r/Kridemy/"} target='_blank' onClick={() => trackSocial('reddit')}><img src={require('../assets/images/reddit.png')} className="img-fluid" alt="Reddit" /></Link>
-                            </div>
+        <footer className="kridemy-footer">
+            <div className="container-xl">
+                <div className="kf-grid">
+                    {/* About */}
+                    <div>
+                        <a href={SHOP_PAGES.home} className="kf-logo">
+                            <img src={require('../assets/images/kridemy-logo-light.png')} alt="Kridemy" />
+                        </a>
+                        <p className="kf-about">
+                            Making learning fun, visual, and effective with AI-powered comics, quizzes, and interactive stories.
+                        </p>
+                        <div className="kf-social">
+                            {SOCIAL_LINKS.map((s) => (
+                                <a
+                                    key={s.id}
+                                    href={s.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={s.label}
+                                    onClick={() => trackSocial(s.id)}
+                                >
+                                    <i className={`bi ${s.icon}`}></i>
+                                </a>
+                            ))}
                         </div>
-                    </Col>
-                    <Col md={3} lg={2}>
-                        <div className="wrapper text-center text-md-start">
-                            <div className="menu-header fs-5 fw-bold text-warning mb-3">Quick Links</div>
-                            <ul className="nav flex-column gap-2">
-                                <li className="nav-item"><Link to={SHOP_PAGES.home} className="nav-link" onClick={() => trackFooterLink('home')}>Home</Link></li>
-                                <li className="nav-item"><Link to={SHOP_PAGES.about} className="nav-link" onClick={() => trackFooterLink('about_us')}>About Us</Link></li>
-                                <li className="nav-item"><Link to={'/contact'} className="nav-link" onClick={() => trackFooterLink('contact_us')}>Contact Us</Link></li>
-                                <li className="nav-item"><Link to={'/faq'} className="nav-link" onClick={() => trackFooterLink('faq')}>FAQ</Link></li>
-                                <li className="nav-item"><Link to={'/privacy-policy'} className="nav-link" onClick={() => trackFooterLink('privacy_policy')}>Privacy Policy</Link></li>
-                                <li className="nav-item"><Link to={'/terms-and-condition'} className="nav-link" onClick={() => trackFooterLink('terms_and_conditions')}>Terms and Condition</Link></li>
-                            </ul>
-                        </div>
-                    </Col>
-                    <Col md={3} lg={2}>
-                        <div className="wrapper text-center text-md-start">
-                            <div className="menu-header fs-5 fw-bold text-warning mb-3">Explore</div>
-                            <ul className="nav flex-column gap-2">
-                                <li className="nav-item"><Link to={'/our-library'} className="nav-link" onClick={() => trackFooterLink('library')}>Library</Link></li>
-                                <li className="nav-item"><Link to={'/create-comic'} className="nav-link" onClick={() => { trackFooterLink('create_comic'); trackClickWithUser('create_comics_click', { location: 'footer' }); }}>Create Comic</Link></li>
-                                <li className="nav-item"><Link to={SHOP_PAGES.studentsParents} className="nav-link" onClick={() => trackFooterLink('for_student')}>For Student</Link></li>
-                                <li className="nav-item"><Link to={SHOP_PAGES.forTeachers} className="nav-link" onClick={() => trackFooterLink('for_teacher')}>For Teacher</Link></li>
-                                <li className="nav-item"><Link to={SHOP_PAGES.studentsParents} className="nav-link" onClick={() => trackFooterLink('for_parent')}>For Parent</Link></li>
-                            </ul>
-                        </div>
-                    </Col>
-                    <Col md={6} lg={4}>
-                        <div className="wrapper text-center text-md-start mx-auto mx-md-0" style={{ maxWidth: '450px' }}>
-                            <div className="menu-header fs-5 fw-bold text-warning mb-3">Our Newsletter</div>
-                            <Form className="mb-4">
-                                <Form.Group>
-                                    {/* <Form.Label controlId="subscribe">Subscribe Now</Form.Label> */}
-                                    <InputGroup>
-                                        <Form.Control type="email" placeholder="Write your email here.." required />
-                                        <Button variant="primary" onClick={() => trackClickWithUser('newsletter_subscribe_click', { location: 'footer' })}>Subscribe</Button>
-                                    </InputGroup>
-                                </Form.Group>
-                            </Form>
+                    </div>
 
-                            {/* <div className="contact-number mb-2 pb-1">
-                                <Link to={'tel:+1 8482398363'} className="d-inline-flex align-items-center gap-2 text-body text-decoration-none">
-                                    <i class="bi bi-telephone-fill fs-5 lh-1"></i> +1 8482398363
-                                </Link>
-                            </div> */}
-                            <div className="contact-email mb-2 pb-1">
-                                <Link to={'mailto:customercare@kridemy.com'} className="d-inline-flex align-items-center gap-2 text-body text-decoration-none">
-                                    <i class="bi bi-envelope-fill fs-5 lh-1"></i> customercare@kridemy.com
-                                </Link>
-                            </div>
-                            <div className="contact-address d-inline-flex align-items-center gap-2">
-                                <i className="bi bi-geo-alt-fill fs-5 lh-1"></i> New Brunswick, New Jersey, USA
+                    {/* Quick links */}
+                    <div>
+                        <h4 className="kf-heading">Quick Links</h4>
+                        <ul className="kf-list">
+                            {QUICK_LINKS.map((item) => <li key={item.label}><FooterLink item={item} /></li>)}
+                        </ul>
+                    </div>
+
+                    {/* Resources */}
+                    <div>
+                        <h4 className="kf-heading">Resources</h4>
+                        <ul className="kf-list">
+                            {RESOURCE_LINKS.map((item) => <li key={item.label}><FooterLink item={item} /></li>)}
+                        </ul>
+                    </div>
+
+                    {/* Contact */}
+                    <div>
+                        <h4 className="kf-heading">Get in Touch</h4>
+                        <p className="kf-contact-desc">Have questions or need support? Reach out to us anytime.</p>
+
+                        <div className="kf-contact-item">
+                            <span className="kf-contact-icon kf-icon-purple"><i className="bi bi-geo-alt-fill"></i></span>
+                            <div>
+                                <span className="kf-contact-label">Address</span>
+                                <span className="kf-contact-value">New Brunswick, New Jersey, USA</span>
                             </div>
                         </div>
-                    </Col>
-                </Row>
-            </div>
 
-            <div className="copyright-sec bg-primary py-3">
-                <div className="container">
-                    <div className="copyright-wrapper text-center text-white">
-                        <div className="copyright-text">© 2025 Sham Insights LLC. All rights reserved.</div>
-                        {/* <div className="designedBy">Web design by Sham Insights LLC.</div> */}
+                        <div className="kf-contact-item">
+                            <span className="kf-contact-icon kf-icon-green"><i className="bi bi-envelope-fill"></i></span>
+                            <div>
+                                <span className="kf-contact-label">Email us</span>
+                                <a href={`mailto:${SUPPORT_EMAIL}`} className="kf-contact-value">{SUPPORT_EMAIL}</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </footer>
-    )
-}
 
+                <div className="kf-bottom">
+                    © {new Date().getFullYear()} Kridemy. All rights reserved by Sham Insights LLC.
+                </div>
+            </div>
+
+            <button
+                type="button"
+                className={`kf-scroll-top ${showTop ? 'active' : ''}`}
+                aria-label="Scroll to top"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
+                <i className="bi bi-chevron-up"></i>
+            </button>
+        </footer>
+    );
+};

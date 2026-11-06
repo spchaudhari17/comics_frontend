@@ -11,6 +11,7 @@ import forComics from "../../assets/images/forComics.jpeg";
 import forImage from "../../assets/images/forImage.jpeg";
 import { trackClick, trackClickWithUser, trackEvent, useScrollDepth } from "../../utility/analytics";
 import EditComicPageModal from './EditComicPageModal';
+import ZoomImage from '../../components/ZoomImage';
 
 // Theme / Style dropdown me "Custom" option ki value (backend limit ke barabar)
 const CUSTOM_OPTION = "__custom__";
@@ -1557,7 +1558,7 @@ export const ComicGenerator = () => {
 
                         {selectedImage ? (
                           <div className="text-center">
-                            <img
+                            <ZoomImage
                               src={selectedImage.imageUrl}
                               alt="selected-comic"
                               style={{

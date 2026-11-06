@@ -3,27 +3,34 @@
 ---------------------------------- */
 $enable-negative-margins: true;
 
-$theme1: #FDFCF5;
-$theme2: #F9E2C5;
-$theme3: #A2845E;
-$theme4: #1a2028;
+// 🎨 Kridemy brand (shop.kridemy.com jaisa): purple -> blue gradient, orange accent
+$theme1: #FAF8FF;   // light lavender (cards / page sections)
+$theme2: #F0F4FF;   // light blue (soft backgrounds)
+$theme3: #5B21B6;   // deep purple (links / text accents)
+$theme4: #1A1A2E;   // dark navy (headings)
 
-$sidebar-bg: #064cb8;
-$primary: #B88746;
-$success: #027A48;
+$sidebar-bg: #6A11CB;
+$primary: #6A11CB;
+$success: #16A34A;
 $warning: #B54708;
 $danger: #B42318;
-$primary-gradient-start: #B88746;
-$primary-gradient-end: #DEC46A;
+$primary-gradient-start: #6A11CB;
+$primary-gradient-end: #2575FC;
 $placeholder-clr: #667085;
 
+// Extra brand colors
+$brand-blue: #2575FC;
+$brand-orange: #FCA311;
+$brand-pink: #E91E63;
+$footer-bg: #0D1220;
+
 $body-color: #344054;
-$btn-border-radius: 0.30rem;
-$input-border-color: #bac1cc;
-$input-border-radius: 0.30rem;
+$btn-border-radius: 50rem; // pill buttons (shop jaisa)
+$input-border-color: #d9dbe9;
+$input-border-radius: 0.75rem;
 // $font-size-base: 0.875rem;
-$font-family-base: "Inter", sans-serif;
-$btn-padding-x: 1rem;
+$font-family-base: "Outfit", sans-serif;
+$btn-padding-x: 1.25rem;
 
 
 /* ----------------------------------

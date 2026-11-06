@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import './authentication.scss';
+import AuthShell from './AuthShell';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, finishLogin } from '../../redux/actions/userActions';
 import { clearError } from "../../redux/actions/userActions";
@@ -91,15 +91,10 @@ export const SignUp = () => {
     };
 
     return (
-        <div className='auth-page SignUp-page d-flex justify-content-center align-items-center min-vh-100 py-4'>
-            <div className="container-xl" style={{ maxWidth: '750px' }}>
-                <div className="content-wrapper bg-theme1 border">
-                    <div className="logo-wrapper text-center mb-4 pb-1">
-                        <img src={require('../../assets/images/logo.png')} onClick={() => navigate("/")} style={{ cursor: "pointer" }} alt="Logo" className="img-fluid" />
-                    </div>
+        <AuthShell className="SignUp-page" wide>
                     <div className="heading-wrapper text-dark mb-4">
-                        <div className="fs-4 fw-bold font-roboto lh-sm mb-1">Create an account</div>
-                        <div className="subtitle fs-14 text-muted">Enter all required details below to create your account!</div>
+                        <div className="fs-4 fw-bold font-roboto lh-sm mb-1">Create your account ✨</div>
+                        <div className="subtitle fs-14 text-muted">Start creating AI comics for your class in minutes.</div>
                     </div>
 
                     {error && <Alert variant="danger">{error}</Alert>}
@@ -244,8 +239,6 @@ export const SignUp = () => {
                             Already registered? <Link to={'/login'} className='btn-link fw-medium text-decoration-none'>Sign In</Link>
                         </div>
                     </Form>
-                </div>
-            </div>
-        </div>
+        </AuthShell>
     );
 };

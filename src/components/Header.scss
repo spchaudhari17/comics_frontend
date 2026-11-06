@@ -1,0 +1,339 @@
+@import "../assets/styles/custom-variables.scss";
+
+// shop.kridemy.com header jaisa
+.kridemy-header {
+    z-index: 1030;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+
+    // ---------- Top bar ----------
+    .kh-top-bar {
+        background: rgba($theme4, 0.95);
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .kh-social {
+        display: flex;
+        gap: 12px;
+
+        a {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.07);
+            text-decoration: none;
+            transition: all 0.25s ease;
+
+            &:hover {
+                background: $primary;
+                color: #fff;
+            }
+        }
+
+        @include media-breakpoint-down(sm) {
+            gap: 8px;
+
+            a {
+                width: 28px;
+                height: 28px;
+                font-size: 13px;
+            }
+        }
+    }
+
+    // ---------- Main ----------
+    .kh-main {
+        padding: 10px 0;
+    }
+
+    .kh-logo img {
+        height: 56px;
+        width: auto;
+        display: block;
+
+        @include media-breakpoint-down(sm) {
+            height: 44px;
+        }
+    }
+
+    .kh-nav {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-left: 1.5rem;
+    }
+
+    .kh-nav-link {
+        color: #444;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 8px 14px;
+        border-radius: 30px;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.25s ease;
+
+        &:hover,
+        &.active {
+            background: $theme2;
+            color: $brand-blue;
+        }
+    }
+
+    // ---------- Buttons ----------
+    .kh-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .kh-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 20px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.25s ease;
+        cursor: pointer;
+    }
+
+    .kh-btn-outline {
+        background: transparent;
+        border: 2px solid $brand-blue;
+        color: $brand-blue;
+
+        &:hover {
+            background: $brand-blue;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba($brand-blue, 0.3);
+        }
+    }
+
+    .kh-btn-orange {
+        background: $brand-orange;
+        border: none;
+        color: #fff;
+        box-shadow: 0 4px 15px rgba($brand-orange, 0.3);
+
+        &:hover {
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba($brand-orange, 0.4);
+        }
+    }
+
+    .kh-icon-btn {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: $theme4;
+        background: $theme2;
+        font-size: 1.15rem;
+        text-decoration: none;
+        transition: all 0.25s ease;
+
+        &:hover,
+        &.active {
+            background: $brand-blue;
+            color: #fff;
+        }
+    }
+
+    .kh-badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 999px;
+        background: $brand-pink;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #fff;
+    }
+
+    // ---------- Account dropdown ----------
+    .kh-avatar-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        border: 1.5px solid #e8e4f3;
+        border-radius: 30px;
+        padding: 4px 12px 4px 4px;
+        font-weight: 600;
+        color: $theme4;
+        max-width: 220px;
+
+        &::after {
+            display: none; // bootstrap caret hatao, apna chevron hai
+        }
+
+        img {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        span {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @include media-breakpoint-down(md) {
+            padding: 3px;
+
+            .bi-chevron-down {
+                display: none;
+            }
+        }
+    }
+
+    .kh-menu {
+        min-width: 250px;
+        border: 1px solid #eee;
+        border-radius: 14px;
+        padding: 6px;
+        margin-top: 8px !important;
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-weight: 500;
+            color: $body-color;
+
+            i {
+                width: 18px;
+                color: $primary;
+            }
+
+            &:hover,
+            &:focus {
+                background: $theme2;
+                color: $primary;
+            }
+
+            &.text-danger i {
+                color: $danger;
+            }
+        }
+
+        .dropdown-header {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: $placeholder-clr;
+        }
+    }
+
+    .kh-menu-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px 12px;
+        margin-bottom: 6px;
+        border-bottom: 1px solid #f0f0f0;
+
+        img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    }
+
+    // ---------- Mobile ----------
+    .kh-hamburger {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        background: none;
+        border: none;
+        padding: 6px;
+
+        span {
+            width: 24px;
+            height: 3px;
+            border-radius: 3px;
+            background: $theme4;
+        }
+    }
+}
+
+// Offcanvas body ke andar (header ke bahar render hota hai)
+.kh-offcanvas {
+    font-family: "Outfit", sans-serif;
+
+    .kh-nav-link {
+        display: block;
+        color: #444;
+        font-weight: 600;
+        padding: 12px 16px;
+        border-radius: 12px;
+        text-decoration: none;
+
+        &:hover,
+        &.active {
+            background: $theme2;
+            color: $brand-blue;
+        }
+    }
+
+    .kh-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        border-radius: 30px;
+        font-weight: 600;
+    }
+
+    .kh-btn-outline {
+        background: transparent;
+        border: 2px solid $brand-blue;
+        color: $brand-blue;
+    }
+
+    .kh-social {
+        display: flex;
+        gap: 10px;
+
+        a {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: $theme2;
+            color: $theme4;
+            text-decoration: none;
+        }
+    }
+}

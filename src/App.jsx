@@ -98,16 +98,14 @@ function App() {
         <ScrollToTop />
 
         <Routes>
-          {/* Auth Routes */}
-          {/* Redirect root to /login */}
-          {/* <Route path="/" element={<Navigate to="/login" replace />} /> */}
-          <Route path="/login" element={<LogIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/OtpVerification" element={<OtpVerification />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-
           {/* Main Layout Routes */}
           <Route path="/" element={<Layout />}>
+            {/* Auth Routes (ab header + footer ke saath) */}
+            <Route path="/login" element={<LogIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/OtpVerification" element={<OtpVerification />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+
             {/* Marketing pages ab shop.kridemy.com pe (utility/shopLinks.js) */}
             <Route index element={<ExternalRedirect to={SHOP_PAGES.home} />} />
             <Route path="about" element={<ExternalRedirect to={SHOP_PAGES.about} />} />

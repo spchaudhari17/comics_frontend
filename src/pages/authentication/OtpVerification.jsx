@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify';
 import { verifyOtp } from '../../redux/actions/userActions';
+import AuthShell from './AuthShell';
 
 const OtpVerification = () => {
   const location = useLocation();
@@ -28,13 +29,11 @@ const OtpVerification = () => {
   };
 
   return (
-    <div className="auth-page otp-page d-flex justify-content-center align-items-center min-vh-100 py-4">
-      <div className="container-xl">
-        <div
-          className="card border-0 rounded-3 shadow w-100 mx-auto px-3 px-sm-5 py-5"
-          style={{ maxWidth: '550px' }}
-        >
-          <div className="fs-4 fw-bold font-roboto lh-sm mb-3">OTP Verification</div>
+    <AuthShell className="otp-page">
+          <div className="heading-wrapper text-dark mb-4">
+            <div className="fs-4 fw-bold font-roboto lh-sm mb-1">Verify your email 📩</div>
+            <div className="subtitle fs-14 text-muted">Enter the 4-digit code we sent to your email.</div>
+          </div>
 
           <Form onSubmit={handleVerify}>
             {error && <div className="alert alert-danger">{error}</div>}
@@ -78,9 +77,7 @@ const OtpVerification = () => {
               {loading ? "Verifying..." : "Verify OTP"}
             </Button>
           </Form>
-        </div>
-      </div>
-    </div>
+    </AuthShell>
   );
 };
 

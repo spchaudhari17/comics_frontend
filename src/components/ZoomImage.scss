@@ -1,0 +1,142 @@
+// 🔍 ZoomImage: hover zoom + full-screen viewer
+.zoom-image {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    vertical-align: top;
+    cursor: zoom-in;
+    border-radius: inherit;
+
+    img {
+        transition: transform 0.15s ease-out;
+        will-change: transform;
+    }
+
+    &.is-zooming img {
+        transition: none; // mouse ke saath turant
+    }
+
+    .zoom-image-hint {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(26, 26, 46, 0.75);
+        color: #fff;
+        font-size: 16px;
+        line-height: 1;
+        opacity: 0;
+        transform: scale(0.85);
+        transition: all 0.2s ease;
+        pointer-events: none;
+    }
+
+    &:hover .zoom-image-hint,
+    &:focus-visible .zoom-image-hint {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    &.is-zooming .zoom-image-hint {
+        opacity: 0;
+    }
+
+    // Touch devices: hint hamesha dikhe (hover nahi hota)
+    @media (hover: none) {
+        .zoom-image-hint {
+            opacity: 0.9;
+            transform: scale(1);
+        }
+    }
+
+    &:focus-visible {
+        outline: 3px solid rgba(106, 17, 203, 0.5);
+        outline-offset: 2px;
+    }
+}
+
+.zoom-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(13, 18, 32, 0.94);
+    display: flex;
+    flex-direction: column;
+    animation: zoom-viewer-in 0.18s ease-out;
+    font-family: "Outfit", sans-serif;
+
+    .zoom-viewer-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 12px 16px;
+        color: #fff;
+
+        > span {
+            margin-right: auto;
+        }
+
+        button,
+        a {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            font-size: 18px;
+            text-decoration: none;
+            transition: background 0.2s ease;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.25);
+            }
+        }
+    }
+
+    .zoom-viewer-stage {
+        flex: 1;
+        min-height: 0;
+        margin: 0 16px 16px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: zoom-in;
+        touch-action: none;
+
+        &.is-zoomed {
+            cursor: zoom-out;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            user-select: none;
+            transition: transform 0.2s ease-out;
+        }
+    }
+}
+
+@keyframes zoom-viewer-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

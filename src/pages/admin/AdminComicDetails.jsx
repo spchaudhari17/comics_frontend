@@ -15,6 +15,7 @@ import API from "../../API";
 import { Loader } from "../../lib/loader";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import ZoomImage from "../../components/ZoomImage";
 
 
 
@@ -304,13 +305,14 @@ const AdminComicDetails = () => {
                             {pages.map((page) => (
                                 <Col md={6} lg={4} key={page._id}>
                                     <div className="comic-page-card border rounded-4 shadow-sm p-2 bg-light text-center h-100">
-                                        <Image
-                                            src={page.imageUrl}
-                                            alt={`Page ${page.pageNumber}`}
-                                            fluid
-                                            className="rounded-3 mb-2"
-                                            style={{ maxHeight: "350px", objectFit: "cover" }}
-                                        />
+                                        <div className="mb-2">
+                                            <ZoomImage
+                                                src={page.imageUrl}
+                                                alt={`Page ${page.pageNumber}`}
+                                                className="img-fluid rounded-3"
+                                                style={{ maxHeight: "350px", objectFit: "cover" }}
+                                            />
+                                        </div>
                                         <div className="fw-semibold mb-1">Page {page.pageNumber}</div>
                                         {page.panels?.length > 0 && (
                                             <>

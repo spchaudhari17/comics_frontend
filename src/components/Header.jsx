@@ -1,38 +1,42 @@
 import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import BellIcon from "../assets/images/icons/bell.svg";
-import UserIcon from "../assets/images/icons/user.svg";
-import LogoutIcon from "../assets/images/icons/log-out.svg";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { logoutUser } from "../redux/actions/userActions";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { Offcanvas } from "bootstrap";
 import API from "../API";
 import { trackClick, trackClickWithUser } from "../utility/analytics";
 import { CART_UPDATED_EVENT } from "../utility/cartEvents";
-import { SHOP_PAGES } from "../utility/shopLinks";
+import { SHOP_PAGES, SOCIAL_LINKS } from "../utility/shopLinks";
+import "./Header.scss";
 
+// Shop (website) ke pages - shop.kridemy.com header jaisa order
+const SHOP_NAV = [
+  { label: "Home", url: SHOP_PAGES.home, track: "home" },
+  { label: "For Teachers", url: SHOP_PAGES.forTeachers, track: "for_teachers" },
+  { label: "Students & Parents", url: SHOP_PAGES.studentsParents, track: "students_parents" },
+  { label: "Creators", url: SHOP_PAGES.forCreators, track: "creators" },
+  { label: "Marketplace", url: SHOP_PAGES.marketplace, track: "marketplace" },
+];
+
+// Role ke hisaab se profile dropdown ke links
+const CREATOR_ROLES = ["admin", "user"];
+const ADMIN_ROLES = ["admin", "moderator"];
 
 export const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); // 👈 current path ke liye
+  const location = useLocation();
   const [cartCount, setCartCount] = useState(0);
 
   const userInfo = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
 
-  // Active check helper
-  const isActive = (path) => location.pathname === path;
-
-  // Active style (underline + color)
-  const activeStyle = (path) => ({
-    color: isActive(path) ? "#0d6efd" : "inherit",
-    fontWeight: isActive(path) ? "600" : "400",
-    borderBottom: isActive(path) ? "2px solid #0d6efd" : "2px solid transparent",
-    paddingBottom: "2px",
-    transition: "all 0.2s ease",
-  });
+  const role = userInfo?.userType;
+  const isLoggedIn = !!userInfo;
+  const canCreate = !userInfo || CREATOR_ROLES.includes(role);
+  const isAdminPanel = ADMIN_ROLES.includes(role);
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -53,9 +57,6 @@ export const Header = () => {
   };
 
   // 🛒 Cart count: page badalne pe + cart me add/remove hone pe refresh
-  // (pehle sirf pehli baar load hota tha, isliye login / add ke baad purana count dikhta tha)
-  const isLoggedIn = !!userInfo;
-
   useEffect(() => {
     if (isLoggedIn) {
       fetchCartCount();
@@ -74,226 +75,192 @@ export const Header = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Mobile menu: page badalte hi band
+  useEffect(() => {
+    const el = document.getElementById("kridemyMobileMenu");
+    if (el) Offcanvas.getInstance(el)?.hide();
+  }, [location.pathname]);
+
+  const goCreate = () => {
+    trackClickWithUser("create_comics_click", { location: "header" });
+    navigate("/create-comic");
+  };
+
+  const avatar = userInfo?.profile_pic || require("../assets/images/avatar.png");
+  const displayName = userInfo?.firstname || userInfo?.username || "User";
+
+  const navLinks = (
+    <>
+      {SHOP_NAV.map((item) => (
+        <a
+          key={item.label}
+          href={item.url}
+          className="kh-nav-link"
+          onClick={() => trackClick("header_shop_link_click", { link_name: item.track, location: "header" })}
+        >
+          {item.label}
+        </a>
+      ))}
+      {(!userInfo || role === "admin" || role === "user") && (
+        <NavLink
+          to="/subscriptions-plan"
+          className={({ isActive }) => `kh-nav-link ${isActive ? "active" : ""}`}
+          onClick={() => trackClick("header_subscription_plan_click", { location: "header" })}
+        >
+          Pricing
+        </NavLink>
+      )}
+    </>
+  );
+
   return (
-    <div className="top-header sticky-top shadow-sm">
-      <div className="announcement-bar bg-primary py-2">
-        <div className="container-xl">
-          <div className="discription fs-12 text-white text-center">
-            You're exploring the <span className="fw-semibold text-danger">Beta version</span>. Some features may be handled manually.
+    <>
+    <div className="kridemy-header sticky-top">
+      {/* ===== Top bar: social (shop jaisa) ===== */}
+      <div className="kh-top-bar">
+        <div className="container-xl d-flex align-items-center justify-content-end">
+          <div className="kh-social">
+            {SOCIAL_LINKS.filter((s) => s.id !== "tiktok").map((s) => (
+              <a key={s.id} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
+                <i className={`bi ${s.icon}`}></i>
+              </a>
+            ))}
           </div>
         </div>
       </div>
 
-      <nav className="navbar navbar-light bg-white border-bottom navbar-expand-lg py-1" data-bs-theme="light" style={{ minHeight: "61px" }}>
-        <div className="container-xl">
-          {/* Logo */}
-          <Link className="navbar-brand logo-wrapper text-center" to={SHOP_PAGES.home}>
-            <img src={require("../assets/images/logo2.png")} alt="Logo" className="img-fluid" />
-          </Link>
+      {/* ===== Main header ===== */}
+      <header className="kh-main">
+        <div className="container-xl d-flex align-items-center gap-3">
+          <a href={SHOP_PAGES.home} className="kh-logo" aria-label="Kridemy home">
+            <img src={require("../assets/images/kridemy-logo-dark.png")} alt="Kridemy" />
+          </a>
 
-          {/* Mobile toggle */}
-          <button className="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasTopHeader" aria-controls="offcanvasTopHeader">
-            <span className="navbar-toggler-icon"></span>
-          </button>
+          {/* Desktop nav */}
+          <nav className="kh-nav d-none d-xl-flex">{navLinks}</nav>
 
-          <div className="offcanvas bg-theme2 offcanvas-start border-0" tabIndex="-1" id="offcanvasTopHeader" aria-labelledby="offcanvasTopHeaderLabel">
-            <div className="offcanvas-header bg-primary">
-              <h5 className="offcanvas-title text-white">Menu</h5>
-              <button type="button" className="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
+          <div className="kh-actions ms-auto">
+            {canCreate && (
+              <button type="button" className="kh-btn kh-btn-outline d-none d-sm-inline-flex" onClick={goCreate}>
+                Create Comics
+              </button>
+            )}
 
-            <div className="offcanvas-body">
-              <ul className="navbar-nav menu-link-nav align-items-center justify-content-end flex-grow-1 gap-2">
-                <>
-                  <li className="nav-item">
-                    <Link
-                      to={'/market-Place'}
-                      title="marketPlace"
-                      className="nav-link p-0"
-                      style={activeStyle('/market-Place')}
-                      onClick={() => trackClick("header_marketplace_click", { location: "header" })}
-                    >
-                      MarketPlace
-                    </Link>
-                  </li>
+            {/* Cart */}
+            {isLoggedIn && (
+              <Link
+                to="/cart"
+                className={`kh-icon-btn ${location.pathname === "/cart" ? "active" : ""}`}
+                title="Cart"
+                aria-label={`Cart (${cartCount})`}
+                onClick={() => trackClick("my_cart_click", { location: "header", cart_count: cartCount })}
+              >
+                <i className="bi bi-cart3"></i>
+                {cartCount > 0 && <span className="kh-badge">{cartCount}</span>}
+              </Link>
+            )}
 
-                  {(!userInfo || userInfo.userType === "admin" || userInfo.userType === "user") && (
-                    <li className="nav-item">
-                      <button
-                        className="nav-link p-0 btn btn-link text-decoration-none"
-                        style={activeStyle('/subscriptions-plan')}
-                        onClick={() => {
-                          trackClick("header_subscription_plan_click", { location: "header" });
-                          navigate("/subscriptions-plan");
-                        }}
-                      >
-                        Pricing
-                      </button>
-                    </li>
-                  )}
+            {/* Profile / Login */}
+            {isLoggedIn ? (
+              <Dropdown align="end" className="kh-account">
+                <Dropdown.Toggle as="button" className="kh-avatar-btn" aria-label="Account menu">
+                  <img src={avatar} alt="" />
+                  <span className="d-none d-md-inline text-capitalize">{displayName}</span>
+                  <i className="bi bi-chevron-down small"></i>
+                </Dropdown.Toggle>
 
-                  {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
-                    <li className="nav-item">
-                      <button
-                        className="nav-link p-0 btn btn-link text-decoration-none"
-                        title="create-comic"
-                        style={activeStyle('/create-comic')}
-                        onClick={() => {
-                          trackClickWithUser("create_comics_click", { location: "header" });
-                          navigate("/create-comic");
-                        }}
-                      >
-                        Create Comics
-                      </button>
-                    </li>
-                  )}
-                </>
-              </ul>
-
-              <ul className="navbar-nav icons-nav align-items-center justify-content-end flex-grow-1 gap-3">
-
-                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
-                  <li className="nav-item">
-                    <Link to={'/super-admin'} title="super-admin" className="nav-link p-0" style={activeStyle('/super-admin')}>
-                      <i className="bi bi-grid-fill"></i>
-                    </Link>
-                  </li>
-                )}
-
-                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
-                  <li className="nav-item">
-                    <Link to={'/allUsers'} title='allUsers' className="nav-link p-0" style={activeStyle('/allUsers')}>
-                      <i className="bi bi-people-fill"></i>
-                    </Link>
-                  </li>
-                )}
-
-                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "moderator") && (
-                  <li className="nav-item">
-                    <Link to={'/contactList'} title="contactList" className="nav-link p-0" style={activeStyle('/contactList')}>
-                      <i className="bi bi-envelope-fill"></i>
-                    </Link>
-                  </li>
-                )}
-
-                {userInfo && (userInfo.userType === "admin") && (
-                  <li className="nav-item">
-                    <Link to={'/subjectlist'} title="subjectlist" className="nav-link p-0" style={activeStyle('/subjectlist')}>
-                      <i className="bi bi-list-ul"></i>
-                    </Link>
-                  </li>
-                )}
-
-                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
-                  <li className="nav-item">
-                    <Link to={'/my-comics'} title="my-comics" className="nav-link p-0" style={activeStyle('/my-comics')} onClick={() => trackClick("header_my_comics_click", { location: "header" })}>
-                      <i className="bi bi-book-half"></i>
-                    </Link>
-                  </li>
-                )}
-
-                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user") && (
-                  <li className="nav-item">
-                    <Link to={'/institute-dashboard'} title="institute-dashboard" className="nav-link p-0" style={activeStyle('/institute-dashboard')}>
-                      <i className="bi bi-speedometer2"></i>
-                    </Link>
-                  </li>
-                )}
-
-                <li className="nav-item">
-                  <Link to={'/cart'} title="cart" className="nav-link p-0" style={activeStyle('/cart')} onClick={() => trackClick("my_cart_click", { location: "header", cart_count: cartCount })}>
-                    <div className="position-relative">
-                      <i className="bi bi-cart-fill fs-5"></i>
-                      {cartCount > 0 && (
-                        <span
-                          className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                          style={{ fontSize: "10px" }}
-                        >
-                          {cartCount}
-                        </span>
-                      )}
+                <Dropdown.Menu className="kh-menu shadow">
+                  <div className="kh-menu-user">
+                    <img src={avatar} alt="" />
+                    <div className="min-w-0">
+                      <div className="fw-semibold text-capitalize text-truncate">{displayName}</div>
+                      <div className="small text-muted text-truncate">{userInfo?.email || userInfo?.username}</div>
                     </div>
-                  </Link>
-                </li>
+                  </div>
 
-                {userInfo && (userInfo.userType === "admin") && (
-                  <li className="nav-item">
-                    <Link to={'/adUnitManager'} title="ComicRevenueReport" className="nav-link p-0" style={activeStyle('/adUnitManager')}>
-                      <i className="bi bi-graph-up-arrow"></i>
-                    </Link>
-                  </li>
-                )}
+                  <Dropdown.Item as={Link} to="/my-account"><i className="bi bi-person"></i>My Account</Dropdown.Item>
 
-                {userInfo && (userInfo.userType === "admin") && (
-                  <li className="nav-item">
-                    <Link to={'/coupon'} title="coupon" className="nav-link p-0" style={activeStyle('/coupon')}>
-                      <i className="bi bi-ticket-perforated"></i>
-                    </Link>
-                  </li>
-                )}
-
-                {userInfo && (userInfo.userType === "parent") && (
-                  <li className="nav-item">
-                    <Link to={'/parent/manage-children'} title='manage-children' className="nav-link p-0" style={activeStyle('/parent/manage-children')}>
-                      <i className="bi bi-speedometer2"></i>
-                    </Link>
-                  </li>
-                )}
-
-                {userInfo && (userInfo.userType === "admin" || userInfo.userType === "user" || userInfo.userType === "moderator" || userInfo.userType === "parent") ? (
-                  <Dropdown align="end" className="account-menu">
-                    <Dropdown.Toggle variant="white" className="bg-transparent border-0 p-0">
-                      <div className="chip-wrapper">
-                        <div className="chip-img bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center rounded-circle overflow-hidden">
-                          <img className="w-100 h-100" src={require("../assets/images/avatar.png")} alt="User" />
-                        </div>
-                      </div>
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu className="text-theme3 shadow-sm rounded-3">
-                      <div className="user-info text-theme3 pb-1 px-3">
-                        <div className="user-info text-start text-truncate">
-                          <div className="username fs-14 fw-semibold text-black text-opacity-75 text-capitalize">
-                            {userInfo?.firstname || userInfo?.username || "User"}
-                          </div>
-                          <div className="user-email fs-12 text-muted text-lowercase text-truncate">
-                            {userInfo?.email || "unknown@example.com"}
-                          </div>
-                        </div>
-                      </div>
-                      <Dropdown.Divider className="my-1" />
-
-                      <Dropdown.Item className="text-theme3" as={Link} to="/my-account">
-                        <img src={UserIcon} alt="User Icon" className="img-fluid" /> Profile
+                  {CREATOR_ROLES.includes(role) && (
+                    <>
+                      <Dropdown.Item as={Link} to="/my-comics" onClick={() => trackClick("header_my_comics_click", { location: "header" })}>
+                        <i className="bi bi-book-half"></i>My Comics
                       </Dropdown.Item>
+                      <Dropdown.Item as={Link} to="/mybundleList"><i className="bi bi-collection"></i>My Bundles</Dropdown.Item>
+                      <Dropdown.Item as={Link} to="/institute-dashboard"><i className="bi bi-speedometer2"></i>Class Dashboard</Dropdown.Item>
+                    </>
+                  )}
 
-                      <Dropdown.Divider className="my-1" />
+                  {role === "parent" && (
+                    <Dropdown.Item as={Link} to="/parent/manage-children"><i className="bi bi-people"></i>My Children</Dropdown.Item>
+                  )}
 
-                      <Dropdown.Item as={Link} to="/mybundleList" className="text-theme3">
-                        <i className="bi bi-key-fill me-2"></i> My Bundle List
-                      </Dropdown.Item>
+                  {isAdminPanel && (
+                    <>
+                      <Dropdown.Divider />
+                      <Dropdown.Header>Admin</Dropdown.Header>
+                      <Dropdown.Item as={Link} to="/super-admin"><i className="bi bi-grid"></i>Comics Panel</Dropdown.Item>
+                      <Dropdown.Item as={Link} to="/allUsers"><i className="bi bi-people"></i>All Users</Dropdown.Item>
+                      <Dropdown.Item as={Link} to="/contactList"><i className="bi bi-envelope"></i>Contacts</Dropdown.Item>
+                      {role === "admin" && (
+                        <>
+                          <Dropdown.Item as={Link} to="/subjectlist"><i className="bi bi-list-ul"></i>Subjects</Dropdown.Item>
+                          <Dropdown.Item as={Link} to="/adUnitManager"><i className="bi bi-graph-up-arrow"></i>Ad Revenue</Dropdown.Item>
+                          <Dropdown.Item as={Link} to="/coupon"><i className="bi bi-ticket-perforated"></i>Coupons</Dropdown.Item>
+                        </>
+                      )}
+                    </>
+                  )}
 
-                      <Dropdown.Item as={Link} to="/changepassword" className="text-theme3">
-                        <i className="bi bi-key-fill me-2"></i> Change Password
-                      </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item as={Link} to="/changepassword"><i className="bi bi-key"></i>Change Password</Dropdown.Item>
+                  <Dropdown.Item onClick={handleLogout} className="text-danger"><i className="bi bi-box-arrow-right"></i>Log out</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              <Link to="/login" className="kh-btn kh-btn-orange">
+                <i className="bi bi-person-circle"></i>
+                <span>Login</span>
+              </Link>
+            )}
 
-                      <Dropdown.Item onClick={handleLogout} className="text-theme3">
-                        <img src={LogoutIcon} alt="Logout Icon" className="img-fluid" /> Log out
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                ) : (
-                  <li className="nav-item">
-                    <Link to={'/login'} className="nav-link d-flex align-items-center gap-2 p-0">
-                      <img src={UserIcon} alt="User Icon" className="img-fluid" />
-                      <span className="text-body d-block d-lg-none">Login/Register</span>
-                    </Link>
-                  </li>
-                )}
-              </ul>
-            </div>
+            {/* Mobile toggle */}
+            <button
+              className="kh-hamburger d-xl-none"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#kridemyMobileMenu"
+              aria-controls="kridemyMobileMenu"
+              aria-label="Open menu"
+            >
+              <span></span><span></span><span></span>
+            </button>
           </div>
         </div>
-      </nav>
+      </header>
     </div>
+
+      {/* ===== Mobile menu (header ke bahar, warna backdrop ke neeche chala jata) ===== */}
+      <div className="offcanvas offcanvas-end kh-offcanvas" tabIndex="-1" id="kridemyMobileMenu" aria-labelledby="kridemyMobileMenuLabel">
+        <div className="offcanvas-header">
+          <img id="kridemyMobileMenuLabel" src={require("../assets/images/kridemy-logo-dark.png")} alt="Kridemy" style={{ height: 44 }} />
+          <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div className="offcanvas-body d-flex flex-column gap-1">
+          {navLinks}
+          {canCreate && (
+            <button type="button" className="kh-btn kh-btn-outline mt-3" data-bs-dismiss="offcanvas" onClick={goCreate}>
+              Create Comics
+            </button>
+          )}
+          <div className="kh-social justify-content-center mt-4">
+            {SOCIAL_LINKS.map((s) => (
+              <a key={s.id} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
+                <i className={`bi ${s.icon}`}></i>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
   );
 };

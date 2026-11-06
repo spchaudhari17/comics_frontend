@@ -1,6 +1,7 @@
 /* ----------------------------------
   1. Import Google Fonts (CSS only)
 ---------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
@@ -73,8 +74,8 @@
 html,
 body {
   // background-color: #F2F4F7;
-  font-size: 14px;
-  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  font-family: "Outfit", sans-serif;
   font-optical-sizing: auto;
   // overflow-x: hidden;
   margin: 0;
@@ -384,6 +385,12 @@ input[type="time"]:invalid:before {
   min-height: 30vh;
   transition: all 0.3s;
   overflow-x: hidden;
+  padding-bottom: 60px; // footer se gap
+
+  // Login / Signup jaise full-bleed pages: apna background footer tak
+  &:has(> .auth-page) {
+    padding-bottom: 0;
+  }
 }
 
 // End: Top Header CSS

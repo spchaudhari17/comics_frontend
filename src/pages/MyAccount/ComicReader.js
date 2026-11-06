@@ -4,6 +4,7 @@ import API from "../../API";
 import { Loader } from "../../lib/loader";
 import { Button, Nav } from "react-bootstrap";
 import { trackClick, useScrollDepth } from "../../utility/analytics";
+import ZoomImage from "../../components/ZoomImage";
 
 const ComicReader = () => {
     const { comicId } = useParams();
@@ -171,8 +172,9 @@ const ComicReader = () => {
             {activeTab === "reader" && (
                 <div className="text-center mt-4">
 
-                    <img
+                    <ZoomImage
                         src={data?.pages?.[currentPage]?.imageUrl}
+                        alt={`Page ${currentPage + 1}`}
                         className="img-fluid rounded shadow"
                         style={{ maxHeight: "80vh" }}
                     />
