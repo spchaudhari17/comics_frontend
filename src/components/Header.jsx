@@ -19,6 +19,21 @@ const SHOP_NAV = [
   { label: "Marketplace", url: SHOP_PAGES.marketplace, track: "marketplace" },
 ];
 
+// shop.kridemy.com header wale SVG icons
+const PersonIcon = ({ size = 20 }) => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="8" r="4"></circle>
+    <path d="M4 21v-2a8 8 0 0 1 16 0v2"></path>
+  </svg>
+);
+
+const CartIcon = () => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+  </svg>
+);
+
 // Role ke hisaab se profile dropdown ke links
 const CREATOR_ROLES = ["admin", "user"];
 const ADMIN_ROLES = ["admin", "moderator"];
@@ -86,7 +101,7 @@ export const Header = () => {
     navigate("/create-comic");
   };
 
-  const avatar = userInfo?.profile_pic || require("../assets/images/avatar.png");
+  // Profile photo nahi dikhate - shop header jaisa person icon
   const displayName = userInfo?.firstname || userInfo?.username || "User";
 
   const navLinks = (
@@ -118,7 +133,7 @@ export const Header = () => {
     <div className="kridemy-header sticky-top">
       {/* ===== Top bar: social (shop jaisa) ===== */}
       <div className="kh-top-bar">
-        <div className="container-xl d-flex align-items-center justify-content-end">
+        <div className="kh-wrap d-flex align-items-center justify-content-end">
           <div className="kh-social">
             {SOCIAL_LINKS.filter((s) => s.id !== "tiktok").map((s) => (
               <a key={s.id} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
@@ -131,47 +146,46 @@ export const Header = () => {
 
       {/* ===== Main header ===== */}
       <header className="kh-main">
-        <div className="container-xl d-flex align-items-center gap-3">
+        <div className="kh-wrap d-flex align-items-center">
           <a href={SHOP_PAGES.home} className="kh-logo" aria-label="Kridemy home">
             <img src={require("../assets/images/kridemy-logo-dark.png")} alt="Kridemy" />
           </a>
 
-          {/* Desktop nav */}
-          <nav className="kh-nav d-none d-xl-flex">{navLinks}</nav>
+          {/* Desktop nav (shop jaisa: logo left, baaki sab right) */}
+          <nav className="kh-nav ms-auto">{navLinks}</nav>
 
-          <div className="kh-actions ms-auto">
+          <div className="kh-actions">
             {canCreate && (
-              <button type="button" className="kh-btn kh-btn-outline d-none d-sm-inline-flex" onClick={goCreate}>
+              <button type="button" className="kh-btn kh-btn-outline kh-create-btn" onClick={goCreate}>
                 Create Comics
               </button>
             )}
 
-            {/* Cart */}
-            {isLoggedIn && (
-              <Link
-                to="/cart"
-                className={`kh-icon-btn ${location.pathname === "/cart" ? "active" : ""}`}
-                title="Cart"
-                aria-label={`Cart (${cartCount})`}
-                onClick={() => trackClick("my_cart_click", { location: "header", cart_count: cartCount })}
-              >
-                <i className="bi bi-cart3"></i>
-                {cartCount > 0 && <span className="kh-badge">{cartCount}</span>}
-              </Link>
-            )}
+            {/* Cart - logout user ko /cart login pe bhej deta hai */}
+            <Link
+              to="/cart"
+              className={`kh-icon-btn ${location.pathname === "/cart" ? "active" : ""}`}
+              title="My Cart"
+              aria-label={`My Cart (${cartCount})`}
+              onClick={() => trackClick("my_cart_click", { location: "header", cart_count: cartCount })}
+            >
+              <CartIcon />
+              {cartCount > 0 && <span className="kh-badge">{cartCount}</span>}
+            </Link>
 
             {/* Profile / Login */}
             {isLoggedIn ? (
               <Dropdown align="end" className="kh-account">
-                <Dropdown.Toggle as="button" className="kh-avatar-btn" aria-label="Account menu">
-                  <img src={avatar} alt="" />
-                  <span className="d-none d-md-inline text-capitalize">{displayName}</span>
-                  <i className="bi bi-chevron-down small"></i>
+                <Dropdown.Toggle as="button" className="kh-profile-btn" aria-label="Account menu">
+                  <span className="kh-profile-avatar"><PersonIcon /></span>
+                  <span className="kh-profile-label">Profile</span>
+                  <svg className="kh-profile-chevron" aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
                 </Dropdown.Toggle>
 
-                <Dropdown.Menu className="kh-menu shadow">
+                <Dropdown.Menu className="kh-menu">
+                  <div className="kh-menu-title">Your Kridemy</div>
                   <div className="kh-menu-user">
-                    <img src={avatar} alt="" />
+                    <span className="kh-profile-avatar"><PersonIcon size={18} /></span>
                     <div className="min-w-0">
                       <div className="fw-semibold text-capitalize text-truncate">{displayName}</div>
                       <div className="small text-muted text-truncate">{userInfo?.email || userInfo?.username}</div>
@@ -217,15 +231,15 @@ export const Header = () => {
                 </Dropdown.Menu>
               </Dropdown>
             ) : (
-              <Link to="/login" className="kh-btn kh-btn-orange">
-                <i className="bi bi-person-circle"></i>
-                <span>Login</span>
+              <Link to="/login" className="kh-profile-btn" aria-label="Login">
+                <span className="kh-profile-avatar"><PersonIcon /></span>
+                <span className="kh-profile-label">Login</span>
               </Link>
             )}
 
             {/* Mobile toggle */}
             <button
-              className="kh-hamburger d-xl-none"
+              className="kh-hamburger"
               type="button"
               data-bs-toggle="offcanvas"
               data-bs-target="#kridemyMobileMenu"

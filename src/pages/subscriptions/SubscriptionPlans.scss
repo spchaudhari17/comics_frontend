@@ -1,0 +1,753 @@
+@import "../../assets/styles/custom-variables.scss";
+
+// Subscription plans page - Kridemy brand (purple -> blue, orange accent)
+// Sab kuch .sp-page ke andar scoped hai, taaki baaki app pe asar na pade
+$sp-gradient: linear-gradient(135deg, $primary-gradient-start 0%, $primary-gradient-end 100%);
+
+.sp-page {
+    background: $theme1;
+    color: $body-color;
+
+    // ---------- Hero ----------
+    .sp-hero {
+        position: relative;
+        padding: 64px 0 120px;
+        text-align: center;
+        color: #fff;
+        background: linear-gradient(150deg, $primary-gradient-start 0%, #4c1d95 55%, $primary-gradient-end 130%);
+        overflow: hidden;
+
+        &::before,
+        &::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        &::before {
+            width: 340px;
+            height: 340px;
+            top: -140px;
+            right: -100px;
+        }
+
+        &::after {
+            width: 240px;
+            height: 240px;
+            bottom: -120px;
+            left: -60px;
+            background: rgba($brand-orange, 0.12);
+        }
+
+        @include media-breakpoint-down(md) {
+            padding: 44px 0 100px;
+        }
+    }
+
+    .sp-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+
+        i {
+            color: $brand-orange;
+        }
+    }
+
+    .sp-eyebrow-orange {
+        background: rgba($brand-orange, 0.15);
+        border-color: rgba($brand-orange, 0.4);
+        color: $brand-orange;
+    }
+
+    .sp-hero-title {
+        font-size: clamp(2rem, 4.5vw, 3.2rem);
+        font-weight: 800;
+        line-height: 1.12;
+        margin: 18px auto 14px;
+        max-width: 760px;
+
+        span {
+            color: $brand-orange;
+        }
+    }
+
+    .sp-hero-sub {
+        font-size: 1.08rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin: 0 auto 32px;
+        max-width: 560px;
+    }
+
+    // ---------- Tabs ----------
+    .sp-tabs {
+        display: inline-flex;
+        gap: 6px;
+        padding: 6px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(6px);
+        max-width: 100%;
+
+        @include media-breakpoint-down(sm) {
+            display: flex;
+            flex-direction: column;
+            border-radius: 20px;
+        }
+    }
+
+    .sp-tab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.85);
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+
+        &:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        &.active {
+            background: #fff;
+            color: $theme3;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+
+            .bi-star-fill {
+                color: $brand-orange;
+            }
+        }
+    }
+
+    .sp-tab-pill {
+        font-size: 0.66rem;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 999px;
+        background: $brand-orange;
+        color: $theme4;
+    }
+
+    // ---------- Body ----------
+    .sp-body {
+        position: relative;
+        margin-top: -72px;
+        padding-bottom: 64px;
+    }
+
+    .sp-pane {
+        animation: sp-fade-up 0.45s ease both;
+    }
+
+    .sp-section-head {
+        text-align: center;
+        margin-bottom: 32px;
+
+        h2 {
+            font-size: clamp(1.5rem, 2.6vw, 2rem);
+            font-weight: 800;
+            color: $theme4;
+            margin-bottom: 6px;
+        }
+
+        p {
+            color: $placeholder-clr;
+            margin: 0;
+        }
+    }
+
+    // Pehla section-head hero ke upar overlap hota hai -> white card jaisa
+    .sp-pane > .sp-section-head:first-child {
+        background: #fff;
+        border-radius: 20px;
+        padding: 22px 16px;
+        box-shadow: 0 12px 40px rgba($theme4, 0.08);
+    }
+
+    // ---------- Alerts ----------
+    .sp-alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 18px;
+        border-radius: 16px;
+        margin-bottom: 18px;
+        background: #fff;
+        border: 1px solid;
+        box-shadow: 0 8px 24px rgba($theme4, 0.06);
+        font-size: 0.95rem;
+
+        > i {
+            font-size: 1.2rem;
+            line-height: 1.3;
+        }
+    }
+
+    .sp-alert-warning {
+        border-color: rgba($warning, 0.3);
+
+        > i {
+            color: $warning;
+        }
+    }
+
+    .sp-alert-info {
+        border-color: rgba($brand-blue, 0.3);
+
+        > i {
+            color: $brand-blue;
+        }
+    }
+
+    .sp-alert-success {
+        border-color: rgba($success, 0.3);
+
+        > i {
+            color: $brand-orange;
+        }
+    }
+
+    // ---------- Plan cards ----------
+    .sp-plan-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 32px 28px 28px;
+        border-radius: 24px;
+        background: #fff;
+        border: 1px solid #ece8f7;
+        box-shadow: 0 10px 30px rgba($theme4, 0.06);
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+
+        &:hover {
+            transform: translateY(-6px);
+            border-color: rgba($primary, 0.35);
+            box-shadow: 0 20px 48px rgba($primary, 0.14);
+        }
+
+        // Highlighted plan: gradient border + halka bada
+        &.is-featured {
+            border: 2px solid transparent;
+            background:
+                linear-gradient(#fff, #fff) padding-box,
+                $sp-gradient border-box;
+            box-shadow: 0 22px 56px rgba($primary, 0.2);
+
+            @include media-breakpoint-up(lg) {
+                transform: scale(1.04);
+
+                &:hover {
+                    transform: scale(1.04) translateY(-6px);
+                }
+            }
+
+            .sp-plan-icon {
+                background: $sp-gradient;
+                color: #fff;
+            }
+        }
+
+        &.is-founding .sp-plan-badge {
+            background: $brand-orange;
+            color: $theme4;
+        }
+
+        &.is-compact {
+            padding: 26px 24px 24px;
+
+            .sp-price {
+                font-size: 2.1rem;
+            }
+        }
+    }
+
+    .sp-plan-badge {
+        position: absolute;
+        top: -13px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: $sp-gradient;
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        box-shadow: 0 6px 16px rgba($primary, 0.3);
+    }
+
+    .sp-plan-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .sp-plan-icon {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: rgba($primary, 0.1);
+        color: $primary;
+        font-size: 1.2rem;
+    }
+
+    .sp-plan-name {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: $theme4;
+    }
+
+    .sp-plan-price {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 4px 6px;
+        margin-bottom: 18px;
+    }
+
+    .sp-price {
+        font-size: 2.6rem;
+        font-weight: 800;
+        line-height: 1;
+        color: $theme4;
+        letter-spacing: -0.02em;
+    }
+
+    .sp-duration {
+        color: $placeholder-clr;
+        font-weight: 500;
+    }
+
+    .sp-original {
+        margin-left: 6px;
+        color: #98a2b3;
+        text-decoration: line-through;
+        font-weight: 600;
+    }
+
+    .sp-trial {
+        display: flex;
+        gap: 10px;
+        padding: 12px 14px;
+        margin-bottom: 18px;
+        border-radius: 14px;
+        background: rgba($brand-orange, 0.1);
+        border: 1px dashed rgba($brand-orange, 0.6);
+        font-size: 0.85rem;
+        line-height: 1.45;
+        color: #7a4a00;
+
+        > i {
+            color: $brand-orange;
+            font-size: 1.1rem;
+        }
+
+        strong {
+            display: block;
+            color: $theme4;
+        }
+    }
+
+    .sp-features {
+        list-style: none;
+        padding: 18px 0 0;
+        margin: 0 0 24px;
+        border-top: 1px solid #f0edf8;
+
+        li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 6px 0;
+            font-size: 0.93rem;
+            color: $body-color;
+        }
+
+        i {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba($primary, 0.1);
+            color: $primary;
+            font-size: 0.8rem;
+        }
+    }
+
+    .sp-lock-note {
+        display: block;
+        margin-top: 8px;
+        text-align: center;
+        color: $placeholder-clr;
+    }
+
+    // ---------- Buttons ----------
+    .sp-btn {
+        min-height: 48px;
+        border-radius: 999px;
+        font-weight: 600;
+        border: 2px solid transparent;
+        transition: transform 0.2s, box-shadow 0.25s, background 0.25s, color 0.25s;
+
+        &.btn-sm {
+            min-height: 38px;
+            padding: 4px 18px;
+        }
+
+        &:not(:disabled):hover {
+            transform: translateY(-2px);
+        }
+    }
+
+    .sp-btn-primary {
+        background: $sp-gradient;
+        color: #fff;
+        box-shadow: 0 10px 24px rgba($primary, 0.3);
+
+        &:hover,
+        &:focus {
+            color: #fff;
+            background: $sp-gradient;
+            box-shadow: 0 14px 30px rgba($primary, 0.4);
+        }
+    }
+
+    .sp-btn-outline {
+        background: #fff;
+        color: $primary;
+        border-color: rgba($primary, 0.35);
+
+        &:hover,
+        &:focus {
+            background: $primary;
+            border-color: $primary;
+            color: #fff;
+        }
+    }
+
+    .sp-btn-orange {
+        background: $brand-orange;
+        color: $theme4;
+        box-shadow: 0 10px 24px rgba($brand-orange, 0.35);
+
+        &:hover,
+        &:focus {
+            background: lighten($brand-orange, 5%);
+            color: $theme4;
+        }
+    }
+
+    .sp-btn-muted,
+    .sp-btn-muted:disabled {
+        background: #f2f4f7;
+        color: $placeholder-clr;
+        border-color: #eaecf0;
+        opacity: 1;
+    }
+
+    .sp-btn-current,
+    .sp-btn-current:disabled {
+        background: rgba($success, 0.1);
+        color: $success;
+        border-color: rgba($success, 0.3);
+        opacity: 1;
+    }
+
+    // ---------- Founding hero ----------
+    .sp-founding-hero {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        align-items: center;
+        padding: 36px 28px;
+        margin-bottom: 48px;
+        border-radius: 28px;
+        color: #fff;
+        background:
+            radial-gradient(circle at 90% 0%, rgba($brand-orange, 0.25), transparent 45%),
+            linear-gradient(135deg, $theme4 0%, #2a1458 100%);
+        box-shadow: 0 20px 60px rgba($theme4, 0.25);
+        overflow: hidden;
+
+        @include media-breakpoint-up(lg) {
+            grid-template-columns: 1.4fr 1fr;
+            padding: 48px;
+        }
+
+        h2 {
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 800;
+            margin: 16px 0 10px;
+        }
+
+        p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 14px;
+        }
+
+        small {
+            color: rgba(255, 255, 255, 0.7);
+        }
+    }
+
+    .sp-founding-cta {
+        padding: 24px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .sp-founding-price {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 16px;
+
+        span {
+            font-size: 2.6rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        small {
+            color: rgba(255, 255, 255, 0.7);
+        }
+    }
+
+    // ---------- Benefits ----------
+    .sp-benefits {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+
+        @include media-breakpoint-up(md) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @include media-breakpoint-up(lg) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .sp-benefit {
+        display: flex;
+        gap: 14px;
+        padding: 22px;
+        border-radius: 20px;
+        background: #fff;
+        border: 1px solid #ece8f7;
+        transition: transform 0.3s, box-shadow 0.3s;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 36px rgba($primary, 0.1);
+        }
+
+        h6 {
+            font-weight: 700;
+            color: $theme4;
+            margin-bottom: 4px;
+        }
+
+        p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: $placeholder-clr;
+        }
+    }
+
+    .sp-benefit-icon {
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: rgba($brand-orange, 0.14);
+        color: darken($brand-orange, 8%);
+        font-size: 1.25rem;
+    }
+
+    // ---------- Refund accordion ----------
+    .sp-refund {
+        margin-top: 32px;
+        border-radius: 20px;
+        background: #fff;
+        border: 1px solid #ece8f7;
+        overflow: hidden;
+
+        &.open .sp-chevron {
+            transform: rotate(180deg);
+        }
+    }
+
+    .sp-refund-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 20px 24px;
+        border: 0;
+        background: transparent;
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: $theme4;
+        text-align: left;
+
+        .bi-shield-check {
+            color: $success;
+            margin-right: 8px;
+        }
+    }
+
+    .sp-chevron {
+        transition: transform 0.3s;
+    }
+
+    .sp-refund-content {
+        padding: 0 24px 22px;
+        animation: sp-fade-up 0.3s ease both;
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+
+            i {
+                color: $success;
+            }
+        }
+    }
+
+    // ---------- Student dashboard (Load more) ----------
+    .sp-dashboard {
+        margin-top: 56px;
+        padding: 28px;
+        border-radius: 24px;
+        background: $theme2;
+        border: 1px dashed rgba($brand-blue, 0.35);
+
+        @include media-breakpoint-down(sm) {
+            padding: 22px 16px;
+        }
+    }
+
+    .sp-dashboard-intro {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        margin-bottom: 20px;
+        text-align: left;
+
+        .sp-plan-icon {
+            background: rgba($brand-blue, 0.12);
+            color: $brand-blue;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: $theme4;
+            margin: 0 0 2px;
+        }
+
+        p {
+            margin: 0;
+            color: $placeholder-clr;
+            font-size: 0.93rem;
+        }
+    }
+
+    .sp-dashboard-plans {
+        margin-bottom: 24px;
+        animation: sp-fade-up 0.4s ease both;
+    }
+
+    .sp-load-more {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 22px;
+        border-radius: 999px;
+        border: 1px solid rgba($brand-blue, 0.4);
+        background: #fff;
+        color: $brand-blue;
+        font-weight: 600;
+        transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+
+        &:hover {
+            background: $brand-blue;
+            color: #fff;
+            box-shadow: 0 10px 24px rgba($brand-blue, 0.25);
+        }
+    }
+
+    // ---------- Rules ----------
+    .sp-rules {
+        margin-top: 48px;
+        text-align: center;
+
+        p {
+            color: $placeholder-clr;
+            margin-bottom: 10px;
+            font-size: 0.93rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sp-pane,
+        .sp-dashboard-plans,
+        .sp-refund-content {
+            animation: none;
+        }
+    }
+}
+
+@keyframes sp-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

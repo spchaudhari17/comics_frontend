@@ -25,11 +25,14 @@ const AuthShell = ({ children, className = "", wide = false }) => (
                             <li key={b.text}><i className={`bi ${b.icon}`}></i>{b.text}</li>
                         ))}
                     </ul>
-                    <img
-                        src={require("../../assets/images/kridemy-cat.png")}
-                        alt="Kridemy superhero cat"
-                        className="auth-brand-cat"
-                    />
+                    {/* wrap = glow + hover, img = float animation */}
+                    <div className="auth-brand-cat-wrap">
+                        <img
+                            src={require("../../assets/images/kridemy-cat.png")}
+                            alt="Kridemy superhero cat"
+                            className="auth-brand-cat"
+                        />
+                    </div>
                 </aside>
 
                 <div className="auth-card">{children}</div>

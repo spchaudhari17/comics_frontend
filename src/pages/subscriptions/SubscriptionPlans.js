@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Badge, Tab, Nav, Alert, Spinner } from "react-bootstrap";
-import "./SubscriptionPlans.css";
+import { Container, Row, Col, Button, Alert, Spinner } from "react-bootstrap";
+import "./SubscriptionPlans.scss";
 import API from "../../API";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "react-bootstrap";
@@ -154,6 +154,20 @@ const dashboardPlans = [
     },
 ];
 
+const PLAN_ICONS = {
+    Starter: "bi-rocket-takeoff-fill",
+    Growth: "bi-graph-up-arrow",
+    Pro: "bi-gem",
+};
+
+const FOUNDING_BENEFITS = [
+    { icon: "bi-lightning-charge-fill", title: "2x Exposure Boost", text: "Receive 2x spotlight across the platform" },
+    { icon: "bi-journal-richtext", title: "Blog Feature & Credits", text: "Have your stories published on Kridemy blogs with full author credit" },
+    { icon: "bi-megaphone-fill", title: "Social Media Amplification", text: "Your educational content featured across official Kridemy social channels" },
+    { icon: "bi-cash-coin", title: "20% Lifetime School Commission", text: "Earn 20% lifetime commission on any successful school integration referred by you" },
+    { icon: "bi-patch-check-fill", title: "Founding Teacher Badge", text: "Exclusive verified badge displayed on your profile and content" },
+];
+
 const SubscriptionPlans = () => {
     const navigate = useNavigate();
     const [currentSub, setCurrentSub] = useState(null);
@@ -165,6 +179,8 @@ const SubscriptionPlans = () => {
     const [activeBanner, setActiveBanner] = useState(null);
     const [activeTab, setActiveTab] = useState("standard");
     const [showRefundAccordion, setShowRefundAccordion] = useState(false);
+    // Student dashboard plans "Load more" ke peeche chhupe rahenge
+    const [showDashboardPlans, setShowDashboardPlans] = useState(false);
     const [userData, setUserData] = useState(null);
     const [purchaseLoading, setPurchaseLoading] = useState(false);
     const [purchaseError, setPurchaseError] = useState(null);
@@ -360,318 +376,215 @@ const SubscriptionPlans = () => {
         }
     };
 
+
+    const formatDate = (d) => new Date(d).toLocaleDateString();
+
+    // Plan card ka CTA button (subscription status ke hisaab se)
+    const renderPlanAction = (plan, planType, { featured = false, locked = false } = {}) => {
+        if (currentSub?.status === "to_cancel") {
+            return <Button variant="" disabled className="sp-btn sp-btn-muted w-100">Cancels on {formatDate(currentSub.endDate)}</Button>;
+        }
+        if (currentSub?.hasPendingChange) {
+            return <Button variant="" disabled className="sp-btn sp-btn-muted w-100">Change Scheduled</Button>;
+        }
+        if (currentSub?.priceId === plan.priceId) {
+            return (
+                <Button variant="" disabled className="sp-btn sp-btn-current w-100">
+                    <i className="bi bi-check2-circle me-2"></i>Current Plan
+                </Button>
+            );
+        }
+        return (
+            <Button
+                variant=""
+                className={`sp-btn w-100 ${featured ? "sp-btn-primary" : "sp-btn-outline"}`}
+                onClick={() => handleSelectPlan(plan.priceId, planType, plan.name)}
+                disabled={locked}
+            >
+                {currentSub
+                    ? "Change Plan"
+                    : plan.trialDays
+                        ? `Start ${plan.trialDays}-Day FREE Trial`
+                        : "Select Plan"}
+            </Button>
+        );
+    };
+
     // Render Plan Cards
     const renderPlanCards = (plans, isFounding = false) => {
         const canSelectPlan = !isFounding || (isFounding && isFoundingTeacher);
 
         return (
-            <Row className="g-4 justify-content-center">
-                {plans.map((plan, index) => (
-                    <Col lg={4} md={6} key={index}>
-                        <div className={`plan-card h-100 position-relative ${isFounding ? 'founding-plan-card' : ''}`}>
-                            {plan.badge && (
-                                <Badge className={`plan-badge ${isFounding ? 'founding-badge' : ''}`}>
-                                    {plan.badge}
-                                </Badge>
-                            )}
-                            <div className="plan-header text-center mb-4">
-                                <h5 className="fw-semibold mb-2">{plan.name}</h5>
-                                <div className="plan-price">
-                                    <div className="d-flex justify-content-center align-items-center gap-2">
-                                        <span className={`price ${isFounding ? 'text-success fw-bold' : ''}`}>
-                                            {plan.price}
-                                        </span>
-                                        {plan.originalPrice && (
-                                            <span className="text-muted text-decoration-line-through">
-                                                {plan.originalPrice}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <span className="duration">{plan.duration}</span>
+            <Row className="g-4 justify-content-center align-items-stretch">
+                {plans.map((plan, index) => {
+                    // Beech wala (Growth) plan highlight
+                    const featured = index === 1;
+                    return (
+                        <Col lg={4} md={6} key={index}>
+                            <div className={`sp-plan-card ${featured ? "is-featured" : ""} ${isFounding ? "is-founding" : ""}`}>
+                                {plan.badge && <span className="sp-plan-badge">{plan.badge}</span>}
 
-                                    {plan.trialText && (
-                                        <div
-                                            className="mt-3 p-2 rounded-3"
-                                            style={{
-                                                background: '#e8f5e9',
-                                                border: '1px dashed #28a745',
-                                                fontSize: '0.85rem',
-                                                color: '#1b5e20',
-                                                fontWeight: 500,
-                                                lineHeight: 1.4
-                                            }}
-                                        >
-                                            <div className="fw-bold mb-1" style={{ fontSize: '0.95rem' }}>
-                                                🎁 30 Days FREE Trial
-                                            </div>
+                                <div className="sp-plan-head">
+                                    <span className="sp-plan-icon">
+                                        <i className={`bi ${PLAN_ICONS[plan.name] || "bi-stars"}`}></i>
+                                    </span>
+                                    <h5 className="sp-plan-name">{plan.name}</h5>
+                                </div>
+
+                                <div className="sp-plan-price">
+                                    <span className="sp-price">{plan.price}</span>
+                                    <span className="sp-duration">{plan.duration}</span>
+                                    {plan.originalPrice && <span className="sp-original">{plan.originalPrice}</span>}
+                                </div>
+
+                                {plan.trialText && (
+                                    <div className="sp-trial">
+                                        <i className="bi bi-gift-fill"></i>
+                                        <div>
+                                            <strong>{plan.trialDays} Days FREE Trial</strong>
                                             <div>{plan.trialText}</div>
                                         </div>
-                                    )}
+                                    </div>
+                                )}
 
+                                <ul className="sp-features">
+                                    {plan.features.map((feature, i) => (
+                                        <li key={i}>
+                                            <i className="bi bi-check-lg"></i>
+                                            <span>{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                <div className="mt-auto">
+                                    {isFounding && !isFoundingTeacher ? (
+                                        <>
+                                            <Button variant="" disabled className="sp-btn sp-btn-muted w-100">
+                                                <i className="bi bi-lock-fill me-2"></i>
+                                                Become a Founding Teacher First
+                                            </Button>
+                                            <small className="sp-lock-note">Pay $99.99 one-time fee to unlock</small>
+                                        </>
+                                    ) : (
+                                        renderPlanAction(plan, "bundle", { featured, locked: !canSelectPlan })
+                                    )}
                                 </div>
                             </div>
-
-                            <ul className="plan-features list-unstyled mb-4">
-                                {plan.features.map((feature, i) => (
-                                    <li key={i}>
-                                        <i className="bi bi-check-circle-fill me-2"></i>
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
-
-                            {isFounding && !isFoundingTeacher && (
-                                <div className="mt-auto">
-                                    <Button
-                                        disabled
-                                        className="w-100"
-                                        variant="secondary"
-                                    >
-                                        <i className="bi bi-lock me-2"></i>
-                                        Become a Founding Teacher First
-                                    </Button>
-                                    <small className="text-muted d-block text-center mt-2">
-                                        Pay $99.99 one-time fee to unlock
-                                    </small>
-                                </div>
-                            )}
-
-                            {currentSub?.status === "to_cancel" ? (
-                                <div className="mt-auto">
-                                    <Button disabled className="w-100">
-                                        Cancels on {new Date(currentSub.endDate).toLocaleDateString()}
-                                    </Button>
-                                </div>
-                            ) : currentSub?.hasPendingChange ? (
-                                <div className="mt-auto">
-                                    <Button disabled className="w-100">
-                                        Change Scheduled
-                                    </Button>
-                                </div>
-                            ) : currentSub?.priceId === plan.priceId ? (
-                                <div className="mt-auto">
-                                    <Button disabled className="w-100">
-                                        Current Plan
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="mt-auto">
-                                    <Button
-                                        className={`btn ${isFounding ? 'btn-success' : 'btn-custom'} w-100 py-2`}
-                                        onClick={() => handleSelectPlan(plan.priceId, isFounding ? "bundle" : "bundle", plan.name)}
-                                        disabled={!canSelectPlan}
-                                    >
-                                        {/* {currentSub ? "Change Plan" : "Select Plan"} */}
-                                        {currentSub
-                                            ? "Change Plan"
-                                            : plan.trialDays
-                                                ? `Start ${plan.trialDays}-Day FREE Trial`
-                                                : "Select Plan"}
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    </Col>
-                ))}
+                        </Col>
+                    );
+                })}
             </Row>
         );
     };
 
     return (
-        <>
-            <section className="subscription-plans-section py-5">
-                {currentSub?.status === "to_cancel" && (
-                    <div className="alert alert-warning text-center mb-4">
-                        <h6 className="fw-semibold mb-2">Subscription Cancelled</h6>
-                        <p className="mb-1">
-                            Your plan will end on <strong>
-                                {new Date(currentSub.endDate).toLocaleDateString()}
-                            </strong>.
-                        </p>
-                        <p className="mb-0 small text-muted">
-                            You can continue using all features until this date.
-                        </p>
-                    </div>
-                )}
+        <div className="sp-page">
+            {/* ===== HERO + TABS ===== */}
+            <section className="sp-hero">
+                <Container className="position-relative">
+                    <span className="sp-eyebrow"><i className="bi bi-lightning-charge-fill"></i> Pricing</span>
+                    <h1 className="sp-hero-title">
+                        Plans that grow with <span>your classroom</span>
+                    </h1>
+                    <p className="sp-hero-sub">
+                        Simple monthly pricing for teachers. Start free, upgrade anytime.
+                    </p>
 
+                    <div className="sp-tabs" role="tablist">
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={activeTab === "standard"}
+                            className={`sp-tab ${activeTab === "standard" ? "active" : ""}`}
+                            onClick={() => setActiveTab("standard")}
+                        >
+                            <i className="bi bi-grid-fill"></i> Standard Plans
+                        </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={activeTab === "founding"}
+                            className={`sp-tab ${activeTab === "founding" ? "active" : ""}`}
+                            onClick={() => setActiveTab("founding")}
+                        >
+                            <i className="bi bi-star-fill"></i> Founding Teacher
+                            <span className="sp-tab-pill">{isFoundingTeacher ? "✓ Unlocked" : "Lifetime Perks"}</span>
+                        </button>
+                    </div>
+                </Container>
+            </section>
+
+            <section className="sp-body">
                 <Container>
+                    {/* ===== Status alerts ===== */}
+                    {currentSub?.status === "to_cancel" && (
+                        <div className="sp-alert sp-alert-warning">
+                            <i className="bi bi-exclamation-triangle-fill"></i>
+                            <div>
+                                <strong>Subscription Cancelled.</strong> Your plan will end on{" "}
+                                <strong>{formatDate(currentSub.endDate)}</strong>. You can continue using all features until this date.
+                            </div>
+                        </div>
+                    )}
+
                     {currentSub?.hasPendingChange && (
-                        <div className="text-center mb-4">
-                            <div className="alert alert-info">
-                                <strong>Plan change scheduled.</strong>
-                                <br />
-                                New plan will activate on{" "}
-                                {currentSub.pendingApplyDate &&
-                                    new Date(currentSub.pendingApplyDate).toLocaleDateString()}
-                                <p className="text-muted small mt-2">
-                                    You cannot schedule another change until this one is applied.
-                                </p>
+                        <div className="sp-alert sp-alert-info">
+                            <i className="bi bi-calendar-check-fill"></i>
+                            <div>
+                                <strong>Plan change scheduled.</strong> New plan will activate on{" "}
+                                {currentSub.pendingApplyDate && formatDate(currentSub.pendingApplyDate)}. You cannot schedule another change until this one is applied.
                             </div>
                         </div>
                     )}
 
-                    {/* Founding Teacher Status Alert */}
                     {isFoundingTeacher && (
-                        <Alert variant="success" className="text-center mb-4">
-                            <i className="bi bi-star-fill me-2"></i>
-                            <strong>You are a Founding Teacher!</strong>
-                            <span className="ms-2">Enjoy exclusive pricing and lifetime benefits.</span>
-                        </Alert>
+                        <div className="sp-alert sp-alert-success">
+                            <i className="bi bi-star-fill"></i>
+                            <div>
+                                <strong>You are a Founding Teacher!</strong> Enjoy exclusive pricing and lifetime benefits.
+                            </div>
+                        </div>
                     )}
 
-                    {/* <div className="text-center mb-3">
-                        {activeBanner?.headline && (
-                            <div className="alert alert-warning fw-semibold">
-                                {activeBanner.headline}
+                    {/* ===== TAB 1: STANDARD PLANS ===== */}
+                    {activeTab === "standard" && (
+                        <div className="sp-pane" key="standard">
+                            <div className="sp-section-head">
+                                <h2>Choose Your Subscription Plan</h2>
+                                <p>Every plan includes AI comics, quizzes and a student dashboard.</p>
                             </div>
-                        )}
-                        <div>
-                            <span className="text-muted">Want more discounts?</span>
-                            <button
-                                type="button"
-                                className="btn btn-link p-0 ms-2 fw-semibold text-decoration-none"
-                                onClick={() => navigate("/coupon-offers")}
-                            >
-                                View Active Offers <i className="bi bi-arrow-right ms-1"></i>
-                            </button>
+                            {renderPlanCards(standardPlans, false)}
                         </div>
-                    </div> */}
+                    )}
 
-                    {/* ===== TAB NAVIGATION ===== */}
-                    <div className="pricing-tab-navigation mb-5">
-                        <div style={{
-                            background: '#f8f9fa',
-                            borderRadius: '60px',
-                            padding: '6px',
-                            maxWidth: '650px',
-                            margin: '0 auto',
-                            boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-                            border: '1px solid #e9ecef'
-                        }}>
-                            <Nav
-                                variant="pills"
-                                className="justify-content-center"
-                                activeKey={activeTab}
-                                onSelect={(k) => setActiveTab(k)}
-                                style={{ gap: '4px' }}
-                            >
-                                <Nav.Item style={{ flex: 1 }}>
-                                    <Nav.Link
-                                        eventKey="standard"
-                                        className="text-center fw-semibold rounded-pill"
-                                        style={{
-                                            padding: '12px 20px',
-                                            fontSize: '0.95rem',
-                                            transition: 'all 0.3s ease',
-                                            background: activeTab === 'standard' ? 'white' : 'transparent',
-                                            color: activeTab === 'standard' ? '#28a745' : '#6c757d',
-                                            boxShadow: activeTab === 'standard' ? '0 4px 15px rgba(40,167,69,0.15)' : 'none',
-                                            border: activeTab === 'standard' ? '2px solid #28a745' : '2px solid transparent',
-                                        }}
-                                    >
-                                        <i className="bi bi-grid-3x3-gap-fill me-2"></i>
-                                        Standard Plans
-                                    </Nav.Link>
-                                </Nav.Item>
-                                <Nav.Item style={{ flex: 1 }}>
-                                    <Nav.Link
-                                        eventKey="founding"
-                                        className="text-center fw-semibold rounded-pill position-relative"
-                                        style={{
-                                            padding: '12px 20px',
-                                            fontSize: '0.95rem',
-                                            transition: 'all 0.3s ease',
-                                            background: activeTab === 'founding' ? 'white' : 'transparent',
-                                            color: activeTab === 'founding' ? '#28a745' : '#6c757d',
-                                            boxShadow: activeTab === 'founding' ? '0 4px 15px rgba(40,167,69,0.15)' : 'none',
-                                            border: activeTab === 'founding' ? '2px solid #28a745' : '2px solid transparent',
-                                        }}
-                                    >
-                                        <div className="d-flex align-items-center justify-content-center gap-2 flex-wrap">
-                                            <i className="bi bi-star-fill text-warning"></i>
-                                            <span>Founding Teacher Plan</span>
-                                            <Badge
-                                                bg="warning"
-                                                text="dark"
-                                                style={{
-                                                    fontSize: '0.6rem',
-                                                    padding: '0.25rem 0.6rem',
-                                                    borderRadius: '50px'
-                                                }}
-                                            >
-                                                ⭐ Lifetime Perks
-                                            </Badge>
-                                            {isFoundingTeacher && (
-                                                <Badge
-                                                    bg="success"
-                                                    style={{
-                                                        fontSize: '0.6rem',
-                                                        padding: '0.25rem 0.6rem',
-                                                        borderRadius: '50px'
-                                                    }}
-                                                >
-                                                    ✓ Unlocked
-                                                </Badge>
-                                            )}
-                                        </div>
-                                    </Nav.Link>
-                                </Nav.Item>
-                            </Nav>
-                        </div>
-                    </div>
-
-                    {/* ===== TAB CONTENT ===== */}
-                    <Tab.Container activeKey={activeTab}>
-                        <Tab.Content>
-                            {/* ===== TAB 1: STANDARD PLANS ===== */}
-                            <Tab.Pane eventKey="standard">
-                                <div className="text-center mb-5">
-                                    <div className="section-heading mb-2">
-                                        Choose Your Subscription Plan
+                    {/* ===== TAB 2: FOUNDING TEACHER PLAN ===== */}
+                    {activeTab === "founding" && (
+                        <div className="sp-pane" key="founding">
+                            {!isFoundingTeacher && (
+                                <div className="sp-founding-hero">
+                                    <div className="sp-founding-copy">
+                                        <span className="sp-eyebrow sp-eyebrow-orange">
+                                            <i className="bi bi-mortarboard-fill"></i> Founding Teacher Status
+                                        </span>
+                                        <h2>Join the exclusive Founding Teacher program</h2>
+                                        <p>Unlock up to 35% off every plan for life, plus spotlight, blog features and commission perks.</p>
+                                        <small><i className="bi bi-people-fill me-1"></i> Limited to the first <strong>1,000 eligible teachers</strong></small>
                                     </div>
-                                    <p className="text-muted">
-                                        Simple monthly pricing for teachers. Upgrade anytime.
-                                    </p>
-                                </div>
 
-                                {renderPlanCards(standardPlans, false)}
-                            </Tab.Pane>
-
-                            {/* ===== TAB 2: FOUNDING TEACHER PLAN ===== */}
-                            <Tab.Pane eventKey="founding">
-                                {/* Show if user already purchased */}
-                                {isFoundingTeacher ? (
-                                    <Alert variant="success" className="text-center mb-4">
-                                        <h5>✅ You are a Founding Teacher!</h5>
-                                        <p className="mb-0">You have access to exclusive pricing and lifetime benefits.</p>
-                                    </Alert>
-                                ) : (
-                                    // Hero Banner - only if not purchased
-                                    <div className="founding-hero-banner bg-success text-white rounded-4 p-5 mb-5 text-center">
-                                        <h2 className="display-5 fw-bold mb-3">
-                                            🎓 Founding Teacher Status
-                                        </h2>
-                                        <p className="lead mb-4">
-                                            Join the exclusive Founding Teacher program and enjoy lifetime benefits!
-                                        </p>
-
+                                    <div className="sp-founding-cta">
+                                        <div className="sp-founding-price">
+                                            <span>$99.99</span>
+                                            <small>One-time fee</small>
+                                        </div>
 
                                         {purchaseError && (
-                                            <Alert variant="danger" className="text-dark mb-3">
-                                                {purchaseError}
-                                            </Alert>
+                                            <Alert variant="danger" className="py-2 small mb-3">{purchaseError}</Alert>
                                         )}
 
-                                        <div className="d-flex justify-content-center align-items-center gap-4 flex-wrap mb-4">
-                                            <div className="bg-white text-dark rounded-3 px-4 py-2">
-                                                <span className="h4 fw-bold">$99.99</span>
-                                                <span className="text-muted ms-2">One-time fee</span>
-                                            </div>
-                                        </div>
                                         <Button
-                                            className="btn btn-light btn-lg px-5 py-3 fw-bold"
+                                            variant=""
+                                            className="sp-btn sp-btn-orange w-100"
                                             onClick={handleFoundingTeacherPurchase}
-                                            // disabled={purchaseLoading || (currentSub && currentSub.status === "active")}
                                             disabled={purchaseLoading || isFoundingTeacher}
                                         >
                                             {purchaseLoading ? (
@@ -680,196 +593,129 @@ const SubscriptionPlans = () => {
                                                     Processing...
                                                 </>
                                             ) : (
-                                                "Become a Founding Teacher 🚀"
+                                                <>Become a Founding Teacher <i className="bi bi-rocket-takeoff-fill ms-1"></i></>
                                             )}
                                         </Button>
-                                        <p className="mt-3 small">
-                                            Limited to the first <strong>1,000 eligible teachers</strong>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="sp-section-head">
+                                <h2>Exclusive Founding Teacher Pricing</h2>
+                                <p>
+                                    {isFoundingTeacher
+                                        ? "Enjoy up to 35% off standard pricing for life"
+                                        : "Become a Founding Teacher to unlock these exclusive prices"}
+                                </p>
+                            </div>
+
+                            {renderPlanCards(foundingTeacherPlans, true)}
+
+                            {/* Founding Teacher Benefits */}
+                            <div className="sp-section-head mt-5 pt-3">
+                                <h2>Founding Teacher Benefits</h2>
+                                <p>Perks that stay with you for life.</p>
+                            </div>
+                            <div className="sp-benefits">
+                                {FOUNDING_BENEFITS.map((b) => (
+                                    <div className="sp-benefit" key={b.title}>
+                                        <span className="sp-benefit-icon"><i className={`bi ${b.icon}`}></i></span>
+                                        <div>
+                                            <h6>{b.title}</h6>
+                                            <p>{b.text}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Refund Policy Accordion */}
+                            <div className={`sp-refund ${showRefundAccordion ? "open" : ""}`}>
+                                <button
+                                    type="button"
+                                    className="sp-refund-toggle"
+                                    onClick={() => setShowRefundAccordion(!showRefundAccordion)}
+                                    aria-expanded={showRefundAccordion}
+                                >
+                                    <span><i className="bi bi-shield-check"></i> Founding Teacher Fee Refund Policy</span>
+                                    <i className="bi bi-chevron-down sp-chevron"></i>
+                                </button>
+
+                                {showRefundAccordion && (
+                                    <div className="sp-refund-content">
+                                        <p>
+                                            You are eligible for a <strong className="text-success">100% refund ($99.99 USD)</strong> if you choose to exit the Founding Teacher Program, provided you complete the following milestones at any point of time:
                                         </p>
+                                        <ul>
+                                            <li><i className="bi bi-check-circle-fill"></i><span><strong>Publish 40 comics</strong> on the platform</span></li>
+                                            <li><i className="bi bi-check-circle-fill"></i><span><strong>Sell 10 bundles</strong> in the marketplace</span></li>
+                                            <li><i className="bi bi-check-circle-fill"></i><span><strong>Share 5 content pieces</strong> directly with the Kridemy team</span></li>
+                                            <li><i className="bi bi-check-circle-fill"></i><span><strong>Contribute 1 blog story</strong></span></li>
+                                        </ul>
                                     </div>
                                 )}
-
-                                {/* Founding Teacher Plans */}
-                                <div className="text-center mb-4">
-                                    <h3 className="fw-bold">Exclusive Founding Teacher Pricing</h3>
-                                    <p className="text-muted">
-                                        {isFoundingTeacher
-                                            ? "Enjoy up to 35% off standard pricing for life"
-                                            : "Become a Founding Teacher to unlock these exclusive prices"}
-                                    </p>
-                                </div>
-
-                                {renderPlanCards(foundingTeacherPlans, true)}
-
-                                {/* Founding Teacher Benefits */}
-                                <div className="founding-benefits mt-5">
-                                    <h4 className="text-center fw-bold mb-4">✨ Founding Teacher Benefits</h4>
-                                    <Row className="g-4">
-                                        <Col md={4}>
-                                            <div className="benefit-card p-4 border rounded-3 h-100 text-center">
-                                                <div className="benefit-icon display-4 mb-3">🚀</div>
-                                                <h5>2x Exposure Boost</h5>
-                                                <p className="text-muted">Receive 2x spotlight across the platform</p>
-                                            </div>
-                                        </Col>
-                                        <Col md={4}>
-                                            <div className="benefit-card p-4 border rounded-3 h-100 text-center">
-                                                <div className="benefit-icon display-4 mb-3">📝</div>
-                                                <h5>Blog Feature & Credits</h5>
-                                                <p className="text-muted">Have your stories published on Kridemy blogs with full author credit</p>
-                                            </div>
-                                        </Col>
-                                        <Col md={4}>
-                                            <div className="benefit-card p-4 border rounded-3 h-100 text-center">
-                                                <div className="benefit-icon display-4 mb-3">📱</div>
-                                                <h5>Social Media Amplification</h5>
-                                                <p className="text-muted">Your educational content featured across official Kridemy social channels</p>
-                                            </div>
-                                        </Col>
-                                        <Col md={6}>
-                                            <div className="benefit-card p-4 border rounded-3 h-100 text-center">
-                                                <div className="benefit-icon display-4 mb-3">💰</div>
-                                                <h5>20% Lifetime School Commission</h5>
-                                                <p className="text-muted">Earn 20% lifetime commission on any successful school integration referred by you</p>
-                                            </div>
-                                        </Col>
-                                        <Col md={6}>
-                                            <div className="benefit-card p-4 border rounded-3 h-100 text-center">
-                                                <div className="benefit-icon display-4 mb-3">🏅</div>
-                                                <h5>Founding Teacher Badge</h5>
-                                                <p className="text-muted">Exclusive verified badge displayed on your profile and content</p>
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                </div>
-
-                                {/* Refund Policy Accordion */}
-                                <div className="refund-policy-section mt-5">
-                                    <div
-                                        className="refund-toggle p-4 border rounded-3 bg-light cursor-pointer"
-                                        onClick={() => setShowRefundAccordion(!showRefundAccordion)}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        <div className="d-flex justify-content-between align-items-center">
-                                            <h5 className="mb-0 fw-bold">
-                                                <i className="bi bi-shield-check me-2 text-success"></i>
-                                                Founding Teacher Fee Refund Policy
-                                            </h5>
-                                            <i className={`bi bi-chevron-${showRefundAccordion ? 'up' : 'down'} fs-4`}></i>
-                                        </div>
-                                    </div>
-
-                                    {showRefundAccordion && (
-                                        <div className="refund-content p-4 border border-top-0 rounded-bottom-3 bg-light">
-                                            <p className="fw-semibold">
-                                                You are eligible for a <span className="text-success">100% refund ($99.99 USD)</span> if you choose to exit the Founding Teacher Program, provided you complete the following milestones at any point of time:
-                                            </p>
-                                            <ul className="list-unstyled">
-                                                <li className="mb-2">
-                                                    <i className="bi bi-check-circle-fill text-success me-2"></i>
-                                                    <strong>Publish 40 comics</strong> on the platform
-                                                </li>
-                                                <li className="mb-2">
-                                                    <i className="bi bi-check-circle-fill text-success me-2"></i>
-                                                    <strong>Sell 10 bundles</strong> in the marketplace
-                                                </li>
-                                                <li className="mb-2">
-                                                    <i className="bi bi-check-circle-fill text-success me-2"></i>
-                                                    <strong>Share 5 content pieces</strong> directly with the Kridemy team
-                                                </li>
-                                                <li className="mb-2">
-                                                    <i className="bi bi-check-circle-fill text-success me-2"></i>
-                                                    <strong>Contribute 1 blog story</strong>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-                            </Tab.Pane>
-                        </Tab.Content>
-                    </Tab.Container>
-
-
-                </Container>
-            </section>
-
-            {/* ===== Standalone Dashboard Plans ===== */}
-            <section className="subscription-plans-section py-5 pt-0">
-                <Container>
-                    <div className="text-center mb-5">
-                        <div className="section-heading mb-2">
-                            Student Dashboard Plans
+                            </div>
                         </div>
-                        <p className="text-muted">
-                            Only need the dashboard? Choose a standalone plan.
-                        </p>
+                    )}
+
+                    {/* ===== Standalone Dashboard Plans (Load more ke andar) ===== */}
+                    <div className={`sp-dashboard ${showDashboardPlans ? "open" : ""}`}>
+                        <div className="sp-dashboard-intro">
+                            <span className="sp-plan-icon"><i className="bi bi-bar-chart-line-fill"></i></span>
+                            <div>
+                                <h3>Only need the Student Dashboard?</h3>
+                                <p>Standalone plans starting at $4.99/month for tracking student progress.</p>
+                            </div>
+                        </div>
+
+                        {showDashboardPlans && (
+                            <Row className="g-4 justify-content-center sp-dashboard-plans">
+                                {dashboardPlans.map((plan, index) => (
+                                    <Col lg={4} md={6} key={index}>
+                                        <div className="sp-plan-card is-compact">
+                                            <div className="sp-plan-head">
+                                                <h5 className="sp-plan-name">{plan.name}</h5>
+                                            </div>
+                                            <div className="sp-plan-price">
+                                                <span className="sp-price">{plan.price}</span>
+                                                <span className="sp-duration">{plan.duration}</span>
+                                            </div>
+                                            <ul className="sp-features">
+                                                {plan.features?.map((feature, i) => (
+                                                    <li key={i}>
+                                                        <i className="bi bi-check-lg"></i>
+                                                        <span>{feature}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <div className="mt-auto">
+                                                {renderPlanAction(plan, "dashboard")}
+                                            </div>
+                                        </div>
+                                    </Col>
+                                ))}
+                            </Row>
+                        )}
+
+                        <div className="text-center">
+                            <button
+                                type="button"
+                                className="sp-load-more"
+                                onClick={() => setShowDashboardPlans((v) => !v)}
+                                aria-expanded={showDashboardPlans}
+                            >
+                                {showDashboardPlans ? "Show less" : "Load more: Student Dashboard Plans"}
+                                <i className={`bi bi-chevron-${showDashboardPlans ? "up" : "down"}`}></i>
+                            </button>
+                        </div>
                     </div>
 
-                    <Row className="g-4 justify-content-center">
-                        {dashboardPlans.map((plan, index) => (
-                            <Col lg={4} md={6} key={index}>
-                                <div className="plan-card h-100">
-                                    <div className="plan-header mb-4">
-                                        <h5 className="fw-semibold mb-2 text-center">{plan.name}</h5>
-                                        <div className="plan-price text-center">
-                                            <span className="price">{plan.price}</span>
-                                            <span className="duration">{plan.duration}</span>
-                                        </div>
-                                    </div>
-
-                                    <ul className="plan-features list-unstyled mb-4">
-                                        {plan.features?.map((feature, i) => (
-                                            <li key={i}>
-                                                <i className="bi bi-check-circle-fill me-2"></i>
-                                                {feature}
-                                            </li>
-                                        ))}
-                                    </ul>
-
-                                    {currentSub?.status === "to_cancel" ? (
-                                        <div className="mt-auto">
-                                            <Button disabled className="w-100">
-                                                Cancels on {new Date(currentSub.endDate).toLocaleDateString()}
-                                            </Button>
-                                        </div>
-                                    ) : currentSub?.hasPendingChange ? (
-                                        <Button disabled className="w-100">
-                                            Change Scheduled
-                                        </Button>
-                                    ) : currentSub?.priceId === plan.priceId ? (
-                                        <Button disabled className="w-100">
-                                            Current Plan
-                                        </Button>
-                                    ) : (
-                                        <div className="mt-auto">
-                                            <Button
-                                                className="btn btn-custom w-100 py-2"
-                                                onClick={() => handleSelectPlan(plan.priceId, "dashboard", plan.name)}
-                                            >
-                                                {currentSub ? "Change Plan" : "Select Plan"}
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-                            </Col>
-                        ))}
-                    </Row>
-                </Container>
-            </section>
-
-            {/* ===== Subscription Rules Link ===== */}
-            <section className="py-4 bg-light">
-                <Container className="text-center">
-                    <p className="mb-2 text-muted">
-                        By purchasing a subscription, you agree to our subscription terms and conditions.
-                    </p>
-                    <Button
-                        variant="outline-dark"
-                        size="sm"
-                        onClick={() => navigate("/subscription-rules")}
-                    >
-                        View Subscription Rules
-                    </Button>
+                    {/* ===== Subscription Rules Link ===== */}
+                    <div className="sp-rules">
+                        <p>By purchasing a subscription, you agree to our subscription terms and conditions.</p>
+                        <Button variant="" className="sp-btn sp-btn-outline btn-sm" onClick={() => navigate("/subscription-rules")}>
+                            View Subscription Rules <i className="bi bi-arrow-right ms-1"></i>
+                        </Button>
+                    </div>
                 </Container>
             </section>
 
@@ -952,7 +798,7 @@ const SubscriptionPlans = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </>
+        </div>
     );
 };
 

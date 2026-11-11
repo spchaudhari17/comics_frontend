@@ -1,38 +1,76 @@
 @import "../assets/styles/custom-variables.scss";
 
-// shop.kridemy.com footer jaisa
+// shop.kridemy.com footer jaisa (WP "kridemy-header-footer" snippet ki values)
 .kridemy-footer {
     background: $footer-bg;
     color: #fff;
     padding-top: 60px;
     position: relative;
+    line-height: 1.65; // shop body line-height
+
+    @media (max-width: 768px) {
+        padding-top: 45px;
+    }
 
     a {
         text-decoration: none;
     }
 
-    .kf-grid {
-        display: grid;
-        grid-template-columns: 1.4fr 0.8fr 0.9fr 1.3fr;
-        gap: 48px;
-        padding-bottom: 48px;
+    .kf-container {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 0 40px;
 
-        @include media-breakpoint-down(lg) {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 36px;
-        }
-
-        @include media-breakpoint-down(md) {
-            grid-template-columns: 1fr;
-            gap: 32px;
+        @media (max-width: 768px) {
+            padding: 0 20px;
         }
     }
 
+    .kf-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 0.8fr 0.8fr 1.3fr;
+        gap: 60px;
+        padding-bottom: 50px;
+
+        @media (max-width: 992px) {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+            gap: 35px;
+        }
+    }
+
+    .kf-logo {
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
     .kf-logo img {
-        height: 64px;
+        max-height: 70px;
+        height: auto;
         width: auto;
         display: block;
-        margin-bottom: 18px;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s;
+
+        &:hover {
+            transform: translateY(-4px) scale(1.04);
+            filter: drop-shadow(0 8px 16px rgba($brand-orange, 0.4));
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            transition: none;
+
+            &:hover {
+                transform: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            max-height: 55px;
+        }
     }
 
     .kf-about {
@@ -40,7 +78,7 @@
         font-size: 14px;
         line-height: 1.8;
         max-width: 320px;
-        margin-bottom: 22px;
+        margin: 0 0 25px;
     }
 
     .kf-social {
@@ -55,10 +93,11 @@
             background: #1a2234;
             border: 1px solid #232c3f;
             color: #94a3b8;
+            font-size: 16px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.25s ease;
+            transition: all 0.3s ease;
 
             &:hover {
                 background: $primary;
@@ -76,7 +115,7 @@
         font-size: 17px;
         font-weight: 700;
         color: #fff;
-        margin-bottom: 20px;
+        margin: 0 0 20px;
         padding-bottom: 10px;
 
         &::after {
@@ -99,7 +138,7 @@
         li {
             position: relative;
             padding-left: 18px;
-            margin-bottom: 13px;
+            margin-bottom: 14px;
 
             &::before {
                 content: "⟩";
@@ -107,6 +146,7 @@
                 left: 0;
                 top: 0;
                 color: $brand-pink;
+                font-size: 16px;
                 font-weight: 700;
             }
         }
@@ -126,7 +166,7 @@
         color: #94a3b8;
         font-size: 14px;
         line-height: 1.7;
-        margin-bottom: 22px;
+        margin: 0 0 22px;
     }
 
     .kf-contact-item {
@@ -152,6 +192,7 @@
         align-items: center;
         justify-content: center;
         color: #fff;
+        font-size: 18px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
@@ -179,25 +220,34 @@
     }
 
     a.kf-contact-value:hover {
-        color: #c4b5fd;
+        color: $primary;
     }
 
     .kf-bottom {
         border-top: 1px solid #1e2637;
-        padding: 24px 0;
+        padding: 25px 0;
         text-align: center;
         color: #64748b;
         font-size: 13.5px;
     }
 
+    .kf-heart {
+        color: $brand-pink;
+    }
+
+    .kf-inflow {
+        color: #fff;
+        font-weight: 700;
+    }
+
     .kf-scroll-top {
         position: fixed;
-        right: 24px;
-        bottom: 24px;
+        right: 25px;
+        bottom: 25px;
         width: 44px;
         height: 44px;
         border: none;
-        border-radius: 10px;
+        border-radius: 8px;
         background: linear-gradient(135deg, $primary-gradient-start, $primary-gradient-end);
         color: #fff;
         font-size: 18px;
@@ -214,6 +264,13 @@
 
         &:hover {
             transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            right: 15px;
+            bottom: 15px;
+            width: 40px;
+            height: 40px;
         }
     }
 }

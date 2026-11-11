@@ -26,6 +26,10 @@ const RESOURCE_LINKS = [
     { label: 'Support', href: SHOP_PAGES.support, track: 'support' },
 ];
 
+// Footer me social icons shop jaisa order
+const FOOTER_SOCIAL_ORDER = ['x', 'instagram', 'linkedin', 'tiktok', 'facebook', 'youtube'];
+const FOOTER_SOCIAL = FOOTER_SOCIAL_ORDER.map((id) => SOCIAL_LINKS.find((s) => s.id === id)).filter(Boolean);
+
 const FooterLink = ({ item }) =>
     item.to ? (
         <Link to={item.to} onClick={() => trackFooterLink(item.track)}>{item.label}</Link>
@@ -44,7 +48,7 @@ export const Footer = () => {
 
     return (
         <footer className="kridemy-footer">
-            <div className="container-xl">
+            <div className="kf-container">
                 <div className="kf-grid">
                     {/* About */}
                     <div>
@@ -55,7 +59,7 @@ export const Footer = () => {
                             Making learning fun, visual, and effective with AI-powered comics, quizzes, and interactive stories.
                         </p>
                         <div className="kf-social">
-                            {SOCIAL_LINKS.map((s) => (
+                            {FOOTER_SOCIAL.map((s) => (
                                 <a
                                     key={s.id}
                                     href={s.url}
@@ -110,7 +114,7 @@ export const Footer = () => {
                 </div>
 
                 <div className="kf-bottom">
-                    © {new Date().getFullYear()} Kridemy. All rights reserved by Sham Insights LLC.
+                    © {new Date().getFullYear()} Kridemy. All rights reserved by Sham Insights LLC. Designed &amp; Developed with <span className="kf-heart">❤</span> by <span className="kf-inflow">Inflow</span>.
                 </div>
             </div>
 

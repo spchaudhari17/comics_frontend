@@ -1,0 +1,348 @@
+@import "../../assets/styles/custom-variables.scss";
+
+// Subscription rules page - pricing page (.sp-page) jaisa brand look
+// Sab kuch .sr-page ke andar scoped hai
+.sr-page {
+    background: $theme1;
+    color: $body-color;
+
+    // ---------- Hero ----------
+    .sr-hero {
+        position: relative;
+        padding: 40px 0 112px;
+        text-align: center;
+        color: #fff;
+        background: linear-gradient(150deg, $primary-gradient-start 0%, #4c1d95 55%, $primary-gradient-end 130%);
+        overflow: hidden;
+
+        &::before,
+        &::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        &::before {
+            width: 320px;
+            height: 320px;
+            top: -140px;
+            right: -100px;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        &::after {
+            width: 220px;
+            height: 220px;
+            bottom: -110px;
+            left: -60px;
+            background: rgba($brand-orange, 0.12);
+        }
+    }
+
+    .sr-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 24px;
+        padding: 6px 14px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.88rem;
+        font-weight: 600;
+        transition: background 0.25s;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.22);
+            color: #fff;
+        }
+
+        @include media-breakpoint-up(md) {
+            position: absolute;
+            left: 12px;
+            top: 0;
+        }
+    }
+
+    .sr-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        font-size: 0.82rem;
+        font-weight: 600;
+
+        i {
+            color: $brand-orange;
+        }
+
+        @include media-breakpoint-up(md) {
+            margin-top: 24px;
+        }
+    }
+
+    .sr-hero-title {
+        font-size: clamp(1.9rem, 4.2vw, 3rem);
+        font-weight: 800;
+        line-height: 1.12;
+        margin: 18px auto 10px;
+
+        span {
+            color: $brand-orange;
+        }
+    }
+
+    .sr-hero-sub {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    // ---------- Layout ----------
+    .sr-body {
+        position: relative;
+        margin-top: -64px;
+        padding-bottom: 64px;
+    }
+
+    .sr-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        max-width: 1080px;
+        margin: 0 auto;
+
+        @include media-breakpoint-up(lg) {
+            grid-template-columns: 270px 1fr;
+            align-items: start;
+        }
+    }
+
+    // ---------- TOC ----------
+    .sr-toc {
+        position: sticky;
+        top: 100px;
+    }
+
+    .sr-toc-card {
+        padding: 18px;
+        border-radius: 20px;
+        background: #fff;
+        border: 1px solid #ece8f7;
+        box-shadow: 0 12px 40px rgba($theme4, 0.08);
+    }
+
+    .sr-toc-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: $placeholder-clr;
+        margin: 0 6px 10px;
+    }
+
+    .sr-toc-link {
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.92rem;
+        color: $theme4;
+        transition: background 0.2s, color 0.2s;
+
+        i {
+            color: $primary;
+            margin-top: 2px;
+        }
+
+        small {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: $placeholder-clr;
+        }
+
+        &:hover {
+            background: rgba($primary, 0.07);
+            color: $primary;
+        }
+    }
+
+    // ---------- Parts ----------
+    .sr-content {
+        min-width: 0;
+    }
+
+    .sr-part {
+        padding: 28px;
+        margin-bottom: 24px;
+        border-radius: 24px;
+        background: #fff;
+        border: 1px solid #ece8f7;
+        box-shadow: 0 12px 40px rgba($theme4, 0.06);
+        scroll-margin-top: 100px;
+        animation: sr-fade-up 0.45s ease both;
+
+        @include media-breakpoint-down(sm) {
+            padding: 22px 18px;
+        }
+    }
+
+    .sr-part-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 18px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #f0edf8;
+
+        small {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: $primary;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+            font-weight: 800;
+            color: $theme4;
+        }
+    }
+
+    .sr-part-icon {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: linear-gradient(135deg, $primary-gradient-start, $primary-gradient-end);
+        color: #fff;
+        font-size: 1.25rem;
+        box-shadow: 0 8px 20px rgba($primary, 0.25);
+    }
+
+    .sr-sections {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 4px 28px;
+
+        @include media-breakpoint-up(md) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    // Ek hi section ho (Part 2) to poori width
+    .sr-section:only-child {
+        grid-column: 1 / -1;
+    }
+
+    .sr-section {
+        padding-top: 16px;
+
+        h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.02rem;
+            font-weight: 700;
+            color: $theme4;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 5px 0;
+            font-size: 0.93rem;
+            line-height: 1.5;
+
+            i {
+                width: 20px;
+                height: 20px;
+                flex-shrink: 0;
+                margin-top: 1px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: rgba($primary, 0.1);
+                color: $primary;
+                font-size: 0.8rem;
+            }
+        }
+    }
+
+    .sr-num {
+        width: 26px;
+        height: 26px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: rgba($brand-orange, 0.16);
+        color: darken($brand-orange, 15%);
+        font-size: 0.8rem;
+        font-weight: 800;
+    }
+
+    // ---------- Acknowledgement ----------
+    .sr-ack {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 18px 22px;
+        border-radius: 18px;
+        background: $theme2;
+        border: 1px dashed rgba($brand-blue, 0.35);
+
+        i {
+            color: $brand-blue;
+            font-size: 1.15rem;
+        }
+
+        p {
+            margin: 0;
+            font-size: 0.93rem;
+            color: $body-color;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sr-part {
+            animation: none;
+        }
+    }
+}
+
+@keyframes sr-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

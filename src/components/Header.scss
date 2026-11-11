@@ -1,16 +1,34 @@
 @import "../assets/styles/custom-variables.scss";
 
-// shop.kridemy.com header jaisa
+// shop.kridemy.com header jaisa (WP "kridemy-header-footer" snippet ki values)
+// 1050px se neeche nav -> hamburger (shop jaisa)
+$kh-mobile: 1050px;
+
 .kridemy-header {
     z-index: 1030;
     background: #fff;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 
+    // Full width, side padding 40px (shop jaisa)
+    .kh-wrap {
+        width: 100%;
+        padding: 0 40px;
+
+        @media (max-width: 1300px) {
+            padding: 0 16px;
+        }
+    }
+
     // ---------- Top bar ----------
     .kh-top-bar {
         background: rgba($theme4, 0.95);
+        backdrop-filter: blur(10px);
         padding: 6px 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+        @media (max-width: $kh-mobile) {
+            display: none;
+        }
     }
 
     .kh-social {
@@ -20,92 +38,129 @@
         a {
             width: 32px;
             height: 32px;
-            border-radius: 4px;
+            border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            color: #e2e8f0;
-            background: rgba(255, 255, 255, 0.07);
+            font-size: 14.4px; // shop top bar: 0.8rem @18px
+            color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.05);
             text-decoration: none;
-            transition: all 0.25s ease;
+            transition: all 0.3s;
 
             &:hover {
-                background: $primary;
+                background: linear-gradient(135deg, #f093fb, #f5576c);
                 color: #fff;
-            }
-        }
-
-        @include media-breakpoint-down(sm) {
-            gap: 8px;
-
-            a {
-                width: 28px;
-                height: 28px;
-                font-size: 13px;
+                transform: translateY(-2px);
             }
         }
     }
 
     // ---------- Main ----------
     .kh-main {
-        padding: 10px 0;
+        padding: 12px 0;
+    }
+
+    // Logo: load pe slide-in, hover pe wiggle
+    .kh-logo {
+        display: block;
+        flex-shrink: 0;
     }
 
     .kh-logo img {
-        height: 56px;
+        height: 80px;
         width: auto;
         display: block;
+        animation: kh-logo-in 0.7s ease-out both;
 
-        @include media-breakpoint-down(sm) {
-            height: 44px;
+        &:hover {
+            animation: kh-logo-wiggle 0.6s ease-in-out;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            animation: none !important;
+        }
+
+        @media (max-width: 1300px) {
+            height: 66px;
+        }
+
+        @media (max-width: $kh-mobile) {
+            height: 56px;
         }
     }
 
     .kh-nav {
         display: flex;
         align-items: center;
-        gap: 2px;
-        margin-left: 1.5rem;
+        gap: 5px;
+
+        @media (max-width: $kh-mobile) {
+            display: none;
+        }
     }
 
     .kh-nav-link {
+        display: flex;
+        align-items: center;
         color: #444;
         font-weight: 600;
-        font-size: 0.95rem;
-        padding: 8px 14px;
+        font-size: 16.2px; // shop: 0.9rem, WP root = 18px (html 112.5%)
+        line-height: 1.65; // shop body line-height
+        padding: 8px 18px;
         border-radius: 30px;
         text-decoration: none;
         white-space: nowrap;
-        transition: all 0.25s ease;
+        transition: all 0.3s;
 
         &:hover,
         &.active {
             background: $theme2;
             color: $brand-blue;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 1300px) {
+            padding: 8px 9px;
+            font-size: 15.12px; // 0.84rem @18px
         }
     }
 
-    // ---------- Buttons ----------
+    // ---------- Actions ----------
     .kh-actions {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        margin-left: 10px;
+
+        @media (max-width: 1300px) {
+            gap: 7px;
+            margin-left: 5px;
+        }
+
+        @media (max-width: $kh-mobile) {
+            margin-left: auto;
+        }
     }
 
     .kh-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
-        padding: 8px 20px;
+        gap: 8px;
+        padding: 8px 22px;
         border-radius: 30px;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 15.3px; // 0.85rem @18px
+        line-height: 1.65;
         text-decoration: none;
         white-space: nowrap;
-        transition: all 0.25s ease;
+        transition: all 0.3s;
         cursor: pointer;
+
+        @media (max-width: 1300px) {
+            padding: 8px 14px;
+        }
     }
 
     .kh-btn-outline {
@@ -120,44 +175,45 @@
         }
     }
 
-    .kh-btn-orange {
-        background: $brand-orange;
-        border: none;
-        color: #fff;
-        box-shadow: 0 4px 15px rgba($brand-orange, 0.3);
-
-        &:hover {
-            color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba($brand-orange, 0.4);
+    // Mobile pe Create Comics offcanvas menu me hai
+    .kh-create-btn {
+        @media (max-width: $kh-mobile) {
+            display: none;
         }
     }
 
+    // Cart: gol icon button
     .kh-icon-btn {
         position: relative;
-        width: 42px;
-        height: 42px;
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        color: $theme4;
+        border: 1px solid #e5eaf3;
         background: $theme2;
-        font-size: 1.15rem;
+        color: #344054;
         text-decoration: none;
-        transition: all 0.25s ease;
+        transition: background 0.2s, color 0.2s;
 
         &:hover,
         &.active {
-            background: $brand-blue;
-            color: #fff;
+            background: #e3edff;
+            color: $brand-blue;
+        }
+
+        &:focus-visible {
+            outline: 2px solid $brand-blue;
+            outline-offset: 2px;
         }
     }
 
     .kh-badge {
         position: absolute;
-        top: -2px;
-        right: -2px;
+        top: -4px;
+        right: -4px;
         min-width: 18px;
         height: 18px;
         padding: 0 5px;
@@ -172,71 +228,107 @@
         border: 2px solid #fff;
     }
 
-    // ---------- Account dropdown ----------
-    .kh-avatar-btn {
+    // ---------- Profile (person icon + "Profile" + chevron) ----------
+    .kh-profile-btn {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        justify-content: center;
+        gap: 9px;
+        min-height: 46px;
+        padding: 5px 13px 5px 6px;
+        border: 1px solid #e4e8ef;
+        border-radius: 999px;
         background: #fff;
-        border: 1.5px solid #e8e4f3;
-        border-radius: 30px;
-        padding: 4px 12px 4px 4px;
+        color: #344054;
+        font: inherit;
+        font-size: 14px;
         font-weight: 600;
-        color: $theme4;
-        max-width: 220px;
+        line-height: 1.25;
+        white-space: nowrap;
+        text-decoration: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.025);
+        transition: border-color 0.2s, background 0.2s;
 
         &::after {
             display: none; // bootstrap caret hatao, apna chevron hai
         }
 
-        img {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            object-fit: cover;
+        &:hover {
+            border-color: #c8d7f5;
+            background: #fafcff;
+            color: #344054;
         }
 
-        span {
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        &:focus-visible {
+            outline: 2px solid $brand-blue;
+            outline-offset: 2px;
         }
 
-        @include media-breakpoint-down(md) {
-            padding: 3px;
+        &[aria-expanded="true"] .kh-profile-chevron {
+            transform: rotate(180deg);
+        }
 
-            .bi-chevron-down {
+        // Chhoti screen pe sirf icon
+        @include media-breakpoint-down(sm) {
+            padding: 5px;
+
+            .kh-profile-label,
+            .kh-profile-chevron {
                 display: none;
             }
         }
     }
 
+    .kh-profile-avatar {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #eff2ff;
+        color: $primary;
+    }
+
+    .kh-profile-chevron {
+        color: #667085;
+        transition: transform 0.2s;
+    }
+
+    // ---------- Dropdown ----------
     .kh-menu {
-        min-width: 250px;
-        border: 1px solid #eee;
-        border-radius: 14px;
-        padding: 6px;
-        margin-top: 8px !important;
+        width: 260px;
+        max-width: calc(100vw - 24px);
+        padding: 12px 8px;
+        margin-top: 10px !important;
+        background: #fff;
+        border: 1px solid #e8ebf2;
+        border-radius: 16px;
+        box-shadow: 0 15px 45px rgba(25, 36, 62, 0.16);
 
         .dropdown-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            border-radius: 10px;
-            padding: 8px 12px;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 9px;
+            color: #344054;
+            font-size: 14px;
             font-weight: 500;
-            color: $body-color;
+            line-height: 1.25;
+            transition: background 0.15s;
 
             i {
                 width: 18px;
-                color: $primary;
+                text-align: center;
+                color: #813dd0;
             }
 
             &:hover,
             &:focus {
-                background: $theme2;
-                color: $primary;
+                background: #f4f1ff;
+                color: #5425a1;
             }
 
             &.text-danger i {
@@ -245,43 +337,52 @@
         }
 
         .dropdown-header {
-            font-size: 0.7rem;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: $placeholder-clr;
+            letter-spacing: 0.07em;
+            color: #87909f;
         }
+    }
+
+    .kh-menu-title {
+        padding: 6px 12px 10px;
+        color: #87909f;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
     }
 
     .kh-menu-user {
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 8px 12px 12px;
+        padding: 4px 12px 12px;
         margin-bottom: 6px;
         border-bottom: 1px solid #f0f0f0;
-
-        img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
+        font-size: 14px;
+        color: $theme4;
     }
 
     // ---------- Mobile ----------
     .kh-hamburger {
-        display: flex;
+        display: none;
         flex-direction: column;
         gap: 5px;
         background: none;
         border: none;
-        padding: 6px;
+        padding: 5px;
 
         span {
-            width: 24px;
+            width: 26px;
             height: 3px;
             border-radius: 3px;
             background: $theme4;
+        }
+
+        @media (max-width: $kh-mobile) {
+            display: flex;
         }
     }
 }
@@ -335,5 +436,36 @@
             color: $theme4;
             text-decoration: none;
         }
+    }
+}
+
+@keyframes kh-logo-in {
+    0% {
+        opacity: 0;
+        transform: translateX(-24px) scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes kh-logo-wiggle {
+    0%,
+    100% {
+        transform: rotate(0) scale(1);
+    }
+
+    25% {
+        transform: rotate(-4deg) scale(1.05);
+    }
+
+    50% {
+        transform: rotate(3deg) scale(1.05);
+    }
+
+    75% {
+        transform: rotate(-2deg) scale(1.03);
     }
 }
