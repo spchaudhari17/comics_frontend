@@ -219,6 +219,153 @@
     }
 }
 
+// ---------- Change Password (single card, auth pages jaisa look) ----------
+.auth-page.change-password-page {
+    min-height: 60vh;
+
+    .cp-card {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 40px 24px 32px;
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba($theme4, 0.08);
+        animation: cp-fade-up 0.4s ease both;
+
+        @include media-breakpoint-up(sm) {
+            padding: 44px 40px 36px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            animation: none;
+        }
+    }
+
+    .cp-head {
+        text-align: center;
+        margin-bottom: 28px;
+
+        h1 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: $theme4;
+            margin: 16px 0 6px;
+        }
+
+        p {
+            margin: 0;
+            color: $placeholder-clr;
+            font-size: 0.95rem;
+        }
+    }
+
+    .cp-icon {
+        width: 64px;
+        height: 64px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 20px;
+        background: linear-gradient(135deg, $primary-gradient-start, $primary-gradient-end);
+        color: #fff;
+        font-size: 1.7rem;
+        box-shadow: 0 12px 28px rgba($primary, 0.3);
+    }
+
+    .cp-input {
+        position: relative;
+
+        .form-control {
+            padding-left: 44px;
+            padding-right: 48px;
+            background-image: none; // bootstrap ka invalid icon eye button se takraata
+        }
+    }
+
+    .cp-input-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $placeholder-clr;
+        pointer-events: none;
+    }
+
+    .cp-eye {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 38px;
+        height: 38px;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: $placeholder-clr;
+        transition: background 0.2s, color 0.2s;
+
+        &:hover {
+            background: $theme2;
+            color: $primary;
+        }
+    }
+
+    .cp-feedback {
+        margin-top: 6px;
+        font-size: 0.85rem;
+        color: $danger;
+    }
+
+    .cp-tips {
+        list-style: none;
+        padding: 12px 14px;
+        margin: 4px 0 24px;
+        border-radius: 12px;
+        background: $theme1;
+        font-size: 0.85rem;
+        color: $placeholder-clr;
+
+        li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            & + li {
+                margin-top: 4px;
+            }
+        }
+
+        i {
+            color: $success;
+        }
+    }
+
+    .cp-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        color: $theme3;
+        text-decoration: none;
+
+        &:hover {
+            color: $primary;
+        }
+    }
+}
+
+@keyframes cp-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @keyframes kridemy-cat-in {
     0% {
         opacity: 0;

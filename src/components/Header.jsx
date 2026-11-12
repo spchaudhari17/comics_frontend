@@ -225,9 +225,11 @@ export const Header = () => {
                     </>
                   )}
 
-                  <Dropdown.Divider />
-                  <Dropdown.Item as={Link} to="/changepassword"><i className="bi bi-key"></i>Change Password</Dropdown.Item>
-                  <Dropdown.Item onClick={handleLogout} className="text-danger"><i className="bi bi-box-arrow-right"></i>Log out</Dropdown.Item>
+                  {/* Lamba menu (admin) scroll ho tab bhi logout hamesha neeche dikhe */}
+                  <div className="kh-menu-footer">
+                    <Dropdown.Item as={Link} to="/changepassword"><i className="bi bi-key"></i>Change Password</Dropdown.Item>
+                    <Dropdown.Item onClick={handleLogout} className="text-danger"><i className="bi bi-box-arrow-right"></i>Log out</Dropdown.Item>
+                  </div>
                 </Dropdown.Menu>
               </Dropdown>
             ) : (

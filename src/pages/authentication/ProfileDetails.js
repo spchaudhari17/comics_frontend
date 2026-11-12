@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
 import API from "../../API";
 import { toast } from "react-toastify"; // Make sure react-toastify is installed
+import "../MyAccount/MyAccount.scss";
 
 const BIO_MAX_LENGTH = 500;
 const BACKGROUND_MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 const BACKGROUND_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+const PROFILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
 
-const ProfileDetails = () => {
+const ROLE_LABELS = { user: "Teacher", admin: "Admin", moderator: "Moderator", parent: "Parent", student: "Student" };
+
+// Profile ka data + saare update handlers.
+// MyAccount me banner aur Profile tab dono ek hi state share karte hain.
+export const useProfile = () => {
   const [userInfo, setUserInfo] = useState(() => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
@@ -43,10 +49,6 @@ const ProfileDetails = () => {
       .catch(() => { });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (!userInfo) {
-    return <h3 className="text-center mt-5">No user data found.</h3>;
-  }
 
   const handleBackgroundUpload = async (event) => {
     const file = event.target.files[0];
@@ -144,11 +146,11 @@ const ProfileDetails = () => {
 
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
+    event.target.value = ""; // same file dobara select ho sake
     if (!file) return;
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
-    if (!allowedTypes.includes(file.type)) {
+    if (!PROFILE_TYPES.includes(file.type)) {
       toast.error("Invalid image type. Allowed: jpeg, png, gif, webp, svg");
       return;
     }
@@ -186,226 +188,229 @@ const ProfileDetails = () => {
     }
   };
 
+  return {
+    userInfo,
+    loading,
+    bgLoading,
+    isEditingBio,
+    setIsEditingBio,
+    bioDraft,
+    setBioDraft,
+    bioSaving,
+    startEditBio,
+    handleBioSave,
+    handleBackgroundUpload,
+    handleBackgroundDelete,
+    handleImageUpload
+  };
+};
+
+// ===== Upar wala banner: cover image (ya brand gradient) + avatar + naam =====
+export const ProfileBanner = ({ profile }) => {
+  const { userInfo, loading, bgLoading, handleBackgroundUpload, handleBackgroundDelete, handleImageUpload } = profile;
+  if (!userInfo) return null;
+
+  const fullName = [userInfo.firstname, userInfo.lastname].filter(Boolean).join(" ") || userInfo.username || "User";
+  const roleLabel = ROLE_LABELS[userInfo.userType] || userInfo.userType;
+
   return (
-    <div className="container my-5" style={{ maxWidth: "700px" }}>
-      <div className="content-wrapper bg-theme1 border rounded overflow-hidden">
-
-        {/* Background / Cover Image */}
-        <div
-          className="position-relative"
-          style={{
-            height: "180px",
-            background: userInfo.background_image
-              ? `url("${userInfo.background_image}") center / cover no-repeat`
-              : "linear-gradient(135deg, #F59E0B 0%, #FDE68A 100%)"
-          }}
-        >
-          <div className="position-absolute top-0 end-0 m-2 d-flex gap-2">
-            <label
-              htmlFor="background-image-upload"
-              className="btn btn-sm btn-light shadow-sm d-flex align-items-center gap-1 mb-0"
-              style={{ cursor: bgLoading ? "not-allowed" : "pointer", opacity: bgLoading ? 0.7 : 1 }}
-            >
-              {bgLoading ? (
-                <span className="spinner-border spinner-border-sm" style={{ width: "14px", height: "14px" }} />
-              ) : (
-                <i className="bi bi-camera-fill"></i>
-              )}
-              <span className="d-none d-sm-inline">
-                {userInfo.background_image ? "Change cover" : "Add cover"}
-              </span>
-              <input
-                type="file"
-                id="background-image-upload"
-                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                onChange={handleBackgroundUpload}
-                style={{ display: "none" }}
-                disabled={bgLoading}
-              />
-            </label>
-
-            {userInfo.background_image && (
-              <button
-                type="button"
-                className="btn btn-sm btn-light shadow-sm"
-                onClick={handleBackgroundDelete}
-                disabled={bgLoading}
-                title="Remove cover"
-                aria-label="Remove cover"
-              >
-                <i className="bi bi-trash"></i>
-              </button>
+    <div className="ma-banner">
+      <div
+        className="ma-cover"
+        style={userInfo.background_image
+          ? { background: `url("${userInfo.background_image}") center / cover no-repeat` }
+          : undefined}
+      >
+        <div className="ma-cover-actions">
+          <label
+            htmlFor="background-image-upload"
+            className={`ma-cover-btn ${bgLoading ? "is-busy" : ""}`}
+          >
+            {bgLoading ? (
+              <span className="spinner-border spinner-border-sm" style={{ width: "14px", height: "14px" }} />
+            ) : (
+              <i className="bi bi-camera-fill"></i>
             )}
-          </div>
-        </div>
-
-        <div className="p-4 pt-0">
-
-        <div className="d-flex align-items-end gap-3 mb-4" style={{ marginTop: "-40px" }}>
-          <div className="profile-img-wrapper position-relative">
-            <img
-              src={
-                userInfo.profile_pic
-                  ? userInfo.profile_pic
-                  : require("../../assets/images/avatar.png")
-              }
-              alt="Profile"
-              className="rounded-circle bg-white shadow-sm"
-
-              style={{ width: "88px", height: "88px", objectFit: "cover", border: "4px solid #fff" }}
+            <span className="d-none d-sm-inline">
+              {userInfo.background_image ? "Change cover" : "Add cover"}
+            </span>
+            <input
+              type="file"
+              id="background-image-upload"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+              onChange={handleBackgroundUpload}
+              style={{ display: "none" }}
+              disabled={bgLoading}
             />
+          </label>
 
-            {/* Pencil Icon for Image Upload */}
-            <label
-              htmlFor="profile-image-upload"
-              className="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-sm"
-              style={{
-                cursor: loading ? "not-allowed" : "pointer",
-                width: "30px",
-                height: "30px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transform: "translate(10%, 10%)",
-                opacity: loading ? 0.6 : 1
-              }}
+          {userInfo.background_image && (
+            <button
+              type="button"
+              className="ma-cover-btn"
+              onClick={handleBackgroundDelete}
+              disabled={bgLoading}
+              title="Remove cover"
+              aria-label="Remove cover"
             >
-              {loading ? (
-                <div className="spinner-border spinner-border-sm" style={{ width: "14px", height: "14px" }} />
-              ) : (
-                <i className="bi bi-pencil-fill" style={{ fontSize: "14px" }}></i>
-              )}
-              <input
-                type="file"
-                id="profile-image-upload"
-                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml"
-                onChange={handleImageUpload}
-                style={{ display: "none" }}
-                disabled={loading}
-              />
-            </label>
-          </div>
-
-          <div>
-            <h4 className="mb-1 text-capitalize">
-              {userInfo.firstname} {userInfo.lastname}
-            </h4>
-            <div className="text-muted fs-14">{userInfo.email}</div>
-          </div>
-        </div>
-
-        {/* Bio */}
-        <div className="d-flex align-items-center justify-content-between mb-2">
-          <h5 className="fw-bold mb-0">About Me</h5>
-          {!isEditingBio && (
-            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={startEditBio}>
-              <i className="bi bi-pencil me-1"></i>
-              {userInfo.bio ? "Edit" : "Add bio"}
+              <i className="bi bi-trash"></i>
             </button>
           )}
         </div>
+      </div>
 
-        <div className="mb-4">
-          {isEditingBio ? (
-            <>
-              <textarea
-                className="form-control"
-                rows={4}
-                maxLength={BIO_MAX_LENGTH}
-                value={bioDraft}
-                onChange={(e) => setBioDraft(e.target.value)}
-                placeholder="Tell students and parents a little about yourself, what you teach and your experience..."
-                disabled={bioSaving}
-                autoFocus
-              />
-              <div className="d-flex align-items-center justify-content-between mt-2">
-                <small className="text-muted">{bioDraft.length}/{BIO_MAX_LENGTH}</small>
-                <div className="d-flex gap-2">
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-secondary"
-                    onClick={() => setIsEditingBio(false)}
-                    disabled={bioSaving}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-primary"
-                    onClick={handleBioSave}
-                    disabled={bioSaving}
-                  >
-                    {bioSaving && <span className="spinner-border spinner-border-sm me-1" />}
-                    Save
-                  </button>
-                </div>
+      <div className="ma-identity">
+        <div className="ma-avatar">
+          <img
+            src={userInfo.profile_pic || require("../../assets/images/avatar.png")}
+            alt="Profile"
+          />
+
+          {/* Pencil Icon for Image Upload */}
+          <label
+            htmlFor="profile-image-upload"
+            className={`ma-avatar-edit ${loading ? "is-busy" : ""}`}
+            title="Change profile photo"
+          >
+            {loading ? (
+              <span className="spinner-border spinner-border-sm" style={{ width: "14px", height: "14px" }} />
+            ) : (
+              <i className="bi bi-pencil-fill"></i>
+            )}
+            <input
+              type="file"
+              id="profile-image-upload"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml"
+              onChange={handleImageUpload}
+              style={{ display: "none" }}
+              disabled={loading}
+            />
+          </label>
+        </div>
+
+        <div className="ma-identity-text">
+          <h1 className="text-capitalize">{fullName}</h1>
+          <div className="ma-email">{userInfo.email}</div>
+          <div className="ma-badges">
+            {roleLabel && <span className="ma-badge"><i className="bi bi-person-badge"></i>{roleLabel}</span>}
+            {userInfo.is_emailVerified === 1 && (
+              <span className="ma-badge ma-badge-success"><i className="bi bi-patch-check-fill"></i>Verified</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const InfoItem = ({ label, value }) => (
+  <div className="ma-info-item">
+    <span>{label}</span>
+    <strong>{value}</strong>
+  </div>
+);
+
+// ===== Profile tab: bio + personal / contact / account details =====
+export const ProfileInfo = ({ profile }) => {
+  const { userInfo, isEditingBio, setIsEditingBio, bioDraft, setBioDraft, bioSaving, startEditBio, handleBioSave } = profile;
+  if (!userInfo) return null;
+
+  return (
+    <div className="ma-profile-info">
+      {/* Bio */}
+      <div className="ma-section-head">
+        <h5>About Me</h5>
+        {!isEditingBio && (
+          <button type="button" className="btn btn-sm btn-outline-primary" onClick={startEditBio}>
+            <i className="bi bi-pencil me-1"></i>
+            {userInfo.bio ? "Edit" : "Add bio"}
+          </button>
+        )}
+      </div>
+
+      <div className="mb-4">
+        {isEditingBio ? (
+          <>
+            <textarea
+              className="form-control"
+              rows={4}
+              maxLength={BIO_MAX_LENGTH}
+              value={bioDraft}
+              onChange={(e) => setBioDraft(e.target.value)}
+              placeholder="Tell students and parents a little about yourself, what you teach and your experience..."
+              disabled={bioSaving}
+              autoFocus
+            />
+            <div className="d-flex align-items-center justify-content-between mt-2">
+              <small className="text-muted">{bioDraft.length}/{BIO_MAX_LENGTH}</small>
+              <div className="d-flex gap-2">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={() => setIsEditingBio(false)}
+                  disabled={bioSaving}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-primary"
+                  onClick={handleBioSave}
+                  disabled={bioSaving}
+                >
+                  {bioSaving && <span className="spinner-border spinner-border-sm me-1" />}
+                  Save
+                </button>
               </div>
-            </>
-          ) : (
-            <div className="text-muted" style={{ whiteSpace: "pre-line" }}>
-              {userInfo.bio || "No bio added yet."}
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          <div className={`ma-bio ${userInfo.bio ? "" : "is-empty"}`}>
+            {userInfo.bio || "No bio added yet."}
+          </div>
+        )}
+      </div>
 
-        {/* Personal Info */}
-        <h5 className="fw-bold mb-3">Personal Information</h5>
-        <div className="row mb-4">
-          <div className="col-md-6 mb-3">
-            <label className="fw-semibold">First Name</label>
-            <div className="text-muted">{userInfo.firstname || "-"}</div>
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="fw-semibold">Last Name</label>
-            <div className="text-muted">{userInfo.lastname || "-"}</div>
-          </div>
+      <h5 className="ma-group-title">Personal Information</h5>
+      <div className="ma-info-grid">
+        <InfoItem label="First Name" value={userInfo.firstname || "-"} />
+        <InfoItem label="Last Name" value={userInfo.lastname || "-"} />
+        <InfoItem label="Username" value={userInfo.username || "Not set"} />
+        <InfoItem label="User Type" value={ROLE_LABELS[userInfo.userType] || userInfo.userType || "-"} />
+      </div>
 
-          <div className="col-md-6 mb-3">
-            <label className="fw-semibold">Username</label>
-            <div className="text-muted">{userInfo.username || "Not set"}</div>
-          </div>
+      <h5 className="ma-group-title">Contact Details</h5>
+      <div className="ma-info-grid">
+        <InfoItem label="Email" value={userInfo.email || "-"} />
+        <InfoItem label="Mobile" value={`${userInfo.countryCode || ""} ${userInfo.mobileNumber || ""}`.trim() || "-"} />
+      </div>
 
-          <div className="col-md-6 mb-3">
-            <label className="fw-semibold">User Type</label>
-            <div className="text-muted text-capitalize">
-              {userInfo.userType === "user" ? "Teacher" : userInfo.userType}
-            </div>
-          </div>
-        </div>
+      <h5 className="ma-group-title">Account Details</h5>
+      <div className="ma-info-grid mb-0">
+        <InfoItem
+          label="Created At"
+          value={userInfo.createdAt ? new Date(userInfo.createdAt).toLocaleDateString() : "-"}
+        />
+        <InfoItem label="Email Verified" value={userInfo.is_emailVerified === 1 ? "Yes" : "No"} />
+      </div>
+    </div>
+  );
+};
 
-        {/* Contact Info */}
-        <h5 className="fw-bold mb-3">Contact Details</h5>
-        <div className="row mb-4">
-          <div className="col-md-6 mb-3">
-            <label className="fw-semibold">Email</label>
-            <div className="text-muted">{userInfo.email}</div>
-          </div>
+// /my-profile route: banner + details ek saath
+const ProfileDetails = () => {
+  const profile = useProfile();
 
-          <div className="col-md-6 mb-3">
-            <label className="fw-semibold">Mobile</label>
-            <div className="text-muted">
-              {userInfo.countryCode} {userInfo.mobileNumber || ""}
-            </div>
-          </div>
-        </div>
+  if (!profile.userInfo) {
+    return <h3 className="text-center mt-5">No user data found.</h3>;
+  }
 
-        {/* Account Info */}
-        <h5 className="fw-bold mb-3">Account Details</h5>
-        <div className="row mb-4">
-          <div className="col-md-6 mb-3">
-            <label className="fw-semibold">Created At</label>
-            <div className="text-muted">
-              {new Date(userInfo.createdAt).toLocaleDateString()}
-            </div>
-          </div>
-
-          <div className="col-md-6 mb-3">
-            <label className="fw-semibold">Email Verified</label>
-            <div className="text-muted">
-              {userInfo.is_emailVerified === 1 ? "Yes" : "No"}
-            </div>
-          </div>
-        </div>
+  return (
+    <div className="ma-page">
+      <div className="container my-5" style={{ maxWidth: "760px" }}>
+        <ProfileBanner profile={profile} />
+        <div className="ma-content mt-4">
+          <ProfileInfo profile={profile} />
         </div>
       </div>
     </div>

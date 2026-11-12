@@ -11,11 +11,17 @@ import forComics from "../../assets/images/forComics.jpeg";
 import forImage from "../../assets/images/forImage.jpeg";
 import { trackClick, trackClickWithUser, trackEvent, useScrollDepth } from "../../utility/analytics";
 import EditComicPageModal from './EditComicPageModal';
+import ScriptEditor from './ScriptEditor';
 import ZoomImage from '../../components/ZoomImage';
 
 // Theme / Style dropdown me "Custom" option ki value (backend limit ke barabar)
 const CUSTOM_OPTION = "__custom__";
 const CUSTOM_TEXT_MAX = 100;
+
+// Mandatory field ke label ke saath lal star
+const RequiredMark = () => (
+  <span className="text-danger ms-1" aria-hidden="true">*</span>
+);
 
 const Stepper = ({ currentStep }) => {
   const steps = [
@@ -845,7 +851,9 @@ export const ComicGenerator = () => {
   };
 
   // Helper functions
+  // Lal star (RequiredMark) wale saare fields bhare hone chahiye
   const isStep0Valid = story?.trim()?.length > 0 && comicTitle.trim() && subject.trim() &&
+    classGrade && concept.trim() && themeType && styleType &&
     (!isCustomTheme || customTheme.trim()) && (!isCustomStyle || customStyle.trim());
 
   const resetAfterBackToPrompt = () => {
@@ -964,7 +972,7 @@ export const ComicGenerator = () => {
                   </Col>
                   <Col sm={6} md={4}>
                     <Form.Group>
-                      <Form.Label>Class/Grade</Form.Label>
+                      <Form.Label>Class/Grade<RequiredMark /></Form.Label>
                       <Form.Select
                         value={classGrade}
                         required
@@ -990,7 +998,7 @@ export const ComicGenerator = () => {
                   </Col>
                   <Col sm={6} md={4}>
                     <Form.Group>
-                      <Form.Label>Subject</Form.Label>
+                      <Form.Label>Subject<RequiredMark /></Form.Label>
                       <Form.Select
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
@@ -1005,7 +1013,7 @@ export const ComicGenerator = () => {
                   <Col sm={6} md={4}>
                     <Form.Group>
                       <Form.Label className="d-flex align-items-center gap-2">
-                        Theme
+                        <span>Theme<RequiredMark /></span>
                         <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-theme">Select a theme and then click to view</Tooltip>}>
                           <i className="bi bi-info-circle text-primary" role="button" onClick={openThemeModal}></i>
                         </OverlayTrigger>
@@ -1042,7 +1050,7 @@ export const ComicGenerator = () => {
                   <Col sm={6} md={4}>
                     <Form.Group>
                       <Form.Label className="d-flex align-items-center gap-2">
-                        Choose Style
+                        <span>Choose Style<RequiredMark /></span>
                         <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-info">Select a style and then click to view style</Tooltip>}>
                           <i className="bi bi-info-circle text-primary" role="button" onClick={openStyleImgModal}></i>
                         </OverlayTrigger>
@@ -1078,7 +1086,7 @@ export const ComicGenerator = () => {
                   </Col>
                   <Col sm={6} md={4}>
                     <Form.Group>
-                      <Form.Label>Comic Title</Form.Label>
+                      <Form.Label>Comic Title<RequiredMark /></Form.Label>
                       <Form.Control
                         type="text"
                         value={comicTitle}
@@ -1090,7 +1098,7 @@ export const ComicGenerator = () => {
 
                   <Col sm={6} md={4}>
                     <Form.Group>
-                      <Form.Label>Concept</Form.Label>
+                      <Form.Label>Concept<RequiredMark /></Form.Label>
                       <Form.Control
                         type="text"
                         value={concept}
@@ -1141,7 +1149,7 @@ export const ComicGenerator = () => {
 
                   <Col xs={12}>
                     <Form.Group>
-                      <Form.Label>Write Story</Form.Label>
+                      <Form.Label>Write Story<RequiredMark /></Form.Label>
                       <Form.Control
                         as="textarea"
                         rows={6}
@@ -1152,6 +1160,9 @@ export const ComicGenerator = () => {
                     </Form.Group>
                   </Col>
                 </Row>
+                <div className="small text-muted mt-2">
+                  <span className="text-danger">*</span> Required fields
+                </div>
                 <div className="btn-wrapper mt-4 d-flex gap-3">
                   {/* <Button type="submit" disabled={!isStep0Valid || loadingPrompt}>
                     {loadingPrompt ? (<><Spinner size="sm" className="me-2" />Generating prompt...</>) : "Convert to Prompt"}
@@ -1351,9 +1362,35 @@ export const ComicGenerator = () => {
                               : "N/A"}
                           </p>
 
-                          <p>
-                            <strong>From:</strong> {p.start} → {p.end}
-                          </p>
+                          {p.storySnippet && (
+                            <p>
+                              <strong>Story:</strong> {p.storySnippet}
+                            </p>
+                          )}
+
+                          {Array.isArray(p.characters) && p.characters.length > 0 && (
+                            <div className="mb-3">
+                              <strong>Characters:</strong>
+                              <ul className="mb-0 mt-1">
+                                {p.characters.map((c) => (
+                                  <li key={c.name}>
+                                    <span className="fw-semibold">{c.name}</span>: {c.description}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {(p.start || p.end) && (
+                            <>
+                              <p className="mb-1">
+                                <strong>Starting point:</strong> {p.start}
+                              </p>
+                              <p>
+                                <strong>Ending point:</strong> {p.end}
+                              </p>
+                            </>
+                          )}
 
                           {/* 🟢 Allow only if not locked */}
                           {!isDone && !isLocked && (
@@ -1393,17 +1430,13 @@ export const ComicGenerator = () => {
 
                 {comicImages?.length === 0 ? (
                   <Form onSubmit={handleGenerateComic}>
-                    <div className="fs-5 fw-semibold mb-2">Comic Script JSON</div>
-                    <Form.Group className="mb-3">
-                      <Form.Control
-                        as="textarea"
-                        rows={10}
-                        value={prompt}
-                        onChange={(e) => handleScriptChange(e.target.value)}
-                        spellCheck={false}
-                        style={{ fontFamily: "monospace" }}
-                      />
-                    </Form.Group>
+                    <div className="fs-5 fw-semibold mb-1">Comic Script</div>
+                    <p className="text-muted small mb-3">
+                      Review each page and edit the scene, caption or dialogue before generating your comic.
+                    </p>
+                    <div className="mb-3">
+                      <ScriptEditor value={prompt} onChange={handleScriptChange} />
+                    </div>
 
                     <div className="btn-wrapper mt-4 d-flex gap-3">
                       <Button

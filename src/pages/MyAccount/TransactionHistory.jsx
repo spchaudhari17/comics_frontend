@@ -89,7 +89,7 @@ const TransactionHistory = () => {
         <div>
             {/* 🔥 Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="fw-bold">Transaction History 💳</h5>
+                <h5 className="fw-bold">Transaction History</h5>
 
                 <div style={{ maxWidth: "300px", width: "100%" }}>
                     <Form.Control

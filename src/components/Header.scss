@@ -307,6 +307,42 @@ $kh-mobile: 1050px;
         border-radius: 16px;
         box-shadow: 0 15px 45px rgba(25, 36, 62, 0.16);
 
+        // Admin ka lamba menu: screen se bahar na jaye, andar scroll ho
+        max-height: calc(100vh - 210px);
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-bottom: 0;
+
+        @media (max-width: 1050px) {
+            max-height: calc(100vh - 120px); // mobile pe top bar nahi hai
+        }
+
+        // Patla, gol, brand rang ka scrollbar (Chrome / Edge / Safari)
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 14px 0; // gol kono ke andar rahe
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba($primary, 0.5);
+            border-radius: 999px;
+
+            &:hover {
+                background: rgba($primary, 0.75);
+            }
+        }
+
+        // Firefox (webkit wale pseudo-elements nahi samajhta)
+        @supports not selector(::-webkit-scrollbar) {
+            scrollbar-width: thin;
+            scrollbar-color: rgba($primary, 0.55) transparent;
+        }
+
         .dropdown-item {
             display: flex;
             align-items: center;
@@ -343,6 +379,17 @@ $kh-mobile: 1050px;
             letter-spacing: 0.07em;
             color: #87909f;
         }
+    }
+
+    // Change Password + Log out: scroll karte waqt bhi neeche chipke rahein
+    .kh-menu-footer {
+        position: sticky;
+        bottom: 0;
+        margin: 6px -8px 0;
+        padding: 6px 8px 12px;
+        background: #fff;
+        border-top: 1px solid #f0f0f0;
+        border-radius: 0 0 16px 16px;
     }
 
     .kh-menu-title {

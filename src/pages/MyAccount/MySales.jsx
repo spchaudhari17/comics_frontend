@@ -45,7 +45,7 @@ const MySales = () => {
         <div>
             {/* 🔥 Header with Button */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="fw-bold mb-0">My Sales Dashboard 💰</h5>
+                <h5 className="fw-bold mb-0">My Sales Dashboard</h5>
                 <Button
                     variant="primary"
                     size="sm"

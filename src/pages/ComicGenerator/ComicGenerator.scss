@@ -69,3 +69,124 @@
         }
     }
 }
+// ---------- Comic script editor (JSON ki jagah form) ----------
+.script-editor {
+    .se-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .se-page-tabs {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    .se-page-tab {
+        flex-shrink: 0;
+        padding: 6px 14px;
+        border-radius: 999px;
+        border: 1px solid $input-border-color;
+        background: #fff;
+        color: $body-color;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+
+        &:hover {
+            border-color: $primary;
+            color: $primary;
+        }
+
+        &.active {
+            background: $primary;
+            border-color: $primary;
+            color: #fff;
+        }
+    }
+
+    .se-page {
+        padding: 18px;
+        border: 1px solid #ece8f7;
+        border-radius: 16px;
+        background: $theme1;
+    }
+
+    .se-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: $theme4;
+    }
+
+    .se-characters {
+        display: grid;
+        gap: 8px;
+
+        @include media-breakpoint-up(md) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .se-character {
+        display: flex;
+        flex-direction: column;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid #ece8f7;
+        font-size: 0.85rem;
+
+        strong {
+            color: $primary;
+        }
+
+        span {
+            color: $placeholder-clr;
+        }
+    }
+
+    .se-panel {
+        padding: 14px;
+        margin-bottom: 14px;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid #ece8f7;
+    }
+
+    .se-panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .se-dialogue {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+
+        .se-speaker {
+            flex: 0 0 34%;
+        }
+
+        @include media-breakpoint-down(sm) {
+            flex-wrap: wrap;
+
+            .se-speaker {
+                flex-basis: 100%;
+            }
+
+            .form-control:not(.se-speaker) {
+                flex: 1;
+            }
+        }
+    }
+}

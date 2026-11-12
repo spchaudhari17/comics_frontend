@@ -125,18 +125,22 @@ const MyPurchases = () => {
             <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <h5 className="fw-bold mb-0">My Purchased Comics</h5>
 
-                <div className="d-flex flex-wrap gap-2">
+                {/* Search + sort ek hi line me (mobile pe neeche-neeche) */}
+                <div
+                    className="d-flex flex-column flex-sm-row gap-2"
+                    style={{ flex: "1 1 420px", maxWidth: "600px" }}
+                >
                     <input
                         type="search"
-                        className="form-control"
-                        style={{ minWidth: "240px" }}
+                        className="form-control flex-grow-1"
+                        style={{ minWidth: 0 }}
                         placeholder="Search bundle, teacher or comic..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                     <select
-                        className="form-select"
-                        style={{ width: "200px" }}
+                        className="form-select flex-shrink-0"
+                        style={{ width: "200px", maxWidth: "100%" }}
                         value={sort}
                         onChange={(e) => {
                             setSort(e.target.value);

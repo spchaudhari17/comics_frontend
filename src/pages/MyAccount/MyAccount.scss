@@ -1,0 +1,385 @@
+@import "../../assets/styles/custom-variables.scss";
+
+// My Account (Option A): upar profile banner, left menu, right content card
+// Pricing page (.sp-page) jaisa brand look. Sab .ma-page ke andar scoped.
+.ma-page {
+    background: $theme1;
+    padding-bottom: 8px;
+
+    // ---------- Banner ----------
+    .ma-banner {
+        background: #fff;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid #ece8f7;
+        box-shadow: 0 12px 40px rgba($theme4, 0.06);
+    }
+
+    // Cover: user ki image, warna brand gradient
+    .ma-cover {
+        position: relative;
+        height: 170px;
+        background: linear-gradient(150deg, $primary-gradient-start 0%, #4c1d95 55%, $primary-gradient-end 130%);
+
+        @include media-breakpoint-down(sm) {
+            height: 130px;
+        }
+    }
+
+    .ma-cover-actions {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        gap: 8px;
+    }
+
+    .ma-cover-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        padding: 7px 14px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        color: $theme4;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+        transition: background 0.2s;
+
+        &:hover {
+            background: #fff;
+        }
+
+        &.is-busy,
+        &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    }
+
+    .ma-identity {
+        display: flex;
+        align-items: flex-end;
+        gap: 18px;
+        padding: 0 28px 22px;
+        margin-top: -44px;
+
+        @include media-breakpoint-down(sm) {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 0 18px 18px;
+        }
+    }
+
+    .ma-avatar {
+        position: relative;
+        flex-shrink: 0;
+
+        img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #fff;
+            border: 4px solid #fff;
+            box-shadow: 0 8px 20px rgba($theme4, 0.15);
+        }
+    }
+
+    .ma-avatar-edit {
+        position: absolute;
+        right: 0;
+        bottom: 2px;
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        background: linear-gradient(135deg, $primary-gradient-start, $primary-gradient-end);
+        color: #fff;
+        font-size: 13px;
+        cursor: pointer;
+
+        &.is-busy {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    }
+
+    .ma-identity-text {
+        min-width: 0;
+        padding-bottom: 4px;
+
+        h1 {
+            margin: 0 0 2px;
+            font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+            font-weight: 800;
+            color: $theme4;
+        }
+    }
+
+    .ma-email {
+        color: $placeholder-clr;
+        font-size: 0.95rem;
+        word-break: break-all;
+    }
+
+    .ma-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .ma-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: rgba($primary, 0.1);
+        color: $primary;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .ma-badge-success {
+        background: rgba($success, 0.1);
+        color: $success;
+    }
+
+    // ---------- Layout ----------
+    .ma-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-top: 24px;
+
+        @include media-breakpoint-up(lg) {
+            grid-template-columns: 250px minmax(0, 1fr);
+            align-items: start;
+        }
+    }
+
+    // ---------- Left menu ----------
+    .ma-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 10px;
+        background: #fff;
+        border-radius: 20px;
+        border: 1px solid #ece8f7;
+        box-shadow: 0 12px 40px rgba($theme4, 0.06);
+
+        @include media-breakpoint-up(lg) {
+            position: sticky;
+            top: 180px; // sticky header (top bar + 80px logo) ke neeche
+        }
+
+        // Mobile / tablet: ek line me side scroll hone wale pills
+        @include media-breakpoint-down(lg) {
+            flex-direction: row;
+            overflow-x: auto;
+            padding: 8px;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+    }
+
+    .ma-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 11px 14px;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        color: $body-color;
+        font-weight: 600;
+        font-size: 0.93rem;
+        text-align: left;
+        white-space: nowrap;
+        transition: background 0.2s, color 0.2s;
+
+        i {
+            width: 20px;
+            font-size: 1.05rem;
+            color: $placeholder-clr;
+            transition: color 0.2s;
+        }
+
+        &:hover {
+            background: $theme2;
+            color: $primary;
+
+            i {
+                color: $primary;
+            }
+        }
+
+        &.active {
+            background: linear-gradient(135deg, $primary-gradient-start, $primary-gradient-end);
+            color: #fff;
+            box-shadow: 0 8px 20px rgba($primary, 0.25);
+
+            i {
+                color: #fff;
+            }
+        }
+
+        &:focus-visible {
+            outline: 2px solid $brand-blue;
+            outline-offset: 2px;
+        }
+
+        @include media-breakpoint-down(lg) {
+            width: auto;
+            flex-shrink: 0;
+            padding: 9px 14px;
+            border-radius: 999px;
+        }
+    }
+
+    // ---------- Content card ----------
+    .ma-content {
+        min-width: 0;
+        padding: 26px;
+        background: #fff;
+        border-radius: 20px;
+        border: 1px solid #ece8f7;
+        box-shadow: 0 12px 40px rgba($theme4, 0.06);
+        animation: ma-fade-in 0.3s ease both;
+
+        @include media-breakpoint-down(sm) {
+            padding: 18px 14px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            animation: none;
+        }
+
+        // Andar ke tabs ki headings ek jaisi
+        h5.fw-bold {
+            color: $theme4;
+            font-weight: 800 !important;
+        }
+
+        // Purane tables ko brand look
+        .table {
+            --bs-table-bg: transparent;
+
+            thead th {
+                background: $theme2;
+                color: $theme4;
+                font-size: 0.8rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+                border-bottom: 0;
+                white-space: nowrap;
+            }
+
+            td {
+                vertical-align: middle;
+            }
+        }
+
+        .table-responsive {
+            border-radius: 14px;
+        }
+    }
+
+    // ---------- Profile tab ----------
+    .ma-section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+
+        h5 {
+            margin: 0;
+            font-weight: 800;
+            color: $theme4;
+        }
+    }
+
+    .ma-bio {
+        white-space: pre-line;
+        color: $body-color;
+        line-height: 1.6;
+
+        &.is-empty {
+            color: $placeholder-clr;
+            font-style: italic;
+        }
+    }
+
+    .ma-group-title {
+        margin: 0 0 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: $placeholder-clr;
+    }
+
+    .ma-info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 24px;
+
+        @include media-breakpoint-up(md) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .ma-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: $theme1;
+        border: 1px solid #f0edf8;
+
+        span {
+            font-size: 0.78rem;
+            color: $placeholder-clr;
+        }
+
+        strong {
+            font-weight: 600;
+            color: $theme4;
+            word-break: break-word;
+            text-transform: none;
+        }
+    }
+}
+
+@keyframes ma-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
