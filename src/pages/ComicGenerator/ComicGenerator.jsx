@@ -200,6 +200,8 @@ export const ComicGenerator = () => {
   const scriptEditedRef = useRef(false);
   const originalPromptRef = useRef("");
   const thumbnailsRef = useRef(null);
+  // Step 4 par is comic ka content load / generate ho chuka hai (dobara na chale)
+  const contentCheckedRef = useRef(null);
 
   useEffect(() => {
     scriptEditedRef.current = false;
@@ -515,7 +517,9 @@ export const ComicGenerator = () => {
   };
 
   // ✅ IMPROVED: Function to generate all additional content with better error handling
-  const generateAllContent = async () => {
+  // only: kaunsa content banana hai (default sab). Retry / resume me sirf missing wala.
+  const generateAllContent = async (only = { quiz: true, faq: true, fact: true, hardcore: true }) => {
+    contentCheckedRef.current = comicId;
     const subjectName = subjectsList.find(s => s._id === subject)?.name || subject;
 
     console.log('🔄 Starting content generation for comic:', comicId);
@@ -526,7 +530,7 @@ export const ComicGenerator = () => {
     // Start all content generation in parallel
     const promises = [
       // Quiz
-      (async () => {
+      only.quiz && (async () => {
         setQuizLoading(true);
         setQuizError("");
         try {
@@ -539,12 +543,13 @@ export const ComicGenerator = () => {
             grade: classGrade
           });
           console.log('✅ Quiz generated:', data.questions?.length, 'questions');
+          if (!data.questions?.length) throw new Error("No quiz questions were generated. Please retry.");
           setQuizData(prev => ({
             ...prev,
             [comicId]: data.questions || []
           }));
         } catch (err) {
-          const errorMsg = err?.response?.data?.error || "Failed to generate quiz";
+          const errorMsg = err?.response?.data?.error || err.message || "Failed to generate quiz";
           console.error('❌ Quiz generation failed:', errorMsg);
           setQuizError(errorMsg);
         } finally {
@@ -553,7 +558,7 @@ export const ComicGenerator = () => {
       })(),
 
       // FAQ
-      (async () => {
+      only.faq && (async () => {
         setFaqLoading(true);
         setFaqError("");
         try {
@@ -563,12 +568,13 @@ export const ComicGenerator = () => {
             story: pages.length > 0 ? pages : JSON.parse(prompt)
           });
           console.log('✅ FAQ generated:', data.faqs?.length, 'FAQs');
+          if (!data.faqs?.length) throw new Error("No FAQs were generated. Please retry.");
           setFaqData(prev => ({
             ...prev,
             [comicId]: data.faqs || []
           }));
         } catch (err) {
-          const errorMsg = err?.response?.data?.error || "Failed to generate FAQs";
+          const errorMsg = err?.response?.data?.error || err.message || "Failed to generate FAQs";
           console.error('❌ FAQ generation failed:', errorMsg);
           setFaqError(errorMsg);
         } finally {
@@ -577,7 +583,7 @@ export const ComicGenerator = () => {
       })(),
 
       // Facts
-      (async () => {
+      only.fact && (async () => {
         setFactLoading(true);
         setFactError("");
         try {
@@ -588,12 +594,13 @@ export const ComicGenerator = () => {
             story: story || pages.join(' ') || JSON.parse(prompt).map(p => p.description).join(' '),
           });
           console.log('✅ Facts generated:', data.didYouKnow?.length, 'facts');
+          if (!data.didYouKnow?.length) throw new Error("No facts were generated. Please retry.");
           setFactData(prev => ({
             ...prev,
             [comicId]: data.didYouKnow || []
           }));
         } catch (err) {
-          const errorMsg = err?.response?.data?.error || "Failed to generate facts";
+          const errorMsg = err?.response?.data?.error || err.message || "Failed to generate facts";
           console.error('❌ Facts generation failed:', errorMsg);
           setFactError(errorMsg);
         } finally {
@@ -602,7 +609,7 @@ export const ComicGenerator = () => {
       })(),
 
       // Hardcore Quiz - FIXED VERSION
-      (async () => {
+      only.hardcore && (async () => {
         setHardcoreQuizLoading(true);
         setHardcoreQuizError("");
         try {
@@ -646,8 +653,60 @@ export const ComicGenerator = () => {
     ];
 
     // Wait for all content to generate (but don't block UI)
-    const results = await Promise.allSettled(promises);
+    const results = await Promise.allSettled(promises.filter(Boolean));
     console.log('🎉 All content generation completed:', results);
+  };
+
+  // Step 4 par content tabhi banta tha jab images isi session me bani ho.
+  // Resume (images pehle se) wale comic par kuch generate hi nahi hota tha aur
+  // button "Generating Content..." par atka rehta tha. Ab: pehle saved content
+  // load karo, jo missing hai sirf wahi generate karo (duplicate na bane).
+  useEffect(() => {
+    if (step !== 4 || !comicId || contentCheckedRef.current === comicId) return;
+    contentCheckedRef.current = comicId;
+
+    const loadOrGenerateContent = async () => {
+      let saved = {};
+      try {
+        const res = await API.get(`/user/comic-reader/${comicId}`);
+        saved = res.data?.data || {};
+      } catch (err) {
+        console.error("Saved content load failed:", err);
+      }
+
+      const savedQuiz = saved.quiz?.[0]?.questions || [];
+      const savedHardcore = saved.hardcoreQuiz?.[0]?.questions || [];
+      const savedFaqs = saved.faqs || [];
+      const savedFacts = saved.facts || [];
+
+      if (savedQuiz.length) setQuizData(prev => ({ ...prev, [comicId]: savedQuiz }));
+      if (savedHardcore.length) setHardcoreQuizData(prev => ({ ...prev, [comicId]: savedHardcore }));
+      if (savedFaqs.length) setFaqData(prev => ({ ...prev, [comicId]: savedFaqs }));
+      if (savedFacts.length) setFactData(prev => ({ ...prev, [comicId]: savedFacts }));
+
+      const missing = {
+        quiz: !savedQuiz.length && !(quizData[comicId]?.length > 0),
+        hardcore: !savedHardcore.length && !(hardcoreQuizData[comicId]?.length > 0),
+        faq: !savedFaqs.length && !(faqData[comicId]?.length > 0),
+        fact: !savedFacts.length && !(factData[comicId]?.length > 0),
+      };
+      if (Object.values(missing).some(Boolean)) {
+        await generateAllContent(missing);
+      }
+    };
+
+    loadOrGenerateContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, comicId]);
+
+  const retryFailedContent = () => {
+    trackClick("retry_content_generation_click", { comic_id: comicId || "" });
+    generateAllContent({
+      quiz: !!quizError,
+      faq: !!faqError,
+      fact: !!factError,
+      hardcore: !!hardcoreQuizError,
+    });
   };
 
   // ✅ IMPROVED: STEP 2: Prompt → Images with REALISTIC PROGRESS
@@ -1840,7 +1899,15 @@ export const ComicGenerator = () => {
                   </div>
                 </div>
 
-                <div className="d-flex gap-3 justify-content-center mt-4">
+                <div className="d-flex flex-wrap gap-3 justify-content-center mt-4">
+                  {(quizError || faqError || factError || hardcoreQuizError) &&
+                    !(quizLoading || faqLoading || factLoading || hardcoreQuizLoading) && (
+                      <Button variant="outline-danger" onClick={retryFailedContent}>
+                        <i className="bi bi-arrow-clockwise me-2"></i>
+                        Retry Failed Content
+                      </Button>
+                    )}
+
                   {/* <Button onClick={handlePublish}>
                     Final Submit
                   </Button> */}
