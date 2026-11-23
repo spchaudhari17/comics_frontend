@@ -1,0 +1,193 @@
+// ✨ AI loading card (prompt + image generation) - Kridemy purple -> blue
+$gl-start: #6a11cb;
+$gl-end: #2575fc;
+
+.generation-loader {
+    margin-top: 1.25rem;
+    padding: 1.25rem 1.25rem 1rem;
+    border: 1px solid rgba($gl-start, 0.15);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba($gl-start, 0.05), rgba($gl-end, 0.05)), #fff;
+    box-shadow: 0 6px 24px rgba($gl-start, 0.08);
+
+    .generation-loader-head {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+    }
+
+    .generation-loader-icon {
+        flex: 0 0 auto;
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.35rem;
+        background: linear-gradient(135deg, $gl-start, $gl-end);
+        animation: gl-pulse 1.8s ease-in-out infinite;
+    }
+
+    .generation-loader-text {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .generation-loader-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #1a1a2e;
+    }
+
+    .generation-loader-message {
+        margin-top: 2px;
+        font-size: 0.92rem;
+        color: $gl-start;
+        animation: gl-fade-in 0.4s ease-out;
+
+        &::after {
+            content: "";
+            display: inline-block;
+            width: 1.2em;
+            text-align: left;
+            animation: gl-dots 1.4s steps(4, end) infinite;
+        }
+    }
+
+    .generation-loader-time {
+        flex: 0 0 auto;
+        align-self: flex-start;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: rgba($gl-start, 0.08);
+        color: #4a4a68;
+        font-size: 0.8rem;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .generation-loader-bar {
+        position: relative;
+        height: 8px;
+        margin-top: 1rem;
+        border-radius: 999px;
+        background: rgba($gl-start, 0.1);
+        overflow: hidden;
+
+        span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, $gl-start, $gl-end);
+            transition: width 0.6s ease;
+        }
+
+        &.is-indeterminate span {
+            position: absolute;
+            width: 35%;
+            animation: gl-slide 1.4s ease-in-out infinite;
+        }
+    }
+
+    .generation-loader-status {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #4a4a68;
+
+        strong {
+            color: $gl-start;
+        }
+    }
+
+    .generation-loader-pages {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 0.875rem;
+    }
+
+    .generation-loader-page {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #6c757d;
+        background: #fff;
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease;
+
+        &.is-done {
+            color: #fff;
+            border-color: transparent;
+            background: linear-gradient(135deg, $gl-start, $gl-end);
+        }
+
+        &.is-active {
+            color: $gl-start;
+            border-color: $gl-start;
+            animation: gl-pulse 1.4s ease-in-out infinite;
+        }
+    }
+
+    .generation-loader-hint {
+        margin-top: 0.75rem;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    @media (max-width: 575.98px) {
+        padding: 1rem;
+
+        .generation-loader-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.15rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .generation-loader-icon,
+        .generation-loader-page.is-active,
+        .generation-loader-message,
+        .generation-loader-message::after {
+            animation: none;
+        }
+
+        .generation-loader-bar.is-indeterminate span {
+            animation: none;
+            width: 100%;
+            opacity: 0.4;
+        }
+    }
+}
+
+@keyframes gl-pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba($gl-start, 0.35); }
+    50% { transform: scale(1.06); box-shadow: 0 0 0 8px rgba($gl-start, 0); }
+}
+
+@keyframes gl-slide {
+    0% { left: -35%; }
+    100% { left: 100%; }
+}
+
+@keyframes gl-fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gl-dots {
+    0% { content: ""; }
+    25% { content: "."; }
+    50% { content: ".."; }
+    75% { content: "..."; }
+}

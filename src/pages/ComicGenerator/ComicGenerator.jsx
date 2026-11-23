@@ -13,10 +13,34 @@ import { trackClick, trackClickWithUser, trackEvent, useScrollDepth } from "../.
 import EditComicPageModal from './EditComicPageModal';
 import ScriptEditor from './ScriptEditor';
 import ZoomImage from '../../components/ZoomImage';
+import GenerationLoader from '../../components/GenerationLoader';
+import PartsBreakdown from './PartsBreakdown';
+import './StoryStep.scss';
 
 // Theme / Style dropdown me "Custom" option ki value (backend limit ke barabar)
 const CUSTOM_OPTION = "__custom__";
 const CUSTOM_TEXT_MAX = 100;
+// "Write Story" box me max itne characters
+const STORY_MAX = 5000;
+
+// Loading ke chhote messages (har ~3.5 sec badalte hain)
+const PROMPT_LOADING_MESSAGES = [
+  "Reading your story",
+  "Finding the key ideas",
+  "Splitting it into parts",
+  "Creating your characters",
+  "Planning each part",
+  "Almost ready",
+];
+
+const IMAGE_LOADING_MESSAGES = [
+  "Getting the art style ready",
+  "Sketching the first page",
+  "Drawing the characters",
+  "Adding colours and details",
+  "Checking every detail",
+  "Drawing the remaining pages",
+];
 
 // Mandatory field ke label ke saath lal star
 const RequiredMark = () => (
@@ -139,6 +163,8 @@ export const ComicGenerator = () => {
   const [progress, setProgress] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
+  // Sirf page images ki request chal rahi hai (quiz / FAQ wala time isme nahi)
+  const [pagesGenerating, setPagesGenerating] = useState(false);
   const [estimatedTime, setEstimatedTime] = useState("");
   const [currentGeneratingPage, setCurrentGeneratingPage] = useState(0);
 
@@ -302,6 +328,13 @@ export const ComicGenerator = () => {
               setPrompt(JSON.stringify(JSON.parse(comic.prompt), null, 2));
             }
             setStep(4);
+          } else if (comic?.scriptStatus === "pending" || comic?.scriptStatus === "failed") {
+            // Is part ki script abhi background me ban rahi hai / fail hui (retry chala do)
+            if (comic.scriptStatus === "failed") {
+              API.post("/user/retry-part-script", { comicId: resumeComicId }).catch(() => { });
+            }
+            setErrorMsg("The script for this part is still being prepared. Please open it again from My Comics in a minute.");
+            setStep(0);
           } else if (data.pages && data.pages.length > 0) {
             // Images ban chuki hain -> preview (yahan se page edit + PDF ho sakta hai)
             // (pehle `comic.images` check hota tha jo API bhejti hi nahi thi)
@@ -454,6 +487,8 @@ export const ComicGenerator = () => {
         grade: classGrade,
         country: selectedCountry?.value,
         showTextInImage,
+        // Parts turant aa jaate hain, har part ki script background me banti hai
+        progressive: true,
       });
 
       if (data.alreadyExists) {
@@ -466,7 +501,8 @@ export const ComicGenerator = () => {
       }
 
       setSeries(data.series);
-      setParts(data.parts);
+      // seriesId har part ke saath, taaki script status poll ho sake (localStorage me bhi rahe)
+      setParts(data.parts.map((p) => ({ ...p, seriesId: data.seriesId })));
       setCompletedParts([]);
       setCurrentPart(null);
       setStep(1); // Go to breakdown step (aapka purana flow)
@@ -478,8 +514,64 @@ export const ComicGenerator = () => {
     }
   };
 
+  // ---------------- Progressive scripts ----------------
+  // Parts turant dikhte hain; jis part ki script ready ho woh shuru kar sakte hain,
+  // baaki background me bante rehte hain. Pending rahe tab tak status poll karo.
+  const pollSeriesId = parts.find((p) => p.seriesId)?.seriesId;
+  const hasPendingScripts = parts.some((p) => p.scriptStatus === "pending");
+  // Scripts series wise banti hain: pehla pending part abhi likha ja raha hai, baaki queue me
+  const writingPartNumber = parts
+    .filter((p) => p.scriptStatus === "pending")
+    .reduce((min, p) => (min == null || p.part < min ? p.part : min), null);
+
+  const applyScriptStatuses = (statusParts = []) => {
+    const statusMap = new Map(statusParts.map((s) => [String(s.comicId), s.scriptStatus]));
+    setParts((prev) =>
+      prev.map((p) =>
+        statusMap.has(String(p.comicId)) ? { ...p, scriptStatus: statusMap.get(String(p.comicId)) } : p
+      )
+    );
+  };
+
+  useEffect(() => {
+    if (!pollSeriesId || !hasPendingScripts) return;
+
+    let cancelled = false;
+    const checkStatus = async () => {
+      try {
+        const { data } = await API.get(`/user/series/${pollSeriesId}/script-status`);
+        if (!cancelled) applyScriptStatuses(data?.parts);
+      } catch {
+        // network glitch -> agle tick pe phir try
+      }
+    };
+
+    checkStatus();
+    const timer = setInterval(checkStatus, 4000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pollSeriesId, hasPendingScripts]);
+
+  const retryPartScript = async (part) => {
+    try {
+      setParts((prev) =>
+        prev.map((p) => (p.comicId === part.comicId ? { ...p, scriptStatus: "pending" } : p))
+      );
+      const { data } = await API.post("/user/retry-part-script", { comicId: part.comicId });
+      if (data?.scriptStatus) applyScriptStatuses([{ comicId: part.comicId, scriptStatus: data.scriptStatus }]);
+    } catch (err) {
+      applyScriptStatuses([{ comicId: part.comicId, scriptStatus: "failed" }]);
+      setErrorMsg(err?.response?.data?.error || "Could not retry this part. Please try again.");
+    }
+  };
+
   // Load part data - AAPKE PURANE CODE JAISA
   const loadPartData = async (part) => {
+    if (part.scriptStatus === "pending" || part.scriptStatus === "failed") return;
+
     trackClick("generate_comic_part_click", {
       comic_id: part.comicId,
       part_number: part.part,
@@ -487,6 +579,12 @@ export const ComicGenerator = () => {
     });
     try {
       const { data } = await API.get(`/user/comics/${part.comicId}`);
+
+      // Background script abhi bhi ban rahi ho (status purana tha) -> wapas parts list pe
+      if (data.comic?.scriptStatus === "pending" || data.comic?.scriptStatus === "failed") {
+        applyScriptStatuses([{ comicId: part.comicId, scriptStatus: data.comic.scriptStatus }]);
+        return;
+      }
 
       // ✅ reset states for new part
       setComicId(part.comicId);
@@ -781,10 +879,64 @@ export const ComicGenerator = () => {
       // 🧠 REAL API CALL
       console.log('🚀 Starting comic generation for', total, 'pages...');
 
-      const { data } = await API.post("/user/generate-comic", {
-        comicId,
-        pages: finalPages,
-      });
+      // Har image ke saath page number + panels bhi, taaki baad me single page edit ho sake
+      const toImage = (img, index) => {
+        const scriptPage =
+          finalPages.find((p) => Number(p.page) === Number(img.page)) || finalPages[index];
+
+        return {
+          page: img.page ?? index + 1,
+          imageUrl: img.imageUrl,
+          panels: scriptPage?.panels || [],
+          caption:
+            scriptPage?.panels?.map((p) => p.caption).filter(Boolean).join("\n") ||
+            scriptPage?.caption ||
+            "",
+        };
+      };
+
+      // Jo page select hai wahi rahe (user page 4 dekh raha ho to page 1 pe na kude)
+      const keepSelection = (imgs) =>
+        setSelectedImage((prev) =>
+          (prev && imgs.find((i) => Number(i.page) === Number(prev.page))) || imgs[0]
+        );
+
+      // 📡 LIVE PAGES: request chal rahi ho tab tak bane hue pages turant dikhao
+      setPagesGenerating(true);
+      let livePagesStopped = false;
+      const fetchLivePages = async () => {
+        try {
+          const res = await API.get(`/user/comics/${comicId}`);
+          if (livePagesStopped) return;
+          const ready = (res.data?.pages || [])
+            .filter((p) => p.imageUrl)
+            .sort((a, b) => a.pageNumber - b.pageNumber)
+            .map((p, i) => toImage({ page: p.pageNumber, imageUrl: p.imageUrl }, i));
+          if (ready.length === 0) return;
+
+          if (progressInterval) clearInterval(progressInterval);
+          setProgress(Math.min(99, Math.round((ready.length / total) * 100)));
+          setCurrentGeneratingPage(Math.min(total, ready.length + 1));
+          setEstimatedTime(`${ready.length} of ${total} pages ready...`);
+          setComicImages(ready);
+          keepSelection(ready);
+        } catch {
+          // agle tick pe phir try
+        }
+      };
+      const livePagesTimer = setInterval(fetchLivePages, 3000);
+
+      let data;
+      try {
+        ({ data } = await API.post("/user/generate-comic", {
+          comicId,
+          pages: finalPages,
+        }));
+      } finally {
+        livePagesStopped = true;
+        clearInterval(livePagesTimer);
+        setPagesGenerating(false);
+      }
 
       // Clear the simulation interval
       if (progressInterval) {
@@ -792,23 +944,9 @@ export const ComicGenerator = () => {
       }
 
       // 🖼️ Process actual images
-      // Har image ke saath page number + panels bhi, taaki baad me single page edit ho sake
       const imgs = (data?.images || [])
         .filter((img) => img.imageUrl)
-        .map((img, index) => {
-          const scriptPage =
-            finalPages.find((p) => Number(p.page) === Number(img.page)) || finalPages[index];
-
-          return {
-            page: img.page ?? index + 1,
-            imageUrl: img.imageUrl,
-            panels: scriptPage?.panels || [],
-            caption:
-              scriptPage?.panels?.map((p) => p.caption).filter(Boolean).join("\n") ||
-              scriptPage?.caption ||
-              "",
-          };
-        });
+        .map(toImage);
       if (imgs.length === 0) throw new Error("No images generated.");
 
       // ✅ FINAL PROGRESS - Show actual completion
@@ -818,7 +956,7 @@ export const ComicGenerator = () => {
 
       // ✅ UPDATE UI WITH ACTUAL IMAGES
       setComicImages(imgs);
-      setSelectedImage(imgs[0]);
+      keepSelection(imgs);
 
       // ✅ AUTO-GENERATE ALL CONTENT
       console.log('🎨 Comic images generated, starting content generation...');
@@ -911,7 +1049,7 @@ export const ComicGenerator = () => {
 
   // Helper functions
   // Lal star (RequiredMark) wale saare fields bhare hone chahiye
-  const isStep0Valid = story?.trim()?.length > 0 && comicTitle.trim() && subject.trim() &&
+  const isStep0Valid = story?.trim()?.length > 0 && story.length <= STORY_MAX && comicTitle.trim() && subject.trim() &&
     classGrade && concept.trim() && themeType && styleType &&
     (!isCustomTheme || customTheme.trim()) && (!isCustomStyle || customStyle.trim());
 
@@ -951,6 +1089,23 @@ export const ComicGenerator = () => {
     subscription?.comicsPerWeek > 0 &&
     subscription?.comicsLeft === 0;
 
+  // Backend unlimited plan ke liye comicsPerWeek / comicsLeft = -1 bhejta hai
+  const isUnlimitedPlan =
+    !!subscription?.isUnlimited || subscription?.comicsPerWeek < 0;
+
+  // "Convert to Prompt" ke paas dikhane ke liye: kaun se required field bache hain
+  const missingStep0Fields = [
+    !classGrade && "Class/Grade",
+    !subject && "Subject",
+    !comicTitle.trim() && "Comic title",
+    !concept.trim() && "Concept",
+    !themeType && "Theme",
+    isCustomTheme && !customTheme.trim() && "Custom theme",
+    !styleType && "Style",
+    isCustomStyle && !customStyle.trim() && "Custom style",
+    !story.trim() && "Story",
+  ].filter(Boolean);
+
 
   return (
     <div className="homePage py-5">
@@ -960,24 +1115,36 @@ export const ComicGenerator = () => {
             <Stepper currentStep={step} />
 
             {subscription?.hasSubscription && (
-              <div className="mb-4 p-3 border rounded bg-light">
-                <div className="d-flex justify-content-between align-items-center flex-wrap">
-                  <div>
-                    <strong>📊 This Week Usage</strong>
-                    <div className="text-muted small">
-                      Generated: {subscription.usedThisWeek} / {subscription.comicsPerWeek}
+              <div className="cg-usage mb-4">
+                <span className="cg-usage-icon" aria-hidden="true">
+                  <i className="bi bi-bar-chart-fill"></i>
+                </span>
+                <div className="cg-usage-body">
+                  <div className="cg-usage-title">This week</div>
+                  <div className="cg-usage-sub">
+                    {isUnlimitedPlan
+                      ? "Unlimited comics on your plan"
+                      : `${subscription.usedThisWeek || 0} of ${subscription.comicsPerWeek || 0} comics created`}
+                  </div>
+                  {!isUnlimitedPlan && subscription.comicsPerWeek > 0 && (
+                    <div className="cg-usage-bar">
+                      <span
+                        style={{
+                          width: `${Math.min(100, ((subscription.usedThisWeek || 0) / subscription.comicsPerWeek) * 100)}%`,
+                        }}
+                      ></span>
                     </div>
-                  </div>
-
-                  <div>
-                    <span className={`badge ${subscription.comicsLeft === 0
-                      ? "bg-danger"
-                      : "bg-success"
-                      }`}>
-                      Remaining: {subscription.comicsLeft}
-                    </span>
-                  </div>
+                  )}
                 </div>
+                <span
+                  className={`cg-usage-badge ${isUnlimitedPlan ? "is-unlimited" : subscription.comicsLeft === 0 ? "is-empty" : ""}`}
+                >
+                  {isUnlimitedPlan ? (
+                    <><i className="bi bi-infinity me-1"></i>Unlimited</>
+                  ) : (
+                    `${subscription.comicsLeft} left`
+                  )}
+                </span>
               </div>
             )}
           </div>
@@ -1009,226 +1176,262 @@ export const ComicGenerator = () => {
           <div className="content-wrapper bg-theme1 border rounded-3 px-3 py-4 p-md-5">
             {/* STEP 0: Story */}
             {step === 0 && (
-              <Form onSubmit={handleConvertToPrompt}>
-                <div className="heading-wrapper text-dark mb-4">
-                  <div className="fs-3 fw-bold">Write your story</div>
-                  {resumeComicId && (
-                    <div className="text-muted fs-6">Resuming comic creation...</div>
-                  )}
+              <Form onSubmit={handleConvertToPrompt} className="cg-story-form">
+                <div className="cg-story-head">
+                  <div>
+                    <div className="fs-3 fw-bold text-dark">Write your story</div>
+                    <div className="cg-story-lead">
+                      Tell us what to teach and share your story idea. We'll turn it into an illustrated comic series.
+                    </div>
+                    {resumeComicId && (
+                      <div className="text-muted small mt-1">Resuming comic creation...</div>
+                    )}
+                  </div>
+                  <div className="cg-how" aria-label="How it works">
+                    <span><i className="bi bi-pencil"></i>Story</span>
+                    <i className="bi bi-chevron-right cg-how-sep" aria-hidden="true"></i>
+                    <span><i className="bi bi-collection"></i>Parts</span>
+                    <i className="bi bi-chevron-right cg-how-sep" aria-hidden="true"></i>
+                    <span><i className="bi bi-images"></i>Comic</span>
+                  </div>
                 </div>
-                <Row className="g-3">
-                  <Col sm={6} md={4}>
-                    <Form.Group>
-                      <Form.Label>Country</Form.Label>
-                      <Select className="custom-select"
-                        options={countries}
-                        value={selectedCountry}
-                        onChange={(selectedOption) => setSelectedCountry(selectedOption)}
-                        placeholder="Select a country"
-                        isSearchable
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col sm={6} md={4}>
-                    <Form.Group>
-                      <Form.Label>Class/Grade<RequiredMark /></Form.Label>
-                      <Form.Select
-                        value={classGrade}
-                        required
-                        onChange={(e) => setClassGrade(e.target.value)}
-                      >
-                        <option value="" disabled>Select Class/Grade</option>
-                        <option value="1st Standard">1st Grade</option>
-                        <option value="2nd Standard">2nd Grade</option>
-                        <option value="3rd Standard">3rd Grade</option>
-                        <option value="4th Standard">4th Grade</option>
-                        <option value="5th Standard">5th Grade</option>
-                        <option value="6th Standard">6th Grade</option>
-                        <option value="7th Standard">7th Grade</option>
-                        <option value="8th Standard">8th Grade</option>
-                        <option value="9th Standard">9th Grade</option>
-                        <option value="10th Standard">10th Grade</option>
-                        <option value="11th Standard">11th Grade</option>
-                        <option value="12th Standard">12th Grade</option>
-                        <option value="UG">UG</option>
-                        <option value="PG">PG</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col sm={6} md={4}>
-                    <Form.Group>
-                      <Form.Label>Subject<RequiredMark /></Form.Label>
-                      <Form.Select
-                        value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
-                      >
-                        <option value="" disabled>Select subject</option>
-                        {subjectsList.map((sub) => (
-                          <option key={sub._id} value={sub._id}>{sub.name}</option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col sm={6} md={4}>
-                    <Form.Group>
-                      <Form.Label className="d-flex align-items-center gap-2">
-                        <span>Theme<RequiredMark /></span>
-                        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-theme">Select a theme and then click to view</Tooltip>}>
-                          <i className="bi bi-info-circle text-primary" role="button" onClick={openThemeModal}></i>
-                        </OverlayTrigger>
-                      </Form.Label>
-                      <Form.Select
-                        value={themeType}
-                        onChange={(e) => setThemeType(e.target.value)}
-                      >
-                        <option value="" disabled>Select Theme</option>
-                        {themes.map((theme) => (
-                          <option key={theme._id} value={theme.name}>{theme.name}</option>
-                        ))}
-                        <option value={CUSTOM_OPTION}>✏️ Custom theme...</option>
-                      </Form.Select>
-                      {isCustomTheme && (
-                        <>
-                          <Form.Control
-                            className="mt-2"
-                            type="text"
-                            value={customTheme}
-                            maxLength={CUSTOM_TEXT_MAX}
-                            onChange={(e) => setCustomTheme(e.target.value)}
-                            placeholder="e.g. Space adventure, Jungle mystery"
-                            autoFocus
-                          />
-                          <Form.Text className="d-flex justify-content-between">
-                            <span>Only for this comic</span>
-                            <span>{customTheme.length}/{CUSTOM_TEXT_MAX}</span>
-                          </Form.Text>
-                        </>
-                      )}
-                    </Form.Group>
-                  </Col>
-                  <Col sm={6} md={4}>
-                    <Form.Group>
-                      <Form.Label className="d-flex align-items-center gap-2">
-                        <span>Choose Style<RequiredMark /></span>
-                        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-info">Select a style and then click to view style</Tooltip>}>
-                          <i className="bi bi-info-circle text-primary" role="button" onClick={openStyleImgModal}></i>
-                        </OverlayTrigger>
-                      </Form.Label>
-                      <Form.Select
-                        value={styleType}
-                        onChange={(e) => setStyleType(e.target.value)}
-                      >
-                        <option value="" disabled>Select Style</option>
-                        {styles.map((style) => (
-                          <option key={style._id} value={style.name}>{style.name}</option>
-                        ))}
-                        <option value={CUSTOM_OPTION}>✏️ Custom style...</option>
-                      </Form.Select>
-                      {isCustomStyle && (
-                        <>
-                          <Form.Control
-                            className="mt-2"
-                            type="text"
-                            value={customStyle}
-                            maxLength={CUSTOM_TEXT_MAX}
-                            onChange={(e) => setCustomStyle(e.target.value)}
-                            placeholder="e.g. Neon, Watercolor, Pixel art"
-                            autoFocus
-                          />
-                          <Form.Text className="d-flex justify-content-between">
-                            <span>Only for this comic</span>
-                            <span>{customStyle.length}/{CUSTOM_TEXT_MAX}</span>
-                          </Form.Text>
-                        </>
-                      )}
-                    </Form.Group>
-                  </Col>
-                  <Col sm={6} md={4}>
-                    <Form.Group>
-                      <Form.Label>Comic Title<RequiredMark /></Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={comicTitle}
-                        onChange={(e) => setComicTitle(e.target.value)}
-                        placeholder="e.g. The Science"
-                      />
-                    </Form.Group>
-                  </Col>
 
-                  <Col sm={6} md={4}>
-                    <Form.Group>
-                      <Form.Label>Concept<RequiredMark /></Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={concept}
-                        onChange={(e) => setConcept(e.target.value)}
-                        placeholder="e.g. photosynthesis"
-                      />
-                    </Form.Group>
-                  </Col>
-
-                  <Col sm={6} md={4}>
-                    <Form.Group>
-                      <Form.Label className="d-flex align-items-center gap-2">
-                        Comic Image Type
-
-                        <OverlayTrigger
-                          placement="top"
-                          overlay={
-                            <Tooltip>
-                              Select type and click info icon to preview
-                            </Tooltip>
-                          }
+                {/* Saare fields ek hi card me (purana layout: 3 columns) */}
+                <section className="cg-section">
+                  <Row className="g-3">
+                    <Col sm={6} md={4}>
+                      <Form.Group>
+                        <Form.Label>Country</Form.Label>
+                        <Select className="custom-select"
+                          options={countries}
+                          value={selectedCountry}
+                          onChange={(selectedOption) => setSelectedCountry(selectedOption)}
+                          placeholder="Select a country"
+                          isSearchable
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col sm={6} md={4}>
+                      <Form.Group>
+                        <Form.Label>Class/Grade<RequiredMark /></Form.Label>
+                        <Form.Select
+                          value={classGrade}
+                          required
+                          onChange={(e) => setClassGrade(e.target.value)}
                         >
-                          <i
-                            className="bi bi-info-circle text-primary"
-                            role="button"
-                            onClick={() => setShowComicTypeModal(true)}
-                          />
-                        </OverlayTrigger>
-                      </Form.Label>
+                          <option value="" disabled>Select Class/Grade</option>
+                          <option value="1st Standard">1st Grade</option>
+                          <option value="2nd Standard">2nd Grade</option>
+                          <option value="3rd Standard">3rd Grade</option>
+                          <option value="4th Standard">4th Grade</option>
+                          <option value="5th Standard">5th Grade</option>
+                          <option value="6th Standard">6th Grade</option>
+                          <option value="7th Standard">7th Grade</option>
+                          <option value="8th Standard">8th Grade</option>
+                          <option value="9th Standard">9th Grade</option>
+                          <option value="10th Standard">10th Grade</option>
+                          <option value="11th Standard">11th Grade</option>
+                          <option value="12th Standard">12th Grade</option>
+                          <option value="UG">UG</option>
+                          <option value="PG">PG</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+                    <Col sm={6} md={4}>
+                      <Form.Group>
+                        <Form.Label>Subject<RequiredMark /></Form.Label>
+                        <Form.Select
+                          value={subject}
+                          onChange={(e) => setSubject(e.target.value)}
+                        >
+                          <option value="" disabled>Select subject</option>
+                          {subjectsList.map((sub) => (
+                            <option key={sub._id} value={sub._id}>{sub.name}</option>
+                          ))}
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+                    <Col sm={6} md={4}>
+                      <Form.Group>
+                        <Form.Label className="d-flex align-items-center gap-2">
+                          <span>Theme<RequiredMark /></span>
+                          <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-theme">Select a theme and then click to view</Tooltip>}>
+                            <i className="bi bi-info-circle text-primary" role="button" onClick={openThemeModal}></i>
+                          </OverlayTrigger>
+                        </Form.Label>
+                        <Form.Select
+                          value={themeType}
+                          onChange={(e) => setThemeType(e.target.value)}
+                        >
+                          <option value="" disabled>Select Theme</option>
+                          {themes.map((theme) => (
+                            <option key={theme._id} value={theme.name}>{theme.name}</option>
+                          ))}
+                          <option value={CUSTOM_OPTION}>✏️ Custom theme...</option>
+                        </Form.Select>
+                        {isCustomTheme && (
+                          <>
+                            <Form.Control
+                              className="mt-2"
+                              type="text"
+                              value={customTheme}
+                              maxLength={CUSTOM_TEXT_MAX}
+                              onChange={(e) => setCustomTheme(e.target.value)}
+                              placeholder="e.g. Space adventure, Jungle mystery"
+                              autoFocus
+                            />
+                            <Form.Text className="d-flex justify-content-between">
+                              <span>Only for this comic</span>
+                              <span>{customTheme.length}/{CUSTOM_TEXT_MAX}</span>
+                            </Form.Text>
+                          </>
+                        )}
+                      </Form.Group>
+                    </Col>
+                    <Col sm={6} md={4}>
+                      <Form.Group>
+                        <Form.Label className="d-flex align-items-center gap-2">
+                          <span>Choose Style<RequiredMark /></span>
+                          <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-info">Select a style and then click to view style</Tooltip>}>
+                            <i className="bi bi-info-circle text-primary" role="button" onClick={openStyleImgModal}></i>
+                          </OverlayTrigger>
+                        </Form.Label>
+                        <Form.Select
+                          value={styleType}
+                          onChange={(e) => setStyleType(e.target.value)}
+                        >
+                          <option value="" disabled>Select Style</option>
+                          {styles.map((style) => (
+                            <option key={style._id} value={style.name}>{style.name}</option>
+                          ))}
+                          <option value={CUSTOM_OPTION}>✏️ Custom style...</option>
+                        </Form.Select>
+                        {isCustomStyle && (
+                          <>
+                            <Form.Control
+                              className="mt-2"
+                              type="text"
+                              value={customStyle}
+                              maxLength={CUSTOM_TEXT_MAX}
+                              onChange={(e) => setCustomStyle(e.target.value)}
+                              placeholder="e.g. Neon, Watercolor, Pixel art"
+                              autoFocus
+                            />
+                            <Form.Text className="d-flex justify-content-between">
+                              <span>Only for this comic</span>
+                              <span>{customStyle.length}/{CUSTOM_TEXT_MAX}</span>
+                            </Form.Text>
+                          </>
+                        )}
+                      </Form.Group>
+                    </Col>
+                    <Col sm={6} md={4}>
+                      <Form.Group>
+                        <Form.Label>Comic Title<RequiredMark /></Form.Label>
+                        <Form.Control
+                          type="text"
+                          value={comicTitle}
+                          onChange={(e) => setComicTitle(e.target.value)}
+                          placeholder="e.g. The Science"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col sm={6} md={4}>
+                      <Form.Group>
+                        <Form.Label>Concept<RequiredMark /></Form.Label>
+                        <Form.Control
+                          type="text"
+                          value={concept}
+                          onChange={(e) => setConcept(e.target.value)}
+                          placeholder="e.g. photosynthesis"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col sm={6} md={4}>
+                      <Form.Group>
+                        <Form.Label className="d-flex align-items-center gap-2">
+                          Comic Image Type
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={<Tooltip>Select type and click info icon to preview</Tooltip>}
+                          >
+                            <i
+                              className="bi bi-info-circle text-primary"
+                              role="button"
+                              onClick={() => setShowComicTypeModal(true)}
+                            />
+                          </OverlayTrigger>
+                        </Form.Label>
+                        <Form.Select
+                          value={showTextInImage ? "text" : "image"}
+                          onChange={(e) => setShowTextInImage(e.target.value === "text")}
+                        >
+                          <option value="text">With Text & Dialogue</option>
+                          <option value="image">No Text - Just Visual Story</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
 
-                      <Form.Select
-                        value={showTextInImage ? "text" : "image"}
-                        onChange={(e) =>
-                          setShowTextInImage(e.target.value === "text")
-                        }
-                      >
-                        <option value="text">
-                          With Text & Dialogue
-                        </option>
+                    {/* Story (poori width) */}
+                    <Col xs={12}>
+                      <Form.Group>
+                        <Form.Label>Write Story<RequiredMark /></Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={7}
+                          className="cg-story-input"
+                          value={story}
+                          maxLength={STORY_MAX}
+                          onChange={(e) => setStory(e.target.value.slice(0, STORY_MAX))}
+                          placeholder="e.g. Asha and her robot friend Bolt shrink down to explore a leaf. They meet tiny chloroplast workers who show them how sunlight, water and air are turned into food for the plant..."
+                          isInvalid={story.length > STORY_MAX}
+                        />
+                        <div className="cg-story-meter">
+                          <div className="cg-story-meter-bar">
+                            <span
+                              className={story.length >= STORY_MAX ? "is-full" : story.length > STORY_MAX * 0.9 ? "is-near" : ""}
+                              style={{ width: `${Math.min(100, (story.length / STORY_MAX) * 100)}%` }}
+                            ></span>
+                          </div>
+                          <span className={story.length >= STORY_MAX ? "text-danger" : ""}>
+                            {story.length.toLocaleString()}/{STORY_MAX.toLocaleString()}
+                          </span>
+                        </div>
+                        {story.length > STORY_MAX && (
+                          <div className="text-danger small mt-1">
+                            Story is too long. Please shorten it to {STORY_MAX} characters.
+                          </div>
+                        )}
+                      </Form.Group>
 
-                        <option value="image">
-                          No Text - Just Visual Story
-                        </option>
-                      </Form.Select>
+                      <div className="cg-story-tips">
+                        <span className="cg-story-tips-label"><i className="bi bi-lightbulb me-1"></i>Tips</span>
+                        <span>Name your main characters</span>
+                        <span>Say where it happens</span>
+                        <span>What do they discover or solve?</span>
+                      </div>
+                    </Col>
+                  </Row>
+                </section>
 
-                    </Form.Group>
-                  </Col>
-
-                  <Col xs={12}>
-                    <Form.Group>
-                      <Form.Label>Write Story<RequiredMark /></Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={6}
-                        value={story}
-                        onChange={(e) => setStory(e.target.value)}
-                        placeholder="Write your story here..."
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-                <div className="small text-muted mt-2">
-                  <span className="text-danger">*</span> Required fields
-                </div>
-                <div className="btn-wrapper mt-4 d-flex gap-3">
-                  {/* <Button type="submit" disabled={!isStep0Valid || loadingPrompt}>
-                    {loadingPrompt ? (<><Spinner size="sm" className="me-2" />Generating prompt...</>) : "Convert to Prompt"}
-                  </Button> */}
+                {/* Submit */}
+                <div className="cg-submit">
+                  <div className="cg-submit-status">
+                    {missingStep0Fields.length === 0 ? (
+                      <span className="text-success">
+                        <i className="bi bi-check-circle-fill me-1"></i>All set! Ready to plan your comic.
+                      </span>
+                    ) : (
+                      <span>
+                        <i className="bi bi-list-check me-1"></i>
+                        Still needed: {missingStep0Fields.join(", ")}
+                      </span>
+                    )}
+                  </div>
 
                   <Button
                     type="submit"
+                    className="cg-submit-btn"
                     disabled={
                       !isStep0Valid ||
                       loadingPrompt ||
@@ -1243,15 +1446,24 @@ export const ComicGenerator = () => {
                     ) : loadingPrompt ? (
                       <>
                         <Spinner size="sm" className="me-2" />
-                        Generating Prompt...
+                        Planning your comic...
                       </>
                     ) : (
-                      "Convert to Prompt"
+                      <>
+                        <i className="bi bi-magic me-2"></i>Convert to Prompt
+                      </>
                     )}
                   </Button>
-
-
                 </div>
+
+                {loadingPrompt && (
+                  <GenerationLoader
+                    icon="bi-magic"
+                    title="Planning your comic series"
+                    messages={PROMPT_LOADING_MESSAGES}
+                    hint="Usually takes under a minute. Please keep this page open."
+                  />
+                )}
 
                 {existingComic && (
                   <div>
@@ -1362,116 +1574,26 @@ export const ComicGenerator = () => {
               </Form>
             )}
 
-            {/* STEP 1: Concept Breakdown - AAPKE PURANE CODE JAISA */}
+            {/* STEP 1: Concept Breakdown */}
             {step === 1 && (
               <div>
-                <div className="fs-3 fw-bold mb-3">Concept Breakdown</div>
-                <p className="text-muted">Your concept has been divided into the following parts:</p>
+                <div className="fs-3 fw-bold mb-1">Concept Breakdown</div>
+                <p className="text-muted">Your story has been planned as a series. Create each part as an 8-page comic.</p>
 
                 {parts.length === 0 ? (
                   <Alert variant="warning">No parts returned from backend.</Alert>
                 ) : (
-                  <div className="d-flex flex-column gap-3">
-                    {parts.map((p) => {
-
-                      const isLocked =
-                        isFreeUser && p.part > 1;
-
-                      const isDone =
-                        completedParts.includes(p.comicId);
-
-                      return (
-                        <div key={p.part} className="p-3 border rounded bg-light position-relative">
-
-                          {/* 🔒 Lock Overlay */}
-                          {isLocked && (
-                            <div
-                              className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-                              style={{
-                                background: "rgba(255,255,255,0.85)",
-                                backdropFilter: "blur(4px)",
-                                zIndex: 5,
-                                borderRadius: "8px"
-                              }}
-                            >
-                              <div className="text-center">
-                                <h6 className="mb-2">🔒 Unlock Full Series</h6>
-                                <Button
-                                  variant="warning"
-                                  size="sm"
-                                  onClick={() => navigate("/subscriptions-plan")}
-                                >
-                                  Upgrade to Bundle
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-
-                          <h5>
-                            Part {p.part}: {p.title}{" "}
-                            {isDone && (
-                              <span className="badge bg-success">Done</span>
-                            )}
-                          </h5>
-
-                          <p>
-                            <strong>Key Terms:</strong>{" "}
-                            {Array.isArray(p.keyTerms)
-                              ? p.keyTerms.join(", ")
-                              : "N/A"}
-                          </p>
-
-                          {p.storySnippet && (
-                            <p>
-                              <strong>Story:</strong> {p.storySnippet}
-                            </p>
-                          )}
-
-                          {Array.isArray(p.characters) && p.characters.length > 0 && (
-                            <div className="mb-3">
-                              <strong>Characters:</strong>
-                              <ul className="mb-0 mt-1">
-                                {p.characters.map((c) => (
-                                  <li key={c.name}>
-                                    <span className="fw-semibold">{c.name}</span>: {c.description}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-
-                          {(p.start || p.end) && (
-                            <>
-                              <p className="mb-1">
-                                <strong>Starting point:</strong> {p.start}
-                              </p>
-                              <p>
-                                <strong>Ending point:</strong> {p.end}
-                              </p>
-                            </>
-                          )}
-
-                          {/* 🟢 Allow only if not locked */}
-                          {!isDone && !isLocked && (
-                            <Button
-                              variant="primary"
-                              onClick={() => loadPartData(p)}
-                            >
-                              Generate Comic for Part {p.part}
-                            </Button>
-                          )}
-
-                          {isDone && (
-                            <Button variant="outline-secondary" disabled>
-                              Already Generated
-                            </Button>
-                          )}
-
-                        </div>
-                      );
-                    })}
-
-                  </div>
+                  <PartsBreakdown
+                    parts={parts}
+                    seriesTitle={comicTitle}
+                    completedParts={completedParts}
+                    isFreeUser={isFreeUser}
+                    writingPartNumber={writingPartNumber}
+                    onStart={loadPartData}
+                    onRetry={retryPartScript}
+                    onUpgrade={() => navigate("/subscriptions-plan")}
+                    onViewMyComics={() => navigate("/my-comics")}
+                  />
                 )}
 
                 <div className="btn-wrapper mt-4 d-flex gap-3">
@@ -1511,7 +1633,7 @@ export const ComicGenerator = () => {
                       <Button type="submit" disabled={!prompt || loadingImage}>
                         {loadingImage ? (
                           <>
-                            <Spinner size="sm" className="me-2" /> Generating comic...
+                            <Spinner size="sm" className="me-2" /> Drawing your comic...
                           </>
                         ) : (
                           "Generate My Comic"
@@ -1521,126 +1643,86 @@ export const ComicGenerator = () => {
 
                     {/* IMPROVED PROGRESS DISPLAY */}
                     {isGenerating && (
-                      <div className="mt-4 p-4 border rounded bg-light">
-                        <div className="text-center">
-                          <h5 className="text-primary mb-3">
-                            🎨 Generating Your Comic
-                          </h5>
-
-                          {/* Progress Bar */}
-                          <div className="progress mb-3" style={{ height: "20px" }}>
-                            <div
-                              className="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                              role="progressbar"
-                              style={{ width: `${progress}%` }}
-                              aria-valuenow={progress}
-                              aria-valuemin="0"
-                              aria-valuemax="100"
-                            >
-                              {progress}%
-                            </div>
+                      <GenerationLoader
+                        icon="bi-palette"
+                        title="Drawing your comic"
+                        messages={IMAGE_LOADING_MESSAGES}
+                        status={estimatedTime}
+                        progress={progress}
+                        hint="Page 1 sets the art style, then the other pages are drawn together. Each page appears as soon as it's ready."
+                      >
+                        {totalPages > 0 && (
+                          <div className="generation-loader-pages" aria-hidden="true">
+                            {Array.from({ length: totalPages }, (_, i) => (
+                              <span
+                                key={i}
+                                className={`generation-loader-page ${i < currentGeneratingPage - 1 ? "is-done" : i === currentGeneratingPage - 1 ? "is-active" : ""}`}
+                              >
+                                {i + 1}
+                              </span>
+                            ))}
                           </div>
-
-                          {/* Page Progress */}
-                          <div className="row text-center mb-3">
-                            <div className="col-md-6">
-                              <div className="card bg-primary text-white">
-                                <div className="card-body py-2">
-                                  <h6 className="mb-0">Current Page</h6>
-                                  <h4 className="mb-0">{currentGeneratingPage}/{totalPages}</h4>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="col-md-6">
-                              <div className="card bg-info text-white">
-                                <div className="card-body py-2">
-                                  <h6 className="mb-0">Overall Progress</h6>
-                                  <h4 className="mb-0">{progress}%</h4>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Status Message */}
-                          <div className="alert alert-info mb-0">
-                            <Spinner size="sm" className="me-2" />
-                            <strong>{estimatedTime}</strong>
-                            <div className="mt-1 small">
-                              {progress < 100 ? "Please wait while we create your comic pages..." : "Finalizing your comic..."}
-                            </div>
-                          </div>
-
-                          {/* Visual Page Indicators */}
-                          {totalPages > 0 && (
-                            <div className="mt-3">
-                              <div className="d-flex justify-content-center flex-wrap gap-2">
-                                {Array.from({ length: totalPages }, (_, i) => (
-                                  <div
-                                    key={i}
-                                    className={`page-indicator ${i < currentGeneratingPage ? 'bg-success' : i === currentGeneratingPage ? 'bg-warning' : 'bg-light border'}`}
-                                    style={{
-                                      width: '30px',
-                                      height: '30px',
-                                      borderRadius: '50%',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      fontWeight: 'bold',
-                                      color: i < currentGeneratingPage ? 'white' : 'black'
-                                    }}
-                                  >
-                                    {i + 1}
-                                  </div>
-                                ))}
-                              </div>
-                              <small className="text-muted mt-2 d-block">
-                                Page {currentGeneratingPage} of {totalPages} in progress...
-                              </small>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                        )}
+                      </GenerationLoader>
                     )}
                   </Form>
                 ) : (
                   <>
+                    {/* Pages ek-ek karke aa rahe hain - jo bane hain woh dekh sakte ho */}
+                    {pagesGenerating && (
+                      <div className="mb-4">
+                        <GenerationLoader
+                          icon="bi-palette"
+                          title={`${comicImages.length} of ${totalPages} pages ready`}
+                          messages={IMAGE_LOADING_MESSAGES.slice(2)}
+                          progress={totalPages ? (comicImages.length / totalPages) * 100 : undefined}
+                          hint="You can look at the finished pages while the rest are drawn."
+                        />
+                      </div>
+                    )}
+
                     <Row>
                       <Col md={3} className="border-end pe-3" style={{ maxHeight: "500px", overflowY: "auto" }} ref={thumbnailsRef}>
                         <div className="d-flex flex-column gap-2">
 
-                          {comicImages.map((img, idx) => (
-                            <div key={img.page ?? idx} className="text-center">
-                              <img
-                                src={img.imageUrl}
-                                alt={`comic-${idx}`}
+                          {comicImages.map((img, idx) => {
+                            const isSelected =
+                              selectedImage &&
+                              (img.page != null
+                                ? Number(selectedImage.page) === Number(img.page)
+                                : selectedImage.imageUrl === img.imageUrl);
+
+                            return (
+                              // Poora tile (image + caption) clickable button hai
+                              <button
+                                type="button"
+                                key={img.page ?? idx}
+                                className={`comic-thumb-tile ${isSelected ? "is-selected" : ""}`}
                                 onClick={() => setSelectedImage(img)}
-                                className={`img-thumbnail ${selectedImage?.imageUrl === img.imageUrl
-                                  ? "border-primary border-3"
-                                  : ""
-                                  }`}
-                                style={{
-                                  cursor: "pointer",
-                                  objectFit: "cover",
-                                  height: "80px",
-                                }}
-                              />
+                                aria-pressed={!!isSelected}
+                                aria-label={`Open page ${img.page ?? idx + 1}`}
+                                title={`Open page ${img.page ?? idx + 1}`}
+                              >
+                                <span className="comic-thumb-img-wrap">
+                                  <img
+                                    src={img.imageUrl}
+                                    alt={`comic page ${img.page ?? idx + 1}`}
+                                    className="comic-thumb-img"
+                                    draggable={false}
+                                  />
+                                  <span className="comic-thumb-page">
+                                    {img.page ?? idx + 1}
+                                  </span>
+                                </span>
 
-                              {editedPages.includes(img.page) && (
-                                <div>
-                                  <Badge bg="success" className="mt-1">Edited</Badge>
-                                </div>
-                              )}
-
-                              <small className="d-block mt-1 text-muted" style={{
-                                fontSize: "11px",
-                                lineHeight: "1.2",
-                                maxHeight: "30px",
-                                overflow: "hidden"
-                              }}>
-                                {img.caption}
-                              </small>
-                            </div>
-                          ))}
+                                {editedPages.includes(img.page) && (
+                                  <span className="d-block">
+                                    <Badge bg="success" className="mt-1">Edited</Badge>
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
 
 
                         </div>
@@ -1651,6 +1733,8 @@ export const ComicGenerator = () => {
                         {selectedImage ? (
                           <div className="text-center">
                             <ZoomImage
+                              // page badle to component naya bane (purana zoom/hover state na bache)
+                              key={`${selectedImage.page ?? ""}-${selectedImage.imageUrl}`}
                               src={selectedImage.imageUrl}
                               alt="selected-comic"
                               style={{
@@ -1675,7 +1759,7 @@ export const ComicGenerator = () => {
                                 <Button
                                   variant="outline-primary"
                                   size="sm"
-                                  disabled={publishing}
+                                  disabled={publishing || pagesGenerating}
                                   onClick={() => {
                                     trackClick("edit_comic_page_click", {
                                       comic_id: comicId || "",
@@ -1702,6 +1786,7 @@ export const ComicGenerator = () => {
                     <div className="btn-wrapper mt-4 d-flex gap-3 justify-content-center">
                       <Button
                         variant="warning"
+                        disabled={pagesGenerating}
                         onClick={() => {
                           setStep(1);
                           resetAfterBackToPrompt();
@@ -1712,7 +1797,7 @@ export const ComicGenerator = () => {
                       <Button
                         variant="success"
                         onClick={handleGeneratePDF}
-                        disabled={publishing}
+                        disabled={publishing || pagesGenerating}
                       >
                         {publishing ? (
                           <>

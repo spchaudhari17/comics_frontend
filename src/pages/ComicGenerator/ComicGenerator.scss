@@ -190,3 +190,72 @@
         }
     }
 }
+
+// 🖼️ Preview: left side page thumbnails (clickable)
+.comic-thumb-tile {
+    display: block;
+    width: 100%;
+    padding: 6px;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+
+    .comic-thumb-img-wrap {
+        position: relative;
+        display: inline-block;
+        line-height: 0;
+    }
+
+    .comic-thumb-img {
+        height: 80px;
+        width: auto;
+        max-width: 100%;
+        object-fit: cover;
+        border: 2px solid #dee2e6;
+        border-radius: 6px;
+        background: #fff;
+        transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .comic-thumb-page {
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 5px;
+        border-radius: 10px;
+        background: #6a11cb;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 20px;
+    }
+
+    &:hover {
+        background: rgba(106, 17, 203, 0.06);
+
+        .comic-thumb-img {
+            transform: scale(1.05);
+            border-color: #a06ee8;
+            box-shadow: 0 4px 12px rgba(106, 17, 203, 0.2);
+        }
+    }
+
+    &:focus-visible {
+        outline: 3px solid rgba(106, 17, 203, 0.5);
+        outline-offset: 2px;
+    }
+
+    &.is-selected {
+        background: rgba(106, 17, 203, 0.1);
+        border-color: #6a11cb;
+
+        .comic-thumb-img {
+            border-color: #6a11cb;
+        }
+    }
+}

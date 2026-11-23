@@ -77,6 +77,14 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Same page (/create-comic) pe hote hue "Create Comics" dabaya to bhi form blank ho:
+// har navigation ka naya location.key hota hai -> component naye sire se mount (saari state reset).
+// My Comics se resume (state.comicId) bhi naye key ke saath hi aata hai, isliye woh pehle jaisa chalega.
+const FreshComicGenerator = () => {
+  const location = useLocation();
+  return <ComicGenerator key={location.key} />;
+};
+
 function App() {
   // AOS Animations
   useEffect(() => {
@@ -175,7 +183,7 @@ function App() {
             <Route path="my-comics" element={<ProtectedRoute>  <MyComics /></ProtectedRoute>} />
 
             {/* <Route path="create-comic" element={<ComicGenerator />} /> */}
-            <Route path="create-comic" element={<ProtectedRoute><ComicGenerator /></ProtectedRoute>} />
+            <Route path="create-comic" element={<ProtectedRoute><FreshComicGenerator /></ProtectedRoute>} />
 
             {/* <Route path="comic-successful" element={<ComicSubmittedSuccessfully />} /> */}
             <Route path="comic-successful" element={<ProtectedRoute><ComicSubmittedSuccessfully /></ProtectedRoute>} />
